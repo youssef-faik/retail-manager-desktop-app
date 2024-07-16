@@ -8,4 +8,6 @@ module com.example.gestioncommercial {
     exports com.example.gestioncommercial;
     opens com.example.gestioncommercial.client to javafx.fxml;
     exports com.example.gestioncommercial.client;
+    opens com.example.gestioncommercial.product to javafx.fxml;
+    exports com.example.gestioncommercial.product;
 }

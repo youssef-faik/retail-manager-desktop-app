@@ -16,6 +16,14 @@
                </items>
             </Menu>
          </menus>
+         <menus>
+            <Menu mnemonicParsing="false" text="Produits">
+               <items>
+                  <MenuItem fx:id="addProductMenuItem" mnemonicParsing="false" onAction="#addProduct" text="Ajouter produit" />
+                  <MenuItem fx:id="listProductsMenuItem" mnemonicParsing="false" onAction="#listProducts" text="Liste produit" />
+               </items>
+            </Menu>
+         </menus>
       </MenuBar>
    </top>
 </BorderPane>

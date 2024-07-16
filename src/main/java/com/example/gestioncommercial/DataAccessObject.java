@@ -1,6 +1,7 @@
 package com.example.gestioncommercial;
 
 import com.example.gestioncommercial.client.Client;
+import com.example.gestioncommercial.product.Product;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -55,5 +56,32 @@ public class DataAccessObject {
         }
 
         return clients;
+    }
+
+    public ObservableList<Product> getProducts(String selectQuery) {
+        ObservableList<Product> products = FXCollections.observableArrayList();
+        try {
+            connection = dataBaseConnector.getConnection();
+            preparedStatement = connection.prepareStatement(selectQuery);
+            resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                products.add(
+                        new Product(
+                                resultSet.getInt("id"),
+                                resultSet.getString("name"),
+                                resultSet.getBigDecimal("purchase_price_excluding_tax"),
+                                resultSet.getBigDecimal("selling_price_excluding_tax"),
+                                resultSet.getString("description"),
+                                resultSet.getInt("quantity"),
+                                resultSet.getBigDecimal("tax_rate")
+                        )
+                );
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return products;
     }
 }
