@@ -29,6 +29,9 @@ public class Main extends Application {
         stage.setHeight(bounds.getHeight());
 
         stage.setScene(scene);
+
+        ((MainController) fxmlLoader.getController()).listInvoices(null);
+
         stage.show();
     }
 }

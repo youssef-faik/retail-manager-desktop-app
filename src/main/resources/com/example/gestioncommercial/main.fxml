@@ -5,7 +5,7 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.layout.BorderPane?>
 
-<BorderPane fx:id="borderPane" prefHeight="480.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.gestioncommercial.MainController">
+<BorderPane fx:id="borderPane" prefHeight="480.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/17.0.6" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.gestioncommercial.MainController">
    <top>
       <MenuBar prefHeight="25.0" prefWidth="600.0" BorderPane.alignment="CENTER">
          <menus>
@@ -21,6 +21,14 @@
                <items>
                   <MenuItem fx:id="addProductMenuItem" mnemonicParsing="false" onAction="#addProduct" text="Ajouter produit" />
                   <MenuItem fx:id="listProductsMenuItem" mnemonicParsing="false" onAction="#listProducts" text="Liste produit" />
+               </items>
+            </Menu>
+         </menus>
+         <menus>
+            <Menu mnemonicParsing="false" text="Factures">
+               <items>
+                  <MenuItem fx:id="addInvoiceMenuItem" mnemonicParsing="false" onAction="#addInvoice" text="Ajouter facture" />
+                  <MenuItem fx:id="listInvoicesMenuItem" mnemonicParsing="false" onAction="#listInvoices" text="Liste factures" />
                </items>
             </Menu>
          </menus>

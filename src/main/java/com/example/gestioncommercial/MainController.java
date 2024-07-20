@@ -57,5 +57,20 @@ public class MainController {
         VBox pane = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("product/list-products.fxml")));
         borderPane.setCenter(pane);
     }
+
+    public void addInvoice(ActionEvent actionEvent) throws IOException {
+        VBox pane = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("invoice/form-invoice.fxml")));
+        borderPane.setCenter(pane);
+    }
+
+    public void listInvoices(ActionEvent actionEvent) throws IOException {
+        refreshInvoicesList();
+    }
+
+    private void refreshInvoicesList() throws IOException {
+        VBox pane = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("invoice/list-invoices.fxml")));
+        borderPane.setCenter(pane);
+    }
+
 }
 
