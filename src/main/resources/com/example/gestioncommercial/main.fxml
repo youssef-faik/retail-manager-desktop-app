@@ -5,6 +5,7 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.layout.BorderPane?>
 
+<?import javafx.scene.control.SeparatorMenuItem?>
 <BorderPane fx:id="borderPane" prefHeight="480.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/17.0.6" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.gestioncommercial.MainController">
    <top>
       <MenuBar prefHeight="25.0" prefWidth="600.0" BorderPane.alignment="CENTER">
@@ -12,6 +13,7 @@
             <Menu mnemonicParsing="false" text="Clients">
                <items>
                   <MenuItem fx:id="addClientMenuItem" mnemonicParsing="false" onAction="#addClient" text="Ajouter client" />
+                  <SeparatorMenuItem/>
                   <MenuItem fx:id="listClientsMenuItem" mnemonicParsing="false" onAction="#listClients" text="Liste clients" />
                </items>
             </Menu>
@@ -20,7 +22,8 @@
             <Menu mnemonicParsing="false" text="Produits">
                <items>
                   <MenuItem fx:id="addProductMenuItem" mnemonicParsing="false" onAction="#addProduct" text="Ajouter produit" />
-                  <MenuItem fx:id="listProductsMenuItem" mnemonicParsing="false" onAction="#listProducts" text="Liste produit" />
+                  <SeparatorMenuItem/>
+                  <MenuItem fx:id="listProductsMenuItem" mnemonicParsing="false" onAction="#listProducts" text="Liste produits" />
                </items>
             </Menu>
          </menus>
@@ -28,6 +31,7 @@
             <Menu mnemonicParsing="false" text="Factures">
                <items>
                   <MenuItem fx:id="addInvoiceMenuItem" mnemonicParsing="false" onAction="#addInvoice" text="Ajouter facture" />
+                  <SeparatorMenuItem/>
                   <MenuItem fx:id="listInvoicesMenuItem" mnemonicParsing="false" onAction="#listInvoices" text="Liste factures" />
                </items>
             </Menu>

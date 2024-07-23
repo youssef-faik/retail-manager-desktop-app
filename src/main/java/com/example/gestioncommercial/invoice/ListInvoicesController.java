@@ -2,6 +2,8 @@ package com.example.gestioncommercial.invoice;
 
 import com.example.gestioncommercial.DataAccessObject;
 import com.example.gestioncommercial.report.InvoiceReportManager;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -13,6 +15,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
+import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
@@ -58,8 +61,8 @@ public class ListInvoicesController implements Initializable {
         totalTaxesColumn.setCellValueFactory(new PropertyValueFactory<>("totalTaxes"));
         totalIncludingTaxesColumn.setCellValueFactory(new PropertyValueFactory<>("totalIncludingTaxes"));
 
-        actionColumn.setMinWidth(80);
-        actionColumn.setMaxWidth(80);
+        actionColumn.setMinWidth(90);
+        actionColumn.setMaxWidth(90);
         actionColumn.setResizable(false);
         actionColumn.setReorderable(false);
 
@@ -67,8 +70,8 @@ public class ListInvoicesController implements Initializable {
 
         invoicesTableView.getColumns().addAll(
                 idColumn,
-                issueDateColumn,
                 clientColumn,
+                issueDateColumn,
                 totalExcludingTaxesColumn,
                 totalTaxesColumn,
                 totalIncludingTaxesColumn,
@@ -89,7 +92,10 @@ public class ListInvoicesController implements Initializable {
                                 setText(null);
 
                             } else {
-                                Button printButton = new Button("imprimer");
+                                Button printButton = new Button("Imprimer");
+                                Text icon = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.PRINT);
+                                printButton.setGraphic(icon);
+
 
                                 printButton.setOnMouseClicked((MouseEvent event) -> {
                                     try {

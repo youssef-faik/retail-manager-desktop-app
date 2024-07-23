@@ -4,6 +4,7 @@ module com.example.gestioncommercial {
     requires java.sql;
     requires tradukisto;
     requires jasperreports;
+    requires de.jensd.fx.glyphs.fontawesome;
 
 
     opens com.example.gestioncommercial to javafx.fxml;
