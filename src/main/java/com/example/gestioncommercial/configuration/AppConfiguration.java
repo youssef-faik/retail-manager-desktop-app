@@ -1,6 +1,5 @@
 package com.example.gestioncommercial.configuration;
 
-import com.example.gestioncommercial.invoice.Invoice;
 import com.example.gestioncommercial.invoice.InvoiceRepository;
 
 import java.util.HashMap;
@@ -19,6 +18,8 @@ public class AppConfiguration {
                     ConfigOptionRepository.save(new ConfigOption(key, "1"));
                 } else if (key == ConfigKey.NEXT_CREDIT_INVOICE_NUMBER) {
                     ConfigOptionRepository.save(new ConfigOption(key, "1"));
+                } else if (key == ConfigKey.PRINT_INVOICE_HEADING) {
+                    ConfigOptionRepository.save(new ConfigOption(key, Boolean.TRUE.toString()));
                 } else {
                     ConfigOptionRepository.save(new ConfigOption(key, ""));
                 }
@@ -43,11 +44,13 @@ public class AppConfiguration {
         }
 
         if (InvoiceRepository.count() > 0) {
-            Invoice invoice = InvoiceRepository.findFirstByOrderByIdDesc().orElseThrow();
-            if (nextInvoiceNumber <= invoice.getReference()) {
-                throw new RuntimeException(
-                        "The next invoice number must be greater than or equal to " + (invoice.getReference() + 1));
-            }
+            InvoiceRepository.findFirstByOrderByIdDesc().ifPresent(invoice -> {
+                        if (nextInvoiceNumber <= invoice.getReference()) {
+                            throw new RuntimeException(
+                                    "The next invoice number must be greater than or equal to " + (invoice.getReference() + 1));
+                        }
+                    }
+            );
         }
     }
 

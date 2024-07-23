@@ -51,9 +51,10 @@
 	<parameter name="if" class="java.lang.String"/>
 	<parameter name="rc" class="java.lang.String"/>
 	<parameter name="patent" class="java.lang.String"/>
-	<parameter name="tel" class="java.lang.String"/>
+	<parameter name="phone_number" class="java.lang.String"/>
 	<parameter name="email" class="java.lang.String"/>
-	<parameter name="fax" class="java.lang.String"/>
+	<parameter name="fixed_phone_number" class="java.lang.String"/>
+	<parameter name="print_invoice_heading" class="java.lang.Boolean"/>
 	<queryString>
 		<![CDATA[]]>
 	</queryString>
@@ -67,14 +68,18 @@
 					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
 				</reportElement>
 				<textField isBlankWhenNull="false">
-					<reportElement x="1" y="70" width="389" height="20" uuid="f101a862-7c65-4bb6-a80c-b9f8d17798e8"/>
+					<reportElement x="1" y="70" width="389" height="20" uuid="f101a862-7c65-4bb6-a80c-b9f8d17798e8">
+						<printWhenExpression><![CDATA[$P{print_invoice_heading}]]></printWhenExpression>
+					</reportElement>
 					<textElement>
 						<font size="14" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$P{companyName}]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement x="0" y="0" width="200" height="49" uuid="251454f3-07e6-4c3a-a6bf-7e089fa84ea0"/>
+					<reportElement x="0" y="0" width="200" height="49" uuid="251454f3-07e6-4c3a-a6bf-7e089fa84ea0">
+						<printWhenExpression><![CDATA[$P{print_invoice_heading}]]></printWhenExpression>
+					</reportElement>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
 						<font size="33" isBold="true" isItalic="false"/>
 					</textElement>
@@ -455,7 +460,9 @@
 	<pageFooter>
 		<band height="75">
 			<textField textAdjust="StretchHeight">
-				<reportElement x="0" y="3" width="220" height="15" uuid="da460ae3-0871-4b55-a530-e6b9a394debb"/>
+				<reportElement x="0" y="3" width="220" height="15" uuid="da460ae3-0871-4b55-a530-e6b9a394debb">
+					<printWhenExpression><![CDATA[$P{print_invoice_heading}]]></printWhenExpression>
+				</reportElement>
 				<textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
 					<font size="10" isBold="true"/>
 					<paragraph lineSpacingSize="1.0"/>
@@ -463,7 +470,9 @@
 				<textFieldExpression><![CDATA[$P{companyName}]]></textFieldExpression>
 			</textField>
 			<textField textAdjust="ScaleFont">
-				<reportElement x="0" y="20" width="220" height="55" uuid="5320dccd-6658-4a71-9eaa-5bd6a42cb004"/>
+				<reportElement x="0" y="20" width="220" height="55" uuid="5320dccd-6658-4a71-9eaa-5bd6a42cb004">
+					<printWhenExpression><![CDATA[$P{print_invoice_heading}]]></printWhenExpression>
+				</reportElement>
 				<textElement textAlignment="Justified" markup="none">
 					<font size="10"/>
 					<paragraph lineSpacingSize="0.5"/>
@@ -471,29 +480,35 @@
 				<textFieldExpression><![CDATA[$P{companyAddress}]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="0" y="0" width="565" height="1" uuid="0abc9b3f-076e-4a14-9b98-899207a73869"/>
+				<reportElement x="0" y="0" width="565" height="1" uuid="0abc9b3f-076e-4a14-9b98-899207a73869">
+					<printWhenExpression><![CDATA[$P{print_invoice_heading}]]></printWhenExpression>
+				</reportElement>
 				<graphicElement>
 					<pen lineWidth="0.5"/>
 				</graphicElement>
 			</line>
 			<textField textAdjust="ScaleFont" isBlankWhenNull="true">
-				<reportElement x="240" y="20" width="159" height="55" isRemoveLineWhenBlank="true" uuid="0f450f13-5dc9-4b05-b06b-e8c97ecb2993"/>
+				<reportElement x="240" y="20" width="159" height="55" isRemoveLineWhenBlank="true" uuid="0f450f13-5dc9-4b05-b06b-e8c97ecb2993">
+					<printWhenExpression><![CDATA[$P{print_invoice_heading}]]></printWhenExpression>
+				</reportElement>
 				<textElement textAlignment="Justified">
 					<font size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA[(($P{rc} == null) ? "" : ($P{rc} + "\n")) +
-(($P{patent} == null) ? "" : ($P{patent} + "\n")) +
-(($P{if} == null) ? "" : ($P{if} + "\n")) +
-(($P{ice} == null) ? "" : $P{ice})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[(($P{rc} != null && !$P{rc}.trim().isEmpty()) ? ("R.C. N° " + $P{rc} + "\n"): "" ) +
+(($P{patent} != null && !$P{patent}.trim().isEmpty()) ? ("Patente N° " + $P{patent} + "\n"): "" ) +
+(($P{if} != null && !$P{if}.trim().isEmpty()) ? ("I.F. N° " + $P{if} + "\n"): "" ) +
+(($P{ice} != null && !$P{ice}.trim().isEmpty()) ? ("I.C.E. N° " + $P{ice}): "" )]]></textFieldExpression>
 			</textField>
 			<textField textAdjust="ScaleFont" isBlankWhenNull="true">
-				<reportElement x="410" y="20" width="156" height="55" isRemoveLineWhenBlank="true" uuid="f93a43dd-c214-486e-92d8-2cbd9f92bf7f"/>
+				<reportElement x="410" y="20" width="156" height="55" isRemoveLineWhenBlank="true" uuid="f93a43dd-c214-486e-92d8-2cbd9f92bf7f">
+					<printWhenExpression><![CDATA[$P{print_invoice_heading}]]></printWhenExpression>
+				</reportElement>
 				<textElement textAlignment="Justified">
 					<font size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA[(($P{tel} == null) ? "" : ($P{tel} +"\n")) +
-(($P{fax} == null) ? "" : ($P{fax} +"\n")) +
-(($P{email} == null) ? "" : $P{email})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[(($P{phone_number} != null && !$P{phone_number}.trim().isEmpty()) ? ("Téléphone : " + $P{rc} + "\n"): "" ) +
+(($P{fixed_phone_number} != null && !$P{fixed_phone_number}.trim().isEmpty()) ? ("Fixe :  " + $P{fixed_phone_number} + "\n"): "" ) +
+(($P{email} != null && !$P{email}.trim().isEmpty()) ? ("E-mail : " + $P{email} + ""): "" )]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageFooter>
@@ -629,7 +644,7 @@
 						<textElement>
 							<font isBold="true"/>
 						</textElement>
-						<text><![CDATA[ARRETE LA PRESENTE FACTURE A LA SOMME DE:]]></text>
+						<text><![CDATA[ARRÊTEZ LA PRÉSENTE FACTURE À LA SOMME DE:]]></text>
 					</staticText>
 				</frame>
 			</frame>

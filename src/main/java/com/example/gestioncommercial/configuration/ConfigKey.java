@@ -5,6 +5,8 @@ package com.example.gestioncommercial.configuration;
  * Each enum constant corresponds to a specific configuration setting.
  */
 public enum ConfigKey {
+    PRINT_INVOICE_HEADING,
+
     /**
      * The company name.
      */

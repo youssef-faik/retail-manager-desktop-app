@@ -2,10 +2,7 @@ package com.example.gestioncommercial.configuration;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 
 import java.net.URL;
 import java.util.Map;
@@ -37,6 +34,8 @@ public class ConfigurationController implements Initializable {
     private TextField commercialRegistrationNumberTextField;
     @FXML
     private Button saveButton;
+    @FXML
+    private CheckBox printHeaderCheckBox;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -56,6 +55,7 @@ public class ConfigurationController implements Initializable {
             emailTextField.setText(allConfigurations.get(ConfigKey.COMPANY_EMAIL_ADDRESS));
             invoiceNumberTextField.setText(allConfigurations.get(ConfigKey.NEXT_INVOICE_NUMBER));
             creditInvoiceNumberTextField.setText(allConfigurations.get(ConfigKey.NEXT_CREDIT_INVOICE_NUMBER));
+            printHeaderCheckBox.setSelected(Boolean.parseBoolean(allConfigurations.get(ConfigKey.PRINT_INVOICE_HEADING)));
         });
 
         thread.start();
@@ -72,7 +72,7 @@ public class ConfigurationController implements Initializable {
             allConfigurations.put(ConfigKey.COMPANY_EMAIL_ADDRESS, emailTextField.getText());
             allConfigurations.put(ConfigKey.NEXT_INVOICE_NUMBER, invoiceNumberTextField.getText());
             allConfigurations.put(ConfigKey.NEXT_CREDIT_INVOICE_NUMBER, creditInvoiceNumberTextField.getText());
-
+            allConfigurations.put(ConfigKey.PRINT_INVOICE_HEADING, String.valueOf(printHeaderCheckBox.isSelected()));
             configuration.setConfigurationValues(allConfigurations);
             displaySuccessAlert();
         });

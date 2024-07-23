@@ -53,15 +53,16 @@ public class InvoiceReportManager {
         parameters.put("totalTaxes", invoice.getTotalTaxes());
         parameters.put("totalTTC", invoice.getTotalIncludingTaxes());
 
+        parameters.put("print_invoice_heading", Boolean.parseBoolean(configurations.get(ConfigKey.PRINT_INVOICE_HEADING)));
         parameters.put("companyName", configurations.get(ConfigKey.COMPANY_NAME));
         parameters.put("companyAddress", configurations.get(ConfigKey.BUSINESS_ADDRESS));
-        parameters.put("rc", "R.C. N° " + configurations.get(ConfigKey.COMMERCIAL_REGISTRATION_NUMBER));
-        parameters.put("patent", "Patente N° " + configurations.get(ConfigKey.COMPANY_PATENT_NUMBER));
-        parameters.put("if", "I.F. N° " + configurations.get(ConfigKey.TAX_IDENTIFIER_NUMBER));
-        parameters.put("ice", "I.C.E. N° " + configurations.get(ConfigKey.COMMON_IDENTIFIER_NUMBER));
-        parameters.put("tel", "Téléphone : " + configurations.get(ConfigKey.COMPANY_PHONE_NUMBER));
-        parameters.put("fax", "Fax :  " + configurations.get(ConfigKey.COMPANY_FIXED_PHONE_NUMBER));
-        parameters.put("email", "E-mail : " + configurations.get(ConfigKey.COMPANY_EMAIL_ADDRESS));
+        parameters.put("rc", configurations.get(ConfigKey.COMMERCIAL_REGISTRATION_NUMBER));
+        parameters.put("patent", configurations.get(ConfigKey.COMPANY_PATENT_NUMBER));
+        parameters.put("if", configurations.get(ConfigKey.TAX_IDENTIFIER_NUMBER));
+        parameters.put("ice", configurations.get(ConfigKey.COMMON_IDENTIFIER_NUMBER));
+        parameters.put("phone_number", configurations.get(ConfigKey.COMPANY_PHONE_NUMBER));
+        parameters.put("fixed_phone_number", configurations.get(ConfigKey.COMPANY_FIXED_PHONE_NUMBER));
+        parameters.put("email", configurations.get(ConfigKey.COMPANY_EMAIL_ADDRESS));
 
         parameters.put("amountInWords", getMoneyIntoWords(invoice.getTotalIncludingTaxes().toString()));
 

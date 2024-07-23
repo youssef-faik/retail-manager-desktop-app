@@ -210,7 +210,7 @@ public interface InvoiceRepository {
 
     static Optional<Invoice> findFirstByOrderByIdDesc() {
         try (Session session = sessionFactory.openSession()) {
-            String query = "SELECT I FROM Invoice I ORDER BY I.reference DESC LIMIT 1";
+            String query = "SELECT I FROM Invoice I WHERE I.reference is not null ORDER BY I.reference  DESC LIMIT 1";
             Query<Invoice> nativeQuery = session.createQuery(query, Invoice.class);
             return Optional.of(nativeQuery.getSingleResult());
         } catch (NoResultException e) {
