@@ -107,10 +107,10 @@ public class InvoiceController implements Initializable {
         invoiceItemEntryTableView.setEditable(true);
 
         // delete
-        Callback<TableColumn<InvoiceItemEntry, String>, TableCell<InvoiceItemEntry, String>> cellFoctory =
+        Callback<TableColumn<InvoiceItemEntry, String>, TableCell<InvoiceItemEntry, String>> cellFactory =
                 (TableColumn<InvoiceItemEntry, String> param) -> {
                     // make cell containing button
-                    final TableCell<InvoiceItemEntry, String> cell = new TableCell<InvoiceItemEntry, String>() {
+                    final TableCell<InvoiceItemEntry, String> cell = new TableCell<>() {
                         @Override
                         public void updateItem(String item, boolean empty) {
                             super.updateItem(item, empty);
@@ -146,7 +146,7 @@ public class InvoiceController implements Initializable {
                     return cell;
                 };
 
-        actionColumn.setCellFactory(cellFoctory);
+        actionColumn.setCellFactory(cellFactory);
 
         // edit quantity and unit price
         quantityColumn.setCellFactory(TextFieldTableCell.forTableColumn());

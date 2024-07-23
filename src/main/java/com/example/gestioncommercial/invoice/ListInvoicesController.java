@@ -1,6 +1,7 @@
 package com.example.gestioncommercial.invoice;
 
 import com.example.gestioncommercial.DataAccessObject;
+import com.example.gestioncommercial.report.InvoiceReportManager;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -10,8 +11,12 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.Callback;
+import net.sf.jasperreports.engine.JRException;
 
 import java.io.IOException;
 import java.net.URL;
@@ -19,13 +24,15 @@ import java.sql.SQLException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ListInvoicesController implements Initializable {
     @FXML
     private TableView<Invoice> invoicesTableView;
 
     @FXML
-    private Button deleteButton, newButton, updateButton;
+    private Button deleteButton, newButton, updateButton, displayInvoiceReportButton;
 
     private DataAccessObject dao;
 
@@ -42,6 +49,7 @@ public class ListInvoicesController implements Initializable {
         TableColumn<Invoice, String> totalExcludingTaxesColumn = new TableColumn<>("Total (HT)");
         TableColumn<Invoice, String> totalTaxesColumn = new TableColumn<>("Taxes");
         TableColumn<Invoice, String> totalIncludingTaxesColumn = new TableColumn<>("Total (TTC)");
+        TableColumn<Invoice, String> actionColumn = new TableColumn<>("Actions");
 
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         issueDateColumn.setCellValueFactory(new PropertyValueFactory<>("issueDate"));
@@ -50,8 +58,12 @@ public class ListInvoicesController implements Initializable {
         totalTaxesColumn.setCellValueFactory(new PropertyValueFactory<>("totalTaxes"));
         totalIncludingTaxesColumn.setCellValueFactory(new PropertyValueFactory<>("totalIncludingTaxes"));
 
-        invoicesTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        actionColumn.setMinWidth(80);
+        actionColumn.setMaxWidth(80);
+        actionColumn.setResizable(false);
+        actionColumn.setReorderable(false);
 
+        invoicesTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
         invoicesTableView.getColumns().addAll(
                 idColumn,
@@ -59,8 +71,57 @@ public class ListInvoicesController implements Initializable {
                 clientColumn,
                 totalExcludingTaxesColumn,
                 totalTaxesColumn,
-                totalIncludingTaxesColumn
+                totalIncludingTaxesColumn,
+                actionColumn
         );
+
+        Callback<TableColumn<Invoice, String>, TableCell<Invoice, String>> cellFactory =
+                (TableColumn<Invoice, String> param) -> {
+                    // make cell containing button
+
+                    return new TableCell<>() {
+                        @Override
+                        public void updateItem(String item, boolean empty) {
+                            super.updateItem(item, empty);
+                            //that cell created only on non-empty rows
+                            if (empty) {
+                                setGraphic(null);
+                                setText(null);
+
+                            } else {
+                                Button printButton = new Button("imprimer");
+
+                                printButton.setOnMouseClicked((MouseEvent event) -> {
+                                    try {
+                                        TableRow tableRow = (TableRow) printButton.getParent().getParent().getParent();
+                                        Invoice selectedInvoice = (Invoice) tableRow.getItem();
+
+                                        Invoice invoice = dao.getInvoiceById(selectedInvoice.getId());
+
+                                        try {
+                                            InvoiceReportManager invoiceReportManager = new InvoiceReportManager();
+                                            invoiceReportManager.displayInvoiceReport(invoice);
+                                        } catch (JRException e) {
+                                            throw new RuntimeException(e);
+                                        }
+
+                                    } catch (Exception ex) {
+                                        Logger.getLogger(InvoiceController.class.getName()).log(Level.SEVERE, null, ex);
+                                    }
+                                });
+
+                                HBox actionsHBox = new HBox(printButton);
+                                actionsHBox.setStyle("-fx-alignment:center");
+                                setGraphic(actionsHBox);
+
+                                setText(null);
+                            }
+                        }
+
+                    };
+                };
+
+        actionColumn.setCellFactory(cellFactory);
 
         invoicesTableView.setOnMouseClicked(e -> {
             if (invoicesTableView.getSelectionModel().getSelectedItem() != null) {
