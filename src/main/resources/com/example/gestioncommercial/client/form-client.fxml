@@ -9,7 +9,7 @@
 
 <AnchorPane prefHeight="340.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.gestioncommercial.client.ClientController">
     <children>
-        <Text layoutX="14.0" layoutY="40.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Ajouter Client">
+        <Text layoutX="14.0" layoutY="40.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Form Client">
             <font>
                 <Font name="System Bold" size="24.0" />
             </font>
@@ -24,6 +24,6 @@
       <Label layoutX="35.0" layoutY="167.0" text="Adresse" />
       <Label layoutX="35.0" layoutY="199.0" text="ICE" />
       <Label layoutX="35.0" layoutY="231.0" text="IF" />
-        <Button fx:id="addButton" layoutX="305.0" layoutY="275.0" mnemonicParsing="false" onAction="#addClient" prefHeight="25.0" prefWidth="75.0" text="Ajouter" />
+        <Button fx:id="saveButton" layoutX="305.0" layoutY="275.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="75.0" text="Enregistrer" />
     </children>
 </AnchorPane>

@@ -1,6 +1,5 @@
 package com.example.gestioncommercial.client;
 
-import com.example.gestioncommercial.DataAccessObject;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -24,23 +23,71 @@ public class ListClientsController implements Initializable {
     private TableView<Client> clientsTableView;
 
     @FXML
-    private Button deleteButton;
+    private Button deleteButton, updateButton;
 
-    @FXML
-    private Button newButton;
-
-    @FXML
-    private Button updateButton;
-
-    private DataAccessObject dao;
+    private ClientRepository clientRepository;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        dao = new DataAccessObject();
+        clientRepository = new ClientRepository();
 
         updateButton.setDisable(true);
         deleteButton.setDisable(true);
 
+        initClientsTableView();
+
+        try {
+            refreshClientsTable();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void addClient(ActionEvent actionEvent) throws IOException, SQLException {
+        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("form-client.fxml")));
+        Stage stage = new Stage();
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.setScene(new Scene(root));
+        stage.setResizable(false);
+        stage.showAndWait();
+        refreshClientsTable();
+    }
+
+    public void updateClient(ActionEvent actionEvent) throws IOException, SQLException {
+        Client selectedClient = clientsTableView.getSelectionModel().getSelectedItem();
+        if (selectedClient != null) {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("form-client.fxml"));
+            Parent root = fxmlLoader.load();
+
+            ClientController clientController = fxmlLoader.getController();
+            clientController.initClientUpdate(selectedClient);
+
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setScene(new Scene(root));
+            stage.setResizable(false);
+            stage.showAndWait();
+            refreshClientsTable();
+        }
+    }
+
+    public void deleteClient(ActionEvent actionEvent) throws SQLException {
+        Client selectedClient = clientsTableView.getSelectionModel().getSelectedItem();
+        if (selectedClient != null) {
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Confirmation de suppression");
+            alert.setHeaderText("Confirmation de suppression");
+            alert.setContentText("Voulez vous supprimer cet client?");
+            Optional<ButtonType> result = alert.showAndWait();
+
+            if (result.isPresent() && result.get() == ButtonType.OK) {
+                clientRepository.deleteById(selectedClient.getId());
+                refreshClientsTable();
+            }
+        }
+    }
+
+    private void initClientsTableView() {
         TableColumn<Client, Integer> idColumn = new TableColumn<>("ID");
         TableColumn<Client, String> nameColumn = new TableColumn<>("Nom");
         TableColumn<Client, String> addressColumn = new TableColumn<>("Adresse");
@@ -59,10 +106,10 @@ public class ListClientsController implements Initializable {
         );
 
         clientsTableView.setOnMouseClicked(e -> {
-            if(clientsTableView.getSelectionModel().getSelectedItem() != null) {
+            if (clientsTableView.getSelectionModel().getSelectedItem() != null) {
                 updateButton.setDisable(false);
                 deleteButton.setDisable(false);
-            }else {
+            } else {
                 updateButton.setDisable(true);
                 deleteButton.setDisable(true);
             }
@@ -77,71 +124,13 @@ public class ListClientsController implements Initializable {
         taxIdentificationNumberColumn.setCellValueFactory(new PropertyValueFactory<>("taxIdentificationNumber"));
 
         clientsTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-
-        try {
-            getAllClients();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
     }
 
-    private void getAllClients() throws SQLException {
-        String clientQuery = "SELECT * FROM Client";
-        clientsTableView.setItems(dao.getClients(clientQuery));
+    private void refreshClientsTable() throws SQLException {
+        clientsTableView.setItems(clientRepository.findAll());
+
         updateButton.setDisable(true);
         deleteButton.setDisable(true);
     }
 
-    public void addClient(ActionEvent actionEvent) throws IOException, SQLException {
-        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("add-client.fxml")));
-        Stage stage = new Stage();
-        stage.initModality(Modality.APPLICATION_MODAL);
-        stage.setScene(new Scene(root));
-        stage.setResizable(false);
-        stage.showAndWait();
-        getAllClients();
-    }
-
-    public void updateClient(ActionEvent actionEvent) throws IOException, SQLException {
-        Client selectedClient = clientsTableView.getSelectionModel().getSelectedItem();
-        if (selectedClient != null) {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("update-client.fxml"));
-            Parent root = fxmlLoader.load();
-
-            ClientController clientController = fxmlLoader.getController();
-
-            clientController.initFields(
-                    selectedClient.getId(),
-                    selectedClient.getName(),
-                    selectedClient.getPhoneNumber(),
-                    selectedClient.getAddress(),
-                    selectedClient.getCommonCompanyIdentifier(),
-                    selectedClient.getTaxIdentificationNumber()
-            );
-
-            Stage stage = new Stage();
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.setScene(new Scene(root));
-            stage.setResizable(false);
-            stage.showAndWait();
-            getAllClients();
-        }
-    }
-
-    public void deleteClient(ActionEvent actionEvent) throws SQLException {
-        Client selectedClient = clientsTableView.getSelectionModel().getSelectedItem();
-        if (selectedClient != null) {
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle("Confirmation de suppression");
-            alert.setHeaderText("Confirmation de suppression");
-            alert.setContentText("Voulez vous supprimer cet client?");
-            Optional<ButtonType> result = alert.showAndWait();
-
-            if (result.isPresent() && result.get() == ButtonType.OK) {
-                String deleteClientQuery = "DELETE FROM Client WHERE id = " + selectedClient.getId();
-                dao.saveData(deleteClientQuery);
-                getAllClients();
-            }
-        }
-    }
 }

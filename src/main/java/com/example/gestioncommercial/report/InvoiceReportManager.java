@@ -35,7 +35,7 @@ public class InvoiceReportManager {
 
         JRBeanCollectionDataSource invoiceItemsDataSet = new JRBeanCollectionDataSource(invoiceReportItems);
 
-        Map<String, Object> parameters = new HashMap<String, Object>();
+        Map<String, Object> parameters = new HashMap<>();
         parameters.put("id", invoice.getId());
         parameters.put("issueDate", invoice.getIssueDate());
 
@@ -69,6 +69,12 @@ public class InvoiceReportManager {
         return JasperFillManager.fillReport(report, parameters, new JREmptyDataSource());
     }
 
+    public void displayInvoiceReport(Invoice invoice) throws JRException {
+        JasperViewer jasperViewer = new JasperViewer(generateInvoice(invoice), false);
+        jasperViewer.setVisible(true);
+        jasperViewer.setTitle("Facture N° " + invoice.getId());
+        jasperViewer.setFitPageZoomRatio();
+    }
 
     private String getMoneyIntoWords(String input) {
         MoneyConverters converter = MoneyConverters.FRENCH_BANKING_MONEY_VALUE;
@@ -76,7 +82,7 @@ public class InvoiceReportManager {
         String[] amounts = input.split("\\.");
         BigDecimal dirhams = new BigDecimal(amounts[0]);
         BigDecimal centimes = new BigDecimal(amounts[1]);
-        String output = "";
+        String output;
 
         if (dirhams.compareTo(BigDecimal.ONE) == 1) {
             output = converter.asWords(dirhams).split("€")[0] + " DIRHAMS";
@@ -91,10 +97,4 @@ public class InvoiceReportManager {
         return output.toUpperCase();
     }
 
-    public void displayInvoiceReport(Invoice invoice) throws JRException {
-        JasperViewer jasperViewer = new JasperViewer(generateInvoice(invoice), false);
-        jasperViewer.setVisible(true);
-        jasperViewer.setTitle("Facture N° " + invoice.getId());
-        jasperViewer.setFitPageZoomRatio();
-    }
 }

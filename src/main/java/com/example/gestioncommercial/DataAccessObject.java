@@ -103,7 +103,6 @@ public class DataAccessObject {
         return products;
     }
 
-
     public int getLastInsertedId() {
         int id = lastInsertedId;
         lastInsertedId = 0;
@@ -145,7 +144,6 @@ public class DataAccessObject {
 
         return invoice;
     }
-
 
     private void getInvoiceAndClientDetails(Invoice invoice) {
         String query = """
@@ -189,7 +187,6 @@ public class DataAccessObject {
             e.printStackTrace();
         }
     }
-
 
     private void getInvoiceItems(Invoice invoice) {
         String query = """

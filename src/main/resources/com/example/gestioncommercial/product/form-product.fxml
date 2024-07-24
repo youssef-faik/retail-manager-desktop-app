@@ -9,7 +9,7 @@
 
 <AnchorPane prefHeight="340.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.gestioncommercial.product.ProductController">
     <children>
-        <Text layoutX="14.0" layoutY="40.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Nouveau Produit">
+        <Text layoutX="14.0" layoutY="40.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Form Produit">
             <font>
                 <Font name="System Bold" size="24.0" />
             </font>
@@ -26,6 +26,6 @@
       <Label layoutX="13.0" layoutY="167.0" text="Prix d'achat (HT)" />
       <Label layoutX="13.0" layoutY="131.0" text="Description" />
       <Label layoutX="13.0" layoutY="231.0" text="Quantite" />
-        <Button fx:id="addButton" layoutX="309.0" layoutY="300.0" mnemonicParsing="false" onAction="#addProduct" prefHeight="25.0" prefWidth="75.0" text="Ajouter" />
+        <Button fx:id="saveButton" layoutX="309.0" layoutY="300.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="75.0" text="Enregistrer" />
     </children>
 </AnchorPane>

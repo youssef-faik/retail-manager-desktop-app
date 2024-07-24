@@ -1,6 +1,5 @@
 package com.example.gestioncommercial.invoice;
 
-import com.example.gestioncommercial.DataAccessObject;
 import com.example.gestioncommercial.report.InvoiceReportManager;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
@@ -33,19 +32,70 @@ import java.util.logging.Logger;
 public class ListInvoicesController implements Initializable {
     @FXML
     private TableView<Invoice> invoicesTableView;
-
     @FXML
-    private Button deleteButton, newButton, updateButton, displayInvoiceReportButton;
+    private Button deleteButton, updateButton;
 
-    private DataAccessObject dao;
+    private InvoiceRepository invoiceRepository;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        dao = new DataAccessObject();
+        invoiceRepository = new InvoiceRepository();
 
         updateButton.setDisable(true);
         deleteButton.setDisable(true);
 
+        initInvoicesTableView();
+        refreshInvoicesTable();
+    }
+
+    public void addInvoice(ActionEvent actionEvent) throws IOException {
+        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("form-invoice.fxml")));
+        Stage stage = new Stage();
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.setScene(new Scene(root));
+        stage.setResizable(false);
+        stage.showAndWait();
+        refreshInvoicesTable();
+    }
+
+    public void updateInvoice(ActionEvent actionEvent) throws IOException {
+        Invoice selectedInvoice = invoicesTableView.getSelectionModel().getSelectedItem();
+        if (selectedInvoice != null) {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("form-invoice.fxml"));
+            Parent root = fxmlLoader.load();
+
+            InvoiceController invoiceController = fxmlLoader.getController();
+
+            Invoice invoice = invoiceRepository.findById(selectedInvoice.getId());
+            invoiceController.initInvoiceUpdate(invoice);
+
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setScene(new Scene(root));
+            stage.setResizable(false);
+            stage.showAndWait();
+
+            refreshInvoicesTable();
+        }
+    }
+
+    public void deleteInvoice(ActionEvent actionEvent) throws SQLException {
+        Invoice selectedInvoice = invoicesTableView.getSelectionModel().getSelectedItem();
+        if (selectedInvoice != null) {
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Confirmation de suppression");
+            alert.setHeaderText("Confirmation de suppression");
+            alert.setContentText("Voulez vous supprimer cette facture?");
+            Optional<ButtonType> result = alert.showAndWait();
+
+            if (result.isPresent() && result.get() == ButtonType.OK) {
+                invoiceRepository.deleteById(selectedInvoice.getId());
+                refreshInvoicesTable();
+            }
+        }
+    }
+
+    private void initInvoicesTableView() {
         TableColumn<Invoice, String> idColumn = new TableColumn<>("ID");
         TableColumn<Invoice, String> issueDateColumn = new TableColumn<>("Date d'émission");
         TableColumn<Invoice, String> clientColumn = new TableColumn<>("Client");
@@ -102,7 +152,7 @@ public class ListInvoicesController implements Initializable {
                                         TableRow tableRow = (TableRow) printButton.getParent().getParent().getParent();
                                         Invoice selectedInvoice = (Invoice) tableRow.getItem();
 
-                                        Invoice invoice = dao.getInvoiceById(selectedInvoice.getId());
+                                        Invoice invoice = invoiceRepository.findById(selectedInvoice.getId());
 
                                         try {
                                             InvoiceReportManager invoiceReportManager = new InvoiceReportManager();
@@ -138,68 +188,12 @@ public class ListInvoicesController implements Initializable {
                 deleteButton.setDisable(true);
             }
         });
-
-        getAllInvoices();
     }
 
-    private void getAllInvoices() {
-        String query = """
-                select I.id as id, issue_date, name, total_excluding_taxes, total_including_taxes, total_taxes
-                from invoice as I
-                    join Client as C on I.id_client = C.id;""";
+    private void refreshInvoicesTable() {
+        invoicesTableView.setItems(invoiceRepository.findAllJoinClient());
 
-        invoicesTableView.setItems(dao.getAllInvoices(query));
         updateButton.setDisable(true);
         deleteButton.setDisable(true);
-    }
-
-    public void addInvoice(ActionEvent actionEvent) throws IOException {
-        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("form-invoice.fxml")));
-        Stage stage = new Stage();
-        stage.initModality(Modality.APPLICATION_MODAL);
-        stage.setScene(new Scene(root));
-        stage.setResizable(false);
-        stage.showAndWait();
-        getAllInvoices();
-    }
-
-    public void updateInvoice(ActionEvent actionEvent) throws IOException {
-        Invoice selectedInvoice = invoicesTableView.getSelectionModel().getSelectedItem();
-        if (selectedInvoice != null) {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("form-invoice.fxml"));
-            Parent root = fxmlLoader.load();
-
-            InvoiceController invoiceController = fxmlLoader.getController();
-
-            Invoice invoice = dao.getInvoiceById(selectedInvoice.getId());
-            invoiceController.initInvoiceUpdate(invoice);
-
-            Stage stage = new Stage();
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.setScene(new Scene(root));
-            stage.setResizable(false);
-            stage.showAndWait();
-
-            getAllInvoices();
-        }
-    }
-
-    public void deleteInvoice(ActionEvent actionEvent) throws SQLException {
-        Invoice selectedInvoice = invoicesTableView.getSelectionModel().getSelectedItem();
-        if (selectedInvoice != null) {
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle("Confirmation de suppression");
-            alert.setHeaderText("Confirmation de suppression");
-            alert.setContentText("Voulez vous supprimer cette facture?");
-            Optional<ButtonType> result = alert.showAndWait();
-
-            if (result.isPresent() && result.get() == ButtonType.OK) {
-                String deleteInvoiceItemsQuery = "DELETE FROM invoice_item WHERE id_invoice = " + selectedInvoice.getId();
-                String deleteInvoiceQuery = "DELETE FROM invoice WHERE id = " + selectedInvoice.getId();
-                dao.saveData(deleteInvoiceItemsQuery);
-                dao.saveData(deleteInvoiceQuery);
-                getAllInvoices();
-            }
-        }
     }
 }

@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class Invoice {
-    private final Set<InvoiceItem> invoiceItems = new HashSet<InvoiceItem>();
+    private final Set<InvoiceItem> invoiceItems = new HashSet<>();
     private Long id;
     private LocalDate issueDate;
     private LocalDate dueDate;

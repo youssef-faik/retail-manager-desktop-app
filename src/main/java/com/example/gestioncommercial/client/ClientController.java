@@ -1,7 +1,5 @@
 package com.example.gestioncommercial.client;
 
-import com.example.gestioncommercial.DataAccessObject;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
@@ -14,83 +12,80 @@ import java.util.ResourceBundle;
 
 public class ClientController implements Initializable {
     @FXML
-    private Button addButton;
+    private Button saveButton;
     @FXML
-    private Button updateButton;
-    @FXML
-    private TextField addressTextField;
-    @FXML
-    private TextField commonCompanyIdentifierTextField;
-    @FXML
-    private TextField nameTextField;
-    @FXML
-    private TextField phoneNumberTextField;
-    @FXML
-    private TextField taxIdentificationNumberTextField;
-
+    private TextField addressTextField, commonCompanyIdentifierTextField, nameTextField, phoneNumberTextField, taxIdentificationNumberTextField;
     private int id;
-
-
-    private DataAccessObject dao;
+    private ClientRepository clientRepository;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        dao = new DataAccessObject();
+        clientRepository = new ClientRepository();
+
+        saveButton.setOnAction(e -> {
+            try {
+                saveClient();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
     }
 
+    public void saveClient() throws SQLException {
+        Client client = mapClient();
+        clientRepository.save(client);
+        displaySuccessAlert();
+        clearTextFields();
+    }
 
-    public void addClient() throws SQLException {
-        String insertClientQuery = "INSERT INTO Client(name, phone_number, address, common_company_identifier, tax_identification_number) VALUES('%s', '%s', '%s', '%s', '%s')"
-                .formatted(
-                        nameTextField.getText(),
-                        phoneNumberTextField.getText(),
-                        addressTextField.getText(),
-                        commonCompanyIdentifierTextField.getText(),
-                        taxIdentificationNumberTextField.getText()
-                );
+    public void updateClient() throws SQLException {
+        Client client = mapClient();
+        clientRepository.update(client);
+        displaySuccessAlert();
+    }
 
-        dao.saveData(insertClientQuery);
+    public void initClientUpdate(Client client) {
+        this.id = client.getId();
+        this.nameTextField.setText(client.getName());
+        this.phoneNumberTextField.setText(client.getPhoneNumber());
+        this.addressTextField.setText(client.getAddress());
+        this.commonCompanyIdentifierTextField.setText(client.getCommonCompanyIdentifier());
+        this.taxIdentificationNumberTextField.setText(client.getTaxIdentificationNumber());
 
+        saveButton.setOnAction(e -> {
+            try {
+                updateClient();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+    }
+
+    private Client mapClient() {
+        Client client = new Client();
+        client.setId(id);
+        client.setName(nameTextField.getText());
+        client.setPhoneNumber(phoneNumberTextField.getText());
+        client.setAddress(addressTextField.getText());
+        client.setCommonCompanyIdentifier(commonCompanyIdentifierTextField.getText());
+        client.setTaxIdentificationNumber(taxIdentificationNumberTextField.getText());
+
+        return client;
+    }
+
+    private void clearTextFields() {
         nameTextField.clear();
         phoneNumberTextField.clear();
         addressTextField.clear();
         commonCompanyIdentifierTextField.clear();
         taxIdentificationNumberTextField.clear();
+    }
 
+    private void displaySuccessAlert() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Success");
         alert.setHeaderText(null);
-        alert.setContentText("Client ajouter avec success");
+        alert.setContentText("Operation effectué avec success");
         alert.showAndWait();
     }
-
-    public void updateClient(ActionEvent actionEvent) throws SQLException {
-        String updateClientQuery = "UPDATE Client SET name = '%s', phone_number ='%s', address ='%s', common_company_identifier ='%s', tax_identification_number ='%s' where id = '%d'"
-                .formatted(
-                        nameTextField.getText(),
-                        phoneNumberTextField.getText(),
-                        addressTextField.getText(),
-                        commonCompanyIdentifierTextField.getText(),
-                        taxIdentificationNumberTextField.getText(),
-                        id
-                );
-
-        dao.saveData(updateClientQuery);
-
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Success");
-        alert.setHeaderText(null);
-        alert.setContentText("Client modifier avec success");
-        alert.showAndWait();
-    }
-
-    public void initFields(int id, String name, String phoneNumber, String address, String commonCompanyIdentifier, String taxIdentificationNumber) {
-        this.id = id;
-        this.nameTextField.setText(name);
-        this.phoneNumberTextField.setText(phoneNumber);
-        this.addressTextField.setText(address);
-        this.commonCompanyIdentifierTextField.setText(commonCompanyIdentifier);
-        this.taxIdentificationNumberTextField.setText(taxIdentificationNumber);
-    }
-
 }
