@@ -9,7 +9,7 @@
 
 <AnchorPane prefHeight="340.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.gestioncommercial.product.ProductController">
     <children>
-        <Text layoutX="14.0" layoutY="40.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Form Produit">
+        <Text layoutX="14.0" layoutY="40.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Produit">
             <font>
                 <Font name="System Bold" size="24.0" />
             </font>

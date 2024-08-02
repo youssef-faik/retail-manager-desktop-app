@@ -3,6 +3,8 @@ package com.example.gestioncommercial;
 import com.example.gestioncommercial.client.Client;
 import com.example.gestioncommercial.invoice.Invoice;
 import com.example.gestioncommercial.invoice.InvoiceItem;
+import com.example.gestioncommercial.invoice.InvoiceStatus;
+import com.example.gestioncommercial.payment.*;
 import com.example.gestioncommercial.product.Product;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -30,7 +32,6 @@ public class DataAccessObject {
 
             // Execute the insert
             int affectedRows = preparedStatement.executeUpdate();
-
 
             // Check if the insert was successful
             if (affectedRows > 0) {
@@ -121,6 +122,8 @@ public class DataAccessObject {
                         new Invoice(
                                 resultSet.getLong("id"),
                                 LocalDate.parse(resultSet.getString("issue_date")),
+                                InvoiceStatus.valueOf(resultSet.getString("status")),
+                                resultSet.getBigDecimal("paid_amount"),
                                 resultSet.getString("name"),
                                 resultSet.getBigDecimal("total_excluding_taxes"),
                                 resultSet.getBigDecimal("total_including_taxes"),
@@ -141,6 +144,7 @@ public class DataAccessObject {
 
         getInvoiceAndClientDetails(invoice);
         getInvoiceItems(invoice);
+        getInvoicePayments(invoice);
 
         return invoice;
     }
@@ -149,18 +153,21 @@ public class DataAccessObject {
         String query = """
                 select
                     issue_date,
+                    due_date,
                     total_excluding_taxes,
                     total_taxes,
                     total_including_taxes,
-                    id_client,
+                    client_id,
                     name,
                     phone_number,
                     address,
                     common_company_identifier,
-                    tax_identification_number
-                from invoice as I
-                    join Client as C on I.id_client = C.id
-                where I.id = %d;""".formatted(invoice.getId());
+                    tax_identification_number,
+                    status,
+                    paid_amount
+                from invoice as i
+                    join client as c on i.client_id = c.id
+                where i.id = %d;""".formatted(invoice.getId());
 
 
         try {
@@ -169,13 +176,20 @@ public class DataAccessObject {
             resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
+                String dueDate = resultSet.getString("due_date");
+                if (dueDate != null) {
+                    invoice.setDueDate(LocalDate.parse(dueDate));
+                }
+
                 invoice.setIssueDate(LocalDate.parse(resultSet.getString("issue_date")));
                 invoice.setTotalExcludingTaxes(resultSet.getBigDecimal("total_excluding_taxes"));
                 invoice.setTotalIncludingTaxes(resultSet.getBigDecimal("total_including_taxes"));
                 invoice.setTotalTaxes(resultSet.getBigDecimal("total_taxes"));
+                invoice.setStatus(InvoiceStatus.valueOf(resultSet.getString("status")));
+                invoice.setPaidAmount(resultSet.getBigDecimal("paid_amount"));
 
                 invoice.setClient(new Client(
-                        resultSet.getInt("id_client"),
+                        resultSet.getInt("client_id"),
                         resultSet.getString("name"),
                         resultSet.getString("phone_number"),
                         resultSet.getString("address"),
@@ -188,24 +202,99 @@ public class DataAccessObject {
         }
     }
 
+    private void getInvoicePayments(Invoice invoice) {
+        String query = """
+                select p.id as payment_id,
+                       p.amount,
+                       p.payment_date,
+                       p.invoice_id,
+                       p.payment_method,
+                       c.id as cash_id,
+                       c.cash_flow_type,
+                       b.id as id_bank_transfer,
+                       b.bank_name as bank_name_bank_transfer,
+                       b.account_number,
+                       b.transaction_id,
+                       k.id as check_id,
+                       k.bank_name as check_bank_name,
+                       k.check_number,
+                       k.due_date,
+                       k.payee_name,
+                       k.sender_account,
+                       k.status
+                from payment p
+                         left join cash c on p.id = c.payment_id
+                         left join bank_transfer b on p.id = b.payment_id
+                         left join payment_check k on p.id = k.payment_id
+                where invoice_id = %d;""".formatted(invoice.getId());
+
+
+        try {
+            connection = dataBaseConnector.getConnection();
+            preparedStatement = connection.prepareStatement(query);
+            resultSet = preparedStatement.executeQuery();
+
+
+            while (resultSet.next()) {
+                PaymentMethod paymentMethod = PaymentMethod.valueOf(resultSet.getString("payment_method"));
+
+                if (paymentMethod == PaymentMethod.CASH) {
+                    invoice.getPayments().add(new Cash(
+                            resultSet.getLong("payment_id"),
+                            resultSet.getBigDecimal("amount"),
+                            resultSet.getString("payment_date") == null ? null : LocalDate.parse(resultSet.getString("payment_date")),
+                            PaymentMethod.CASH,
+                            CashFlowType.valueOf(resultSet.getString("cash_flow_type"))
+                    ));
+                } else if (paymentMethod == PaymentMethod.BANK_TRANSFER) {
+                    invoice.getPayments().add(new BankTransfer(
+                            resultSet.getLong("payment_id"),
+                            resultSet.getBigDecimal("amount"),
+                            resultSet.getString("payment_date") == null ? null : LocalDate.parse(resultSet.getString("payment_date")),
+                            resultSet.getString("account_number"),
+                            resultSet.getString("transaction_id"),
+                            PaymentMethod.BANK_TRANSFER,
+                            resultSet.getString("bank_name_bank_transfer")
+                    ));
+                } else if (paymentMethod == PaymentMethod.CHECK) {
+                    invoice.getPayments().add(new Check(
+                            resultSet.getLong("payment_id"),
+                            resultSet.getBigDecimal("amount"),
+                            resultSet.getString("payment_date") == null ? null : LocalDate.parse(resultSet.getString("payment_date")),
+                            resultSet.getString("payee_name"),
+                            resultSet.getString("check_number"),
+                            resultSet.getString("sender_account"),
+                            PaymentMethod.CHECK,
+                            resultSet.getString("due_date") == null ? null : LocalDate.parse(resultSet.getString("due_date")),
+                            resultSet.getString("check_bank_name"),
+                            CheckStatus.valueOf(resultSet.getString("status").toUpperCase())
+                    ));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
     private void getInvoiceItems(Invoice invoice) {
         String query = """
-                select I.id as id_item,
-                       I.quantity as quantity_item,
+                select i.id as item_id,
+                       i.quantity as quantity_item,
                        unit_price_excluding_taxes,
                        total_excluding_taxes,
                        total_taxes,
                        total_including_taxes,
-                       id_product,
+                       product_id,
                        name,
                        description,
                        purchase_price_excluding_tax,
                        selling_price_excluding_tax,
-                       P.quantity as quantity_product,
+                       p.quantity as quantity_product,
                        tax_rate
-                from invoice_item as I
-                         join Product as P on I.id_product = P.id
-                where id_invoice = %d;""".formatted(invoice.getId());
+                from invoice_item as i
+                         join product as p on i.product_id = p.id
+                where invoice_id = %d;""".formatted(invoice.getId());
 
         try {
             connection = dataBaseConnector.getConnection();
@@ -215,9 +304,9 @@ public class DataAccessObject {
             while (resultSet.next()) {
                 invoice.getInvoiceItems().add(
                         new InvoiceItem(
-                                resultSet.getLong("id_item"),
+                                resultSet.getLong("item_id"),
                                 new Product(
-                                        resultSet.getInt("id_product"),
+                                        resultSet.getInt("product_id"),
                                         resultSet.getString("name"),
                                         resultSet.getBigDecimal("purchase_price_excluding_tax"),
                                         resultSet.getBigDecimal("selling_price_excluding_tax"),

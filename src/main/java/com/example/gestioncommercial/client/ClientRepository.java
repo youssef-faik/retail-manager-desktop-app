@@ -13,12 +13,12 @@ public class ClientRepository {
     }
 
     public ObservableList<Client> findAll() {
-        String clientQuery = "SELECT * FROM Client";
+        String clientQuery = "select * from client";
         return dao.getClients(clientQuery);
     }
 
     public void save(Client client) throws SQLException {
-        String query = "INSERT INTO Client(name, phone_number, address, common_company_identifier, tax_identification_number) VALUES('%s', '%s', '%s', '%s', '%s')"
+        String query = "insert into client(name, phone_number, address, common_company_identifier, tax_identification_number) values('%s', '%s', '%s', '%s', '%s')"
                 .formatted(
                         client.getName(),
                         client.getPhoneNumber(),
@@ -31,7 +31,7 @@ public class ClientRepository {
     }
 
     public void update(Client client) throws SQLException {
-        String updateClientQuery = "UPDATE Client SET name = '%s', phone_number ='%s', address ='%s', common_company_identifier ='%s', tax_identification_number ='%s' where id = %d"
+        String updateClientQuery = "update client set name = '%s', phone_number ='%s', address ='%s', common_company_identifier ='%s', tax_identification_number ='%s' where id = %d"
                 .formatted(
                         client.getName(),
                         client.getPhoneNumber(),
@@ -45,7 +45,7 @@ public class ClientRepository {
     }
 
     public void deleteById(int id) throws SQLException {
-        String query = "DELETE FROM Client WHERE id = " + id;
+        String query = "delete from client where id = " + id;
         dao.saveData(query);
     }
 }

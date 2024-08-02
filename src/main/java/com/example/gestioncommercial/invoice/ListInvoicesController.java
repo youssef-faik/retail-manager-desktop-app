@@ -13,7 +13,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -49,13 +51,10 @@ public class ListInvoicesController implements Initializable {
     }
 
     public void addInvoice(ActionEvent actionEvent) throws IOException {
-        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("form-invoice.fxml")));
-        Stage stage = new Stage();
-        stage.initModality(Modality.APPLICATION_MODAL);
-        stage.setScene(new Scene(root));
-        stage.setResizable(false);
-        stage.showAndWait();
-        refreshInvoicesTable();
+        VBox pane = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("form-invoice.fxml")));
+        Button button = (Button) actionEvent.getSource();
+        BorderPane borderPane = (BorderPane) button.getScene().getRoot();
+        borderPane.setCenter(pane);
     }
 
     public void updateInvoice(ActionEvent actionEvent) throws IOException {
@@ -97,19 +96,31 @@ public class ListInvoicesController implements Initializable {
 
     private void initInvoicesTableView() {
         TableColumn<Invoice, String> idColumn = new TableColumn<>("ID");
-        TableColumn<Invoice, String> issueDateColumn = new TableColumn<>("Date d'émission");
         TableColumn<Invoice, String> clientColumn = new TableColumn<>("Client");
-        TableColumn<Invoice, String> totalExcludingTaxesColumn = new TableColumn<>("Total (HT)");
-        TableColumn<Invoice, String> totalTaxesColumn = new TableColumn<>("Taxes");
+        TableColumn<Invoice, String> issueDateColumn = new TableColumn<>("Date d'émission");
+        TableColumn<Invoice, String> statusColumn = new TableColumn<>("Status");
         TableColumn<Invoice, String> totalIncludingTaxesColumn = new TableColumn<>("Total (TTC)");
+        TableColumn<Invoice, String> paidAmountColumn = new TableColumn<>("Montant payé");
+        TableColumn<Invoice, String> remainingAmountTaxesColumn = new TableColumn<>("Montant restant");
+        TableColumn<Invoice, String> dueDateColumn = new TableColumn<>("Date d'échéance");
         TableColumn<Invoice, String> actionColumn = new TableColumn<>("Actions");
 
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         issueDateColumn.setCellValueFactory(new PropertyValueFactory<>("issueDate"));
         clientColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getClient().getName()));
-        totalExcludingTaxesColumn.setCellValueFactory(new PropertyValueFactory<>("totalExcludingTaxes"));
-        totalTaxesColumn.setCellValueFactory(new PropertyValueFactory<>("totalTaxes"));
+        remainingAmountTaxesColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getTotalIncludingTaxes().subtract(cellData.getValue().getPaidAmount()).toPlainString()));
         totalIncludingTaxesColumn.setCellValueFactory(new PropertyValueFactory<>("totalIncludingTaxes"));
+        statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
+        paidAmountColumn.setCellValueFactory(new PropertyValueFactory<>("paidAmount"));
+
+        dueDateColumn.setCellValueFactory(cellData -> {
+            return new SimpleStringProperty(cellData.getValue().getDueDate() == null ? "N/A" : cellData.getValue().getDueDate().toString());
+        });
+
+
+        idColumn.setMinWidth(50);
+        idColumn.setMaxWidth(50);
+        idColumn.setReorderable(false);
 
         actionColumn.setMinWidth(90);
         actionColumn.setMaxWidth(90);
@@ -122,9 +133,11 @@ public class ListInvoicesController implements Initializable {
                 idColumn,
                 clientColumn,
                 issueDateColumn,
-                totalExcludingTaxesColumn,
-                totalTaxesColumn,
+                dueDateColumn,
+                statusColumn,
                 totalIncludingTaxesColumn,
+                paidAmountColumn,
+                remainingAmountTaxesColumn,
                 actionColumn
         );
 

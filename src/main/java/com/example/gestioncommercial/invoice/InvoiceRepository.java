@@ -1,6 +1,10 @@
 package com.example.gestioncommercial.invoice;
 
 import com.example.gestioncommercial.DataAccessObject;
+import com.example.gestioncommercial.payment.BankTransfer;
+import com.example.gestioncommercial.payment.Cash;
+import com.example.gestioncommercial.payment.Check;
+import com.example.gestioncommercial.payment.Payment;
 import com.example.gestioncommercial.product.Product;
 import javafx.collections.ObservableList;
 
@@ -18,9 +22,9 @@ public class InvoiceRepository {
 
     public ObservableList<Invoice> findAllJoinClient() {
         String query = """
-                select I.id as id, issue_date, name, total_excluding_taxes, total_including_taxes, total_taxes
-                from invoice as I
-                    join Client as C on I.id_client = C.id;""";
+                select i.id as id, issue_date, status, paid_amount, name, total_excluding_taxes, total_including_taxes, total_taxes
+                from invoice as i
+                    join client as c on i.client_id = c.id;""";
 
         return dao.getAllInvoices(query);
     }
@@ -36,14 +40,17 @@ public class InvoiceRepository {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-        String insertInvoiceQuery = "insert into invoice(issue_date, id_client, total_excluding_taxes, total_taxes, total_including_taxes)" +
-                "values ('%s', %s, %s, %s, %s);"
+        String insertInvoiceQuery = "insert into invoice(issue_date, due_date, client_id, total_excluding_taxes, total_taxes, total_including_taxes, status, paid_amount)" +
+                "values ('%s', %s, %s, %s, %s, %s, '%s', %s);"
                         .formatted(
                                 invoice.getIssueDate().format(formatter),
+                                invoice.getDueDate() == null ? "null" : "'" + invoice.getDueDate().format(formatter) + "'",
                                 invoice.getClient().getId(),
                                 df.format(invoice.getTotalExcludingTaxes()),
                                 df.format(invoice.getTotalTaxes()),
-                                df.format(invoice.getTotalIncludingTaxes())
+                                df.format(invoice.getTotalIncludingTaxes()),
+                                invoice.getStatus().name(),
+                                df.format(invoice.getPaidAmount())
                         );
 
         // save invoice items to DB and retrieve its id
@@ -51,7 +58,7 @@ public class InvoiceRepository {
         invoice.setId((long) dao.getLastInsertedId());
 
         // save invoice items
-        StringBuilder insertInvoiceItemQuery = new StringBuilder("insert into invoice_item(id_invoice, id_product, quantity, unit_price_excluding_taxes, total_excluding_taxes, total_taxes, total_including_taxes) values ");
+        StringBuilder insertInvoiceItemQuery = new StringBuilder("insert into invoice_item(invoice_id, product_id, quantity, unit_price_excluding_taxes, total_excluding_taxes, total_taxes, total_including_taxes) values ");
 
         invoice.getInvoiceItems().forEach(item -> insertInvoiceItemQuery.append("(%d, %d, %d, %s, %s, %s, %s),"
                 .formatted(
@@ -69,6 +76,8 @@ public class InvoiceRepository {
 
         // save invoice items to DB
         dao.saveData(insertInvoiceItemQuery.toString());
+
+        savePayments(invoice, df, formatter);
     }
 
     public void update(Invoice invoice) throws SQLException {
@@ -80,18 +89,24 @@ public class InvoiceRepository {
 
         String insertInvoiceQuery = """
                 update invoice
-                set issue_date = '%s',
-                id_client = %s,
+                set issue_date = %s,
+                due_date = %s,
+                client_id = %s,
                 total_excluding_taxes = %s,
                 total_taxes = %s,
-                total_including_taxes = %s
+                total_including_taxes = %s,
+                status = '%s',
+                paid_amount = %s
                 where id = %d;"""
                 .formatted(
-                        invoice.getIssueDate().format(formatter),
+                        invoice.getIssueDate() == null ? "null" : "'" + invoice.getIssueDate().format(formatter) + "'",
+                        invoice.getDueDate() == null ? "null" : "'" + invoice.getDueDate().format(formatter) + "'",
                         invoice.getClient().getId(),
                         df.format(invoice.getTotalExcludingTaxes()),
                         df.format(invoice.getTotalTaxes()),
                         df.format(invoice.getTotalIncludingTaxes()),
+                        invoice.getStatus().name(),
+                        df.format(invoice.getPaidAmount()),
                         invoice.getId()
                 );
 
@@ -99,11 +114,11 @@ public class InvoiceRepository {
         dao.saveData(insertInvoiceQuery);
 
         // delete old invoice items
-        String deleteInvoiceItemsQuery = "DELETE FROM invoice_item WHERE id_invoice = " + invoice.getId();
+        String deleteInvoiceItemsQuery = "delete from invoice_item where invoice_id = " + invoice.getId();
         dao.saveData(deleteInvoiceItemsQuery);
 
         // insert new invoice items
-        StringBuilder insertInvoiceItemQuery = new StringBuilder("insert into invoice_item(id_invoice, id_product, quantity, unit_price_excluding_taxes, total_excluding_taxes, total_taxes, total_including_taxes) values ");
+        StringBuilder insertInvoiceItemQuery = new StringBuilder("insert into invoice_item(invoice_id, product_id, quantity, unit_price_excluding_taxes, total_excluding_taxes, total_taxes, total_including_taxes) values ");
 
         invoice.getInvoiceItems().forEach(invoiceItem -> insertInvoiceItemQuery.append("(%d, %d, %d, %s, %s, %s, %s),"
                 .formatted(
@@ -122,16 +137,109 @@ public class InvoiceRepository {
 
         // save invoice items to DB
         dao.saveData(insertInvoiceItemQuery.toString());
+
+        deletePaymentsByInvoiceId(invoice.getId());
+        savePayments(invoice, df, formatter);
     }
 
     public void deleteById(long id) throws SQLException {
-        String deleteInvoiceItemsQuery = "DELETE FROM invoice_item WHERE id_invoice = " + id;
-        String deleteInvoiceQuery = "DELETE FROM invoice WHERE id = " + id;
+        deletePaymentsByInvoiceId(id);
+
+        String deleteInvoiceItemsQuery = "delete from invoice_item where invoice_id = " + id;
+        String deleteInvoiceQuery = "delete from invoice where id = " + id;
+
         dao.saveData(deleteInvoiceItemsQuery);
         dao.saveData(deleteInvoiceQuery);
     }
 
     public ObservableList<Product> findAll() {
-        return dao.getProducts("SELECT * FROM Product");
+        return dao.getProducts("select * from product");
     }
+
+    private void savePayments(Invoice invoice, DecimalFormat df, DateTimeFormatter formatter) throws SQLException {
+        for (Payment payment : invoice.getPayments()) {
+            String insertPaymentQuery = """
+                    insert into payment (amount, payment_date, invoice_id, payment_method)
+                    values (%s, %s, %d, '%s');"""
+                    .formatted(
+                            df.format(payment.getAmount()),
+                            payment.getPaymentDate() == null ? "null" : "'" + payment.getPaymentDate().format(formatter) + "'",
+                            invoice.getId(),
+                            payment.getPaymentMethod().name()
+                    );
+
+            // save payment to DB and retrieve its id
+            dao.saveData(insertPaymentQuery);
+            payment.setId(dao.getLastInsertedId());
+
+            if (payment instanceof Cash cash) {
+                insertPaymentQuery = """
+                        insert into cash (cash_flow_type, payment_id)
+                        values ('%s', %d)"""
+                        .formatted(cash.getCashFlowType(), payment.getId());
+            } else if (payment instanceof BankTransfer bankTransfer) {
+                insertPaymentQuery = """
+                        insert into bank_transfer (bank_name, payment_id, account_number, transaction_id)
+                        values ('%s', %d, '%s', '%s');"""
+                        .formatted(
+                                bankTransfer.getBankName(),
+                                payment.getId(),
+                                bankTransfer.getAccountNumber(),
+                                bankTransfer.getTransactionId()
+                        );
+            } else if (payment instanceof Check check) {
+                insertPaymentQuery = """
+                        insert into payment_check(bank_name, due_date, status, payment_id, check_number, payee_name, sender_account)
+                        values ('%s', %s, '%s', %d, '%s', '%s', '%s');"""
+                        .formatted(
+                                check.getBankName(),
+                                check.getDueDate() == null ? "null" : "'" + check.getDueDate().format(formatter) + "'",
+                                check.getCheckStatus().name(),
+                                check.getId(),
+                                check.getCheckNumber(),
+                                check.getPayeeName(),
+                                check.getSenderAccount()
+                        );
+            }
+
+            // save
+            dao.saveData(insertPaymentQuery);
+        }
+    }
+
+    private void deletePaymentsByInvoiceId(long id) throws SQLException {
+        String deleteCheckPaymentsQuery = """
+                delete from payment_check
+                where payment_id in (
+                        select id
+                        from payment
+                        where invoice_id = %d
+                );""".formatted(id);
+
+        String deleteCashPaymentsQuery = """
+                delete from cash
+                where payment_id in (
+                        select id
+                        from payment
+                        where invoice_id = %d
+                );""".formatted(id);
+
+        String deleteBankTransferPaymentsQuery = """
+                delete from bank_transfer
+                where payment_id in (
+                        select id
+                        from payment
+                        where invoice_id = %d
+                );""".formatted(id);
+
+        String deletePaymentsQuery = """
+                delete from payment
+                where invoice_id = %d""".formatted(id);
+
+        dao.saveData(deleteCashPaymentsQuery);
+        dao.saveData(deleteCheckPaymentsQuery);
+        dao.saveData(deleteBankTransferPaymentsQuery);
+        dao.saveData(deletePaymentsQuery);
+    }
+
 }

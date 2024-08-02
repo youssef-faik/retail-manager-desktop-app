@@ -15,7 +15,7 @@ public class ProductRepository {
     }
 
     public ObservableList<Product> findAll() {
-        String productsQuery = "SELECT * FROM Product";
+        String productsQuery = "select * from product";
         return dao.getProducts(productsQuery);
     }
 
@@ -24,7 +24,7 @@ public class ProductRepository {
         symbols.setDecimalSeparator('.');
         DecimalFormat df = new DecimalFormat("0.00", symbols);
 
-        String insertQuery = "INSERT INTO Product(name, description, selling_price_excluding_tax, purchase_price_excluding_tax, quantity, tax_rate) VALUES('%s', '%s', %s, %s, %d, %s)"
+        String insertQuery = "insert into product(name, description, selling_price_excluding_tax, purchase_price_excluding_tax, quantity, tax_rate) values('%s', '%s', %s, %s, %d, %s)"
                 .formatted(
                         product.getName(),
                         product.getDescription(),
@@ -42,7 +42,7 @@ public class ProductRepository {
         symbols.setDecimalSeparator('.');
         DecimalFormat df = new DecimalFormat("0.00", symbols);
 
-        String updateQuery = "UPDATE Product SET name = '%s', description ='%s', purchase_price_excluding_tax = %s, selling_price_excluding_tax = %s, quantity =%s, tax_rate = %s where id = %d"
+        String updateQuery = "update product set name = '%s', description ='%s', purchase_price_excluding_tax = %s, selling_price_excluding_tax = %s, quantity =%s, tax_rate = %s where id = %d"
                 .formatted(
                         product.getName(),
                         product.getDescription(),
@@ -57,7 +57,7 @@ public class ProductRepository {
     }
 
     public void deleteById(int id) throws SQLException {
-        String query = "DELETE FROM Product WHERE id = " + id;
+        String query = "delete from product where id = " + id;
         dao.saveData(query);
     }
 }
