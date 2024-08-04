@@ -72,5 +72,9 @@ public class MainController {
         borderPane.setCenter(pane);
     }
 
+    public void editConfig() throws IOException {
+        VBox pane = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("configuration/form-config.fxml")));
+        borderPane.setCenter(pane);
+    }
 }
 

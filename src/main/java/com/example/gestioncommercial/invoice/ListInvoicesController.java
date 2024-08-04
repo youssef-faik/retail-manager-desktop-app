@@ -96,6 +96,7 @@ public class ListInvoicesController implements Initializable {
 
     private void initInvoicesTableView() {
         TableColumn<Invoice, String> idColumn = new TableColumn<>("ID");
+        TableColumn<Invoice, String> referenceColumn = new TableColumn<>("Référence");
         TableColumn<Invoice, String> clientColumn = new TableColumn<>("Client");
         TableColumn<Invoice, String> issueDateColumn = new TableColumn<>("Date d'émission");
         TableColumn<Invoice, String> statusColumn = new TableColumn<>("Status");
@@ -117,10 +118,15 @@ public class ListInvoicesController implements Initializable {
             return new SimpleStringProperty(cellData.getValue().getDueDate() == null ? "N/A" : cellData.getValue().getDueDate().toString());
         });
 
+        referenceColumn.setCellValueFactory(cellData -> {
+            return new SimpleStringProperty(cellData.getValue().getReference() == 0L ? "N/A" : cellData.getValue().getReference().toString());
+        });
 
-        idColumn.setMinWidth(50);
-        idColumn.setMaxWidth(50);
-        idColumn.setReorderable(false);
+        idColumn.setVisible(false);
+
+        referenceColumn.setMinWidth(70);
+        referenceColumn.setMaxWidth(70);
+        referenceColumn.setReorderable(false);
 
         actionColumn.setMinWidth(90);
         actionColumn.setMaxWidth(90);
@@ -131,6 +137,7 @@ public class ListInvoicesController implements Initializable {
 
         invoicesTableView.getColumns().addAll(
                 idColumn,
+                referenceColumn,
                 clientColumn,
                 issueDateColumn,
                 dueDateColumn,

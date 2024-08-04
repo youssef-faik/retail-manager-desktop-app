@@ -19,4 +19,6 @@ module com.example.gestioncommercial {
     opens com.example.gestioncommercial.report to javafx.fxml;
     exports com.example.gestioncommercial.payment;
     opens com.example.gestioncommercial.payment to javafx.fxml;
+    exports com.example.gestioncommercial.configuration;
+    opens com.example.gestioncommercial.configuration to javafx.fxml;
 }

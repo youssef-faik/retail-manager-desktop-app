@@ -16,11 +16,15 @@
 <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="616.0" prefWidth="1240.0" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.gestioncommercial.invoice.InvoiceController">
     <HBox prefHeight="100.0" prefWidth="200.0">
         <children>
-          <Label prefHeight="35.0" prefWidth="416.0" text="Facture" HBox.hgrow="ALWAYS">
-              <font>
-                  <Font name="System Bold" size="24.0" />
-              </font>
-          </Label>
+         <VBox spacing="8.0" HBox.hgrow="ALWAYS">
+            <children>
+                <Label fx:id="invoiceReferenceLabel" prefHeight="35.0" prefWidth="416.0" text="Facture">
+                    <font>
+                        <Font name="System Bold" size="24.0" />
+                    </font>
+                </Label>
+            </children>
+         </VBox>
             <HBox alignment="TOP_RIGHT" fillHeight="false" prefHeight="101.0" prefWidth="1240.0">
                 <children>
                     <VBox prefHeight="108.0" prefWidth="315.0" spacing="8.0">
@@ -315,9 +319,9 @@
                   <children>
                      <Label prefHeight="17.0" prefWidth="132.0" />
                      <Button fx:id="saveInvoiceButton" minWidth="0.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="220.0" text="Valider" HBox.hgrow="ALWAYS">
-                        <graphic>
-                           <FontAwesomeIconView glyphName="CHECK" />
-                        </graphic>
+                         <graphic>
+                             <FontAwesomeIconView glyphName="CHECK" text="" />
+                         </graphic>
                      </Button>
                   </children>
                   <VBox.margin>

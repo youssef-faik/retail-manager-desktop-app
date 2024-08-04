@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 
 public class InvoiceRepository {
     private final DataAccessObject dao;
@@ -22,7 +23,7 @@ public class InvoiceRepository {
 
     public ObservableList<Invoice> findAllJoinClient() {
         String query = """
-                select i.id as id, issue_date, status, paid_amount, name, total_excluding_taxes, total_including_taxes, total_taxes
+                select i.id as id, reference, issue_date, status, paid_amount, name, total_excluding_taxes, total_including_taxes, total_taxes
                 from invoice as i
                     join client as c on i.client_id = c.id;""";
 
@@ -40,9 +41,10 @@ public class InvoiceRepository {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-        String insertInvoiceQuery = "insert into invoice(issue_date, due_date, client_id, total_excluding_taxes, total_taxes, total_including_taxes, status, paid_amount)" +
-                "values ('%s', %s, %s, %s, %s, %s, '%s', %s);"
+        String insertInvoiceQuery = "insert into invoice(reference, issue_date, due_date, client_id, total_excluding_taxes, total_taxes, total_including_taxes, status, paid_amount)" +
+                "values (%d, '%s', %s, %s, %s, %s, %s, '%s', %s);"
                         .formatted(
+                                invoice.getReference() == null ? 0L : invoice.getReference(),
                                 invoice.getIssueDate().format(formatter),
                                 invoice.getDueDate() == null ? "null" : "'" + invoice.getDueDate().format(formatter) + "'",
                                 invoice.getClient().getId(),
@@ -91,6 +93,7 @@ public class InvoiceRepository {
                 update invoice
                 set issue_date = %s,
                 due_date = %s,
+                reference = %d,
                 client_id = %s,
                 total_excluding_taxes = %s,
                 total_taxes = %s,
@@ -101,6 +104,7 @@ public class InvoiceRepository {
                 .formatted(
                         invoice.getIssueDate() == null ? "null" : "'" + invoice.getIssueDate().format(formatter) + "'",
                         invoice.getDueDate() == null ? "null" : "'" + invoice.getDueDate().format(formatter) + "'",
+                        invoice.getReference(),
                         invoice.getClient().getId(),
                         df.format(invoice.getTotalExcludingTaxes()),
                         df.format(invoice.getTotalTaxes()),
@@ -242,4 +246,11 @@ public class InvoiceRepository {
         dao.saveData(deletePaymentsQuery);
     }
 
+    public long count() {
+        return dao.getCountInvoice();
+    }
+
+    public Optional<Invoice> findFirstByOrderByIdDesc() {
+        return dao.getMostRecentInvoice();
+    }
 }

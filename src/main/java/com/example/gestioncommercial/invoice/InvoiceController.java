@@ -2,6 +2,8 @@ package com.example.gestioncommercial.invoice;
 
 import com.example.gestioncommercial.client.Client;
 import com.example.gestioncommercial.client.ClientRepository;
+import com.example.gestioncommercial.configuration.AppConfiguration;
+import com.example.gestioncommercial.configuration.ConfigKey;
 import com.example.gestioncommercial.payment.*;
 import com.example.gestioncommercial.product.Product;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
@@ -28,6 +30,7 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,6 +38,9 @@ import java.util.logging.Logger;
 public class InvoiceController implements Initializable {
     @FXML
     private TextField totalExcludingTaxesTextField, totalTaxesTextField, totalIncludingTaxesTextField, addressTextField, commonCompanyIdentifierTextField, remainingAmountTextField, paidAmountTextField;
+
+    @FXML
+    private Label invoiceReferenceLabel;
 
     @FXML
     private Button addProductButton, saveInvoiceButton, addPaymentButton;
@@ -135,7 +141,7 @@ public class InvoiceController implements Initializable {
 
         saveInvoiceButton.setOnAction(e -> {
             try {
-                saveInvoice();
+                addInvoice();
             } catch (SQLException ex) {
                 throw new RuntimeException(ex);
             }
@@ -144,15 +150,43 @@ public class InvoiceController implements Initializable {
     }
 
 
-    private void saveInvoice() throws SQLException {
+    private void addInvoice() throws SQLException {
         mapInvoice();
-        invoiceRepository.save(invoice);
+
+        if (invoice.getStatus() != InvoiceStatus.DRAFT) {
+            AppConfiguration configuration = AppConfiguration.getInstance();
+            long lastInvoiceNumber = Long.parseLong(configuration.getConfigurationValue(ConfigKey.NEXT_INVOICE_NUMBER).getValue());
+
+            invoice.setReference(lastInvoiceNumber);
+
+            invoiceRepository.save(invoice);
+
+            lastInvoiceNumber++;
+            configuration.setConfigurationValues(Map.of(ConfigKey.NEXT_INVOICE_NUMBER, String.valueOf(lastInvoiceNumber)));
+        } else {
+            invoiceRepository.save(invoice);
+        }
+
         displaySuccessAlert();
     }
 
     public void updateInvoice() throws SQLException {
         mapInvoice();
-        invoiceRepository.update(invoice);
+
+        if (isDraftInvoice && invoice.getStatus() != InvoiceStatus.DRAFT) {
+            AppConfiguration configuration = AppConfiguration.getInstance();
+            long lastInvoiceNumber = Long.parseLong(configuration.getConfigurationValue(ConfigKey.NEXT_INVOICE_NUMBER).getValue());
+
+            invoice.setReference(lastInvoiceNumber);
+
+            invoiceRepository.update(invoice);
+
+            lastInvoiceNumber++;
+            configuration.setConfigurationValues(Map.of(ConfigKey.NEXT_INVOICE_NUMBER, String.valueOf(lastInvoiceNumber)));
+        } else {
+            invoiceRepository.update(invoice);
+        }
+
         displaySuccessAlert();
     }
 
@@ -439,6 +473,11 @@ public class InvoiceController implements Initializable {
 
     public void initInvoiceUpdate(Invoice invoice) {
         this.invoice = invoice;
+
+        if (invoice.getReference() != 0) {
+            this.invoiceReferenceLabel.setText(invoiceReferenceLabel.getText() + " N° : " + invoice.getReference());
+        }
+
         this.issueDateDatePicker.setValue(invoice.getIssueDate());
         this.dueDateDatePicker.setValue(invoice.getDueDate());
         this.totalIncludingTaxesTextField.setText(invoice.getTotalIncludingTaxes().toString());

@@ -14,6 +14,7 @@ public class Invoice {
     private final Set<InvoiceItem> invoiceItems = new HashSet<>();
     private List<Payment> payments = new ArrayList<>();
     private Long id;
+    private Long reference;
     private LocalDate issueDate;
     private LocalDate dueDate;
     private Client client;
@@ -26,8 +27,9 @@ public class Invoice {
     public Invoice() {
     }
 
-    public Invoice(Long id, LocalDate issueDate, LocalDate dueDate, InvoiceStatus status, BigDecimal paidAmount, Client client, BigDecimal totalExcludingTaxes, BigDecimal totalIncludingTaxes, BigDecimal totalTaxes) {
+    public Invoice(Long id, Long reference, LocalDate issueDate, LocalDate dueDate, InvoiceStatus status, BigDecimal paidAmount, Client client, BigDecimal totalExcludingTaxes, BigDecimal totalIncludingTaxes, BigDecimal totalTaxes) {
         this.id = id;
+        this.reference = reference;
         this.issueDate = issueDate;
         this.dueDate = dueDate;
         this.status = status;
@@ -38,8 +40,9 @@ public class Invoice {
         this.totalTaxes = totalTaxes;
     }
 
-    public Invoice(Long id, LocalDate issueDate, InvoiceStatus status, BigDecimal paidAmount, String clientName, BigDecimal totalExcludingTaxes, BigDecimal totalIncludingTaxes, BigDecimal totalTaxes) {
+    public Invoice(Long id, Long reference, LocalDate issueDate, InvoiceStatus status, BigDecimal paidAmount, String clientName, BigDecimal totalExcludingTaxes, BigDecimal totalIncludingTaxes, BigDecimal totalTaxes) {
         this.id = id;
+        this.reference = reference;
         this.issueDate = issueDate;
         this.client = new Client();
         this.client.setName(clientName);
@@ -132,5 +135,13 @@ public class Invoice {
 
     public void setStatus(InvoiceStatus status) {
         this.status = status;
+    }
+
+    public Long getReference() {
+        return reference;
+    }
+
+    public void setReference(Long reference) {
+        this.reference = reference;
     }
 }
