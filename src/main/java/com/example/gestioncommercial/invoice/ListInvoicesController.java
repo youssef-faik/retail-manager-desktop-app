@@ -4,6 +4,9 @@ import com.example.gestioncommercial.report.InvoiceReportManager;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -36,8 +39,13 @@ public class ListInvoicesController implements Initializable {
     private TableView<Invoice> invoicesTableView;
     @FXML
     private Button deleteButton, updateButton;
+    @FXML
+    private TextField searchInvoiceTextField;
 
     private InvoiceRepository invoiceRepository;
+    ObservableList<Invoice> invoiceObservableList;
+    FilteredList<Invoice> filteredInvoiceList;
+    SortedList<Invoice> invoiceSortedList;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -48,6 +56,38 @@ public class ListInvoicesController implements Initializable {
 
         initInvoicesTableView();
         refreshInvoicesTable();
+
+        filteredInvoiceList = new FilteredList<>(invoiceObservableList);
+        searchInvoiceTextField.textProperty().addListener((observable, oldValue, newValue) -> {
+            filteredInvoiceList.setPredicate(invoice -> {
+                if (newValue == null || newValue.isEmpty() || newValue.isBlank()) {
+                    return true;
+                }
+
+                String lowerCaseFilter = newValue.toLowerCase();
+
+                try {
+                    Long value = Long.valueOf(searchInvoiceTextField.getText());
+
+                    if (Objects.equals(invoice.getReference(), value)) {
+                        return true;
+                    }
+                }
+                catch (Exception ignored) {
+                }
+
+                if (invoice.getClient().getName().toLowerCase().contains(lowerCaseFilter)) {
+                    return true;
+                }
+
+                return false;
+
+            });
+        });
+
+        invoiceSortedList = new SortedList<>(filteredInvoiceList);
+        invoiceSortedList.comparatorProperty().bind(invoicesTableView.comparatorProperty());
+        invoicesTableView.setItems(invoiceSortedList);
     }
 
     public void addInvoice(ActionEvent actionEvent) throws IOException {
@@ -211,7 +251,12 @@ public class ListInvoicesController implements Initializable {
     }
 
     private void refreshInvoicesTable() {
-        invoicesTableView.setItems(invoiceRepository.findAllJoinClient());
+        invoiceObservableList = invoiceRepository.findAllJoinClient();
+
+        filteredInvoiceList = new FilteredList<>(invoiceObservableList);
+        invoiceSortedList = new SortedList<>(filteredInvoiceList);
+        invoiceSortedList.comparatorProperty().bind(invoicesTableView.comparatorProperty());
+        invoicesTableView.setItems(invoiceSortedList);
 
         updateButton.setDisable(true);
         deleteButton.setDisable(true);

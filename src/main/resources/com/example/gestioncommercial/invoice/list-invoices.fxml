@@ -5,6 +5,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
@@ -18,23 +19,37 @@
          <Insets />
       </VBox.margin>
     </Label>
-   <HBox alignment="TOP_RIGHT" spacing="8.0">
+   <HBox spacing="8.0">
       <children>
-           <Button fx:id="newButton" mnemonicParsing="false" onAction="#addInvoice" prefHeight="25.0" prefWidth="90.0" text="Nouveau">
-            <graphic>
-               <FontAwesomeIconView glyphName="PLUS" />
-           </graphic>
-         </Button>
-           <Button fx:id="updateButton" mnemonicParsing="false" onAction="#updateInvoice" prefHeight="25.0" prefWidth="90.0" text="Modifier">
-            <graphic>
-           <FontAwesomeIconView glyphName="EDIT" />
-       </graphic>
-         </Button>
-           <Button fx:id="deleteButton" mnemonicParsing="false" onAction="#deleteInvoice" prefWidth="90.0" text="Supprimer">
-            <graphic>
-               <FontAwesomeIconView glyphName="TRASH" />
-           </graphic>
-         </Button>
+         <HBox prefHeight="25.0" prefWidth="923.0" HBox.hgrow="ALWAYS">
+            <children>
+               <Label text="Recherche">
+                  <HBox.margin>
+                     <Insets right="8.0" />
+                  </HBox.margin>
+               </Label>
+               <TextField fx:id="searchInvoiceTextField" focusTraversable="false" prefHeight="25.0" prefWidth="451.0" promptText="Rechercher une facture par reference, ou le nom du client" />
+            </children>
+         </HBox>
+         <HBox prefHeight="25.0" prefWidth="274.0" spacing="8.0">
+            <children>
+                 <Button fx:id="newButton" mnemonicParsing="false" onAction="#addInvoice" prefHeight="25.0" prefWidth="90.0" text="Nouveau">
+                  <graphic>
+                     <FontAwesomeIconView glyphName="PLUS" />
+                 </graphic>
+               </Button>
+                 <Button fx:id="updateButton" mnemonicParsing="false" onAction="#updateInvoice" prefHeight="25.0" prefWidth="90.0" text="Modifier">
+                  <graphic>
+                 <FontAwesomeIconView glyphName="EDIT" />
+             </graphic>
+               </Button>
+                 <Button fx:id="deleteButton" mnemonicParsing="false" onAction="#deleteInvoice" prefWidth="90.0" text="Supprimer">
+                  <graphic>
+                     <FontAwesomeIconView glyphName="TRASH" />
+                 </graphic>
+               </Button>
+            </children>
+         </HBox>
       </children>
    </HBox>
     <TableView fx:id="invoicesTableView" prefHeight="515.0" prefWidth="1260.0" />

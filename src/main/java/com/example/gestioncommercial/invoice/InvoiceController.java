@@ -210,7 +210,7 @@ public class InvoiceController implements Initializable {
         TableColumn<InvoiceItemEntry, String> taxRateColumn = new TableColumn<>("Taux TVA");
         TableColumn<InvoiceItemEntry, String> totalIncludingTaxesColumn = new TableColumn<>("Total (TTC)");
         TableColumn<InvoiceItemEntry, String> totalExcludingTaxesColumn = new TableColumn<>("Total (HT)");
-        TableColumn<InvoiceItemEntry, String> totalTaxesColumn = new TableColumn<>("Taxes");
+        TableColumn<InvoiceItemEntry, String> totalTaxesColumn = new TableColumn<>("Total TVA");
         TableColumn<InvoiceItemEntry, String> actionColumn = new TableColumn<>("Actions");
 
         productColumn.setCellValueFactory(new PropertyValueFactory<>("productComboBox"));
