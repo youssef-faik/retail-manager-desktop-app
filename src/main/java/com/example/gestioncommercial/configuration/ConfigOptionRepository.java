@@ -1,23 +1,39 @@
 package com.example.gestioncommercial.configuration;
 
-import com.example.gestioncommercial.DataAccessObject;
+import com.example.gestioncommercial.HibernateUtil;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.resource.transaction.spi.TransactionStatus;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * The ConfigOptionRepository class is a repository for managing configuration options.
  */
-public class ConfigOptionRepository {
-    private final List<ConfigOption> configOptions = new ArrayList<>();
-    private final DataAccessObject dao;
+public interface ConfigOptionRepository {
+    SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
 
-    public ConfigOptionRepository() {
-        this.dao = new DataAccessObject();
+    /**
+     * Finds all configuration options.
+     *
+     * @return a list of all configuration options
+     */
+    static Set<ConfigOption> findAll() {
+        Set<ConfigOption> configOptions = new HashSet<>();
+
+        Session session = sessionFactory.openSession();
+
+        try (session) {
+            configOptions = session.createQuery("select C from ConfigOption C", ConfigOption.class).stream().collect(Collectors.toSet());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return configOptions;
     }
-
 
     /**
      * Finds a configuration option by its key.
@@ -25,39 +41,62 @@ public class ConfigOptionRepository {
      * @param key the configuration key
      * @return an Optional containing the configuration option if found, or an empty Optional if not found
      */
-    public Optional<ConfigOption> findByKey(ConfigKey key) {
-        return dao.getConfigOptions().stream()
+    static Optional<ConfigOption> findByKey(ConfigKey key) {
+        return findAll().stream()
                 .filter(option -> option.getKey().equals(key))
                 .findFirst();
     }
 
     /**
-     * Finds all configuration options.
+     * Saves a configuration option.
      *
-     * @return a list of all configuration options
+     * @param option the configuration option to save
      */
-    public List<ConfigOption> findAll() {
-        return dao.getConfigOptions();
+    static void save(ConfigOption option) {
+        Session session = sessionFactory.openSession();
+
+        try {
+            session.beginTransaction();
+            session.persist(option);
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            if (session.getTransaction().getStatus() == TransactionStatus.ACTIVE
+                    || session.getTransaction().getStatus() == TransactionStatus.MARKED_ROLLBACK) {
+                session.getTransaction().rollback();
+            }
+        } finally {
+            session.close();
+        }
+
     }
 
     /**
-     * Saves a configuration option.
+     * Updates a configuration option.
      *
-     * @param option        the configuration option to save
-     * @param isUpdateQuery
+     * @param updatedOption the configuration option to update
      */
-    public void save(ConfigOption option, boolean isUpdateQuery) {
-        String query = "insert into config_option (option_key,value) values ('%s','%s')".formatted(option.getKey(), option.getValue());
 
-        if (isUpdateQuery) {
-            query = "update config_option set value = '%s' where option_key = '%s';".formatted(option.getValue(), option.getKey());
-        }
+    static void update(ConfigOption updatedOption) {
+        Session session = sessionFactory.openSession();
 
         try {
-            dao.saveData(query);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+            session.beginTransaction();
 
+            ConfigOption oldOption = session.find(ConfigOption.class, updatedOption.getKey());
+            oldOption.setValue(updatedOption.getValue());
+
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            if (session.getTransaction().getStatus() == TransactionStatus.ACTIVE
+                    || session.getTransaction().getStatus() == TransactionStatus.MARKED_ROLLBACK) {
+                session.getTransaction().rollback();
+            }
+        } finally {
+            session.close();
+        }
     }
 }

@@ -10,13 +10,7 @@ import java.math.BigDecimal;
 
 public class InvoiceItemEntry {
     private ComboBox<Product> productComboBox = new ComboBox<>();
-    private int quantity;
-    private BigDecimal unitPriceExcludingTaxes;
-    private BigDecimal taxRate;
-    private BigDecimal totalExcludingTaxes;
-    private BigDecimal totalIncludingTaxes;
-    private BigDecimal totalTaxes;
-
+    private InvoiceItem invoiceItem;
     private InvoiceController invoiceController;
 
     public InvoiceItemEntry() {
@@ -25,57 +19,45 @@ public class InvoiceItemEntry {
     public InvoiceItemEntry(
             ObservableList<Product> items,
             InvoiceController invoiceController) {
-
+        this.invoiceItem = new InvoiceItem();
         this.invoiceController = invoiceController;
         initProductsComboBox(items);
-
-        this.quantity = 0;
-        this.unitPriceExcludingTaxes = BigDecimal.ZERO;
-        this.taxRate = BigDecimal.ZERO;
-        this.totalExcludingTaxes = BigDecimal.ZERO;
-        this.totalIncludingTaxes = BigDecimal.ZERO;
-        this.totalTaxes = BigDecimal.ZERO;
     }
 
     public InvoiceItemEntry(ObservableList<Product> items,
                             InvoiceController invoiceController,
                             InvoiceItem invoiceItem) {
-
-        this.invoiceController = invoiceController;
         initProductsComboBox(items);
         getProductComboBox().setValue(invoiceItem.getProduct());
 
-        this.quantity = invoiceItem.getQuantity();
-        this.unitPriceExcludingTaxes = invoiceItem.getUnitPriceExcludingTaxes();
-        this.taxRate = invoiceItem.getProduct().getTaxRate();
-        this.totalExcludingTaxes = invoiceItem.getTotalExcludingTaxes();
-        this.totalIncludingTaxes = invoiceItem.getTotalIncludingTaxes();
-        this.totalTaxes = invoiceItem.getTotalTaxes();
+        this.invoiceController = invoiceController;
+        this.invoiceItem = invoiceItem;
     }
 
     private void initProductsComboBox(ObservableList<Product> items) {
         this.productComboBox = new ComboBox<>(items);
+
         productComboBox.setCellFactory(x -> new ProductComboCell());
         productComboBox.setButtonCell(new ProductComboCell());
-        productComboBox.setPromptText("Sélectionnez produit");
+        productComboBox.setPromptText("Sélectionnez un produit");
         productComboBox.setMinWidth(350);
 
         productComboBox.setOnAction(event -> {
             Product product = productComboBox.getSelectionModel().getSelectedItem();
-            // set new values for InvoiceItemEntry
-            this.quantity = 1;
-            this.unitPriceExcludingTaxes = product.getSellingPriceExcludingTax();
-            this.taxRate = product.getTaxRate();
+            // set new values for InvoiceItem
+            this.invoiceItem.setProduct(product);
+            this.invoiceItem.setQuantity(1);
+            this.invoiceItem.setUnitPriceExcludingTaxes(product.getSellingPriceExcludingTax());
 
             // find new invoice item totals
-            BigDecimal priceExcludingTaxes = product.getSellingPriceExcludingTax().multiply(BigDecimal.valueOf(this.quantity));
+            BigDecimal priceExcludingTaxes = product.getSellingPriceExcludingTax().multiply(BigDecimal.valueOf(this.invoiceItem.getQuantity()));
             BigDecimal taxes = priceExcludingTaxes.multiply(product.getTaxRate());
             BigDecimal priceIncludingTaxes = priceExcludingTaxes.add(taxes);
 
-            // set new totals for InvoiceItemEntry
-            this.totalExcludingTaxes = priceExcludingTaxes;
-            this.totalIncludingTaxes = priceIncludingTaxes;
-            this.totalTaxes = taxes;
+            // set new totals for InvoiceItem
+            this.invoiceItem.setTotalExcludingTaxes(priceExcludingTaxes);
+            this.invoiceItem.setTotalIncludingTaxes(priceIncludingTaxes);
+            this.invoiceItem.setTotalTaxes(taxes);
 
             TableRow parent = (TableRow) productComboBox.getParent().getParent();
             parent.getTableView().refresh();
@@ -84,60 +66,56 @@ public class InvoiceItemEntry {
         });
     }
 
+    public InvoiceItem getInvoiceItem() {
+        return invoiceItem;
+    }
+
     public ComboBox<Product> getProductComboBox() {
         return productComboBox;
     }
 
-    public void setProductComboBox(ComboBox<Product> productComboBox) {
-        this.productComboBox = productComboBox;
-    }
-
     public int getQuantity() {
-        return quantity;
+        return this.invoiceItem.getQuantity();
     }
 
     public void setQuantity(int quantity) {
-        this.quantity = quantity;
+        this.invoiceItem.setQuantity(quantity);
     }
 
     public BigDecimal getUnitPriceExcludingTaxes() {
-        return unitPriceExcludingTaxes;
+        return this.invoiceItem.getUnitPriceExcludingTaxes();
     }
 
     public void setUnitPriceExcludingTaxes(BigDecimal unitPriceExcludingTaxes) {
-        this.unitPriceExcludingTaxes = unitPriceExcludingTaxes;
+        this.invoiceItem.setUnitPriceExcludingTaxes(unitPriceExcludingTaxes);
     }
 
     public BigDecimal getTaxRate() {
-        return taxRate;
-    }
-
-    public void setTaxRate(BigDecimal taxRate) {
-        this.taxRate = taxRate;
+        return invoiceItem.getProduct() == null ? BigDecimal.ZERO : invoiceItem.getProduct().getTaxRate();
     }
 
     public BigDecimal getTotalIncludingTaxes() {
-        return totalIncludingTaxes;
+        return this.invoiceItem.getTotalIncludingTaxes();
     }
 
     public void setTotalIncludingTaxes(BigDecimal totalIncludingTaxes) {
-        this.totalIncludingTaxes = totalIncludingTaxes;
+        this.invoiceItem.setTotalIncludingTaxes(totalIncludingTaxes);
     }
 
     public BigDecimal getTotalExcludingTaxes() {
-        return totalExcludingTaxes;
+        return this.invoiceItem.getTotalExcludingTaxes();
     }
 
     public void setTotalExcludingTaxes(BigDecimal totalExcludingTaxes) {
-        this.totalExcludingTaxes = totalExcludingTaxes;
+        this.invoiceItem.setTotalExcludingTaxes(totalExcludingTaxes);
     }
 
     public BigDecimal getTotalTaxes() {
-        return totalTaxes;
+        return this.invoiceItem.getTotalTaxes();
     }
 
     public void setTotalTaxes(BigDecimal totalTaxes) {
-        this.totalTaxes = totalTaxes;
+        this.invoiceItem.setTotalTaxes(totalTaxes);
     }
 
     private static class ProductComboCell extends ListCell<Product> {

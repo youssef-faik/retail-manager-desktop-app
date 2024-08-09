@@ -1,6 +1,7 @@
 package com.example.gestioncommercial.payment;
 
 import com.example.gestioncommercial.invoice.InvoiceController;
+import com.example.gestioncommercial.invoice.InvoicePaymentEntry;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -33,11 +34,9 @@ public class PaymentController implements Initializable {
     @FXML
     private ComboBox<PaymentMethod> paymentMethodComboBox;
 
-
-    private TableView<Payment> paymentsTableView;
+    private TableView<InvoicePaymentEntry> paymentsTableView;
     private Payment selectedPayment;
     private InvoiceController invoiceController;
-
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -53,33 +52,34 @@ public class PaymentController implements Initializable {
         referenceHBox.setVisible(false);
 
         paymentDateDatePicker.setValue(LocalDate.now());
+        if (invoiceController != null) {
+            paymentAmountTextField.setText(invoiceController.getRemainingAmount());
+        }
 
-        addPaymentButton.setDisable(true);
         addPaymentButton.setOnAction(e -> {
             switch (paymentMethodComboBox.getSelectionModel().getSelectedItem()) {
                 case CASH:
-                    paymentsTableView.getItems().add(new Cash(
-                            0L,
+                    Cash cash = new Cash(
                             BigDecimal.valueOf(Double.parseDouble(paymentAmountTextField.getText())),
                             paymentDateDatePicker.getValue(),
                             PaymentMethod.CASH,
                             CashFlowType.REVENUE
-                    ));
+                    );
+                    paymentsTableView.getItems().add(new InvoicePaymentEntry(cash));
                     break;
                 case BANK_TRANSFER:
-                    paymentsTableView.getItems().add(new BankTransfer(
-                            0L,
+                    BankTransfer bankTransfer = new BankTransfer(
                             BigDecimal.valueOf(Double.parseDouble(paymentAmountTextField.getText())),
                             paymentDateDatePicker.getValue(),
                             "",
                             paymentReferenceTextField.getText(),
                             PaymentMethod.BANK_TRANSFER,
                             bankNameTextField.getText()
-                    ));
+                    );
+                    paymentsTableView.getItems().add(new InvoicePaymentEntry(bankTransfer));
                     break;
                 case CHECK:
-                    paymentsTableView.getItems().add(new Check(
-                            0L,
+                    Check check = new Check(
                             BigDecimal.valueOf(Double.parseDouble(paymentAmountTextField.getText())),
                             paymentDateDatePicker.getValue(),
                             payeeNameTextField.getText(),
@@ -89,15 +89,15 @@ public class PaymentController implements Initializable {
                             checkDueDateDatePicker.getValue(),
                             bankNameTextField.getText(),
                             checkStatusComboBox.getSelectionModel().getSelectedItem()
-                    ));
+                    );
+                    paymentsTableView.getItems().add(new InvoicePaymentEntry(check));
                     break;
             }
 
-            displaySuccessAlert();
             resetForm();
+            displaySuccessAlert();
         });
     }
-
 
     private void initPaymentMethodComboBox() {
         ObservableList<PaymentMethod> paymentMethods = FXCollections.observableArrayList();
@@ -146,19 +146,17 @@ public class PaymentController implements Initializable {
 
                         break;
                 }
+
+                if (invoiceController != null) {
+                    paymentAmountTextField.setText(invoiceController.getRemainingAmount());
+                }
             }
         });
+
+        paymentMethodComboBox.getSelectionModel().selectFirst();
     }
 
-    private void displaySuccessAlert() {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Success");
-        alert.setHeaderText(null);
-        alert.setContentText("Operation effectué avec success");
-        alert.showAndWait();
-    }
-
-    public void setPaymentsTableView(TableView<Payment> paymentsTableView) {
+    public void setPaymentsTableView(TableView<InvoicePaymentEntry> paymentsTableView) {
         this.paymentsTableView = paymentsTableView;
     }
 
@@ -167,7 +165,12 @@ public class PaymentController implements Initializable {
         paymentMethodComboBox.getSelectionModel().selectFirst();
 
         paymentDateDatePicker.setValue(LocalDate.now());
-        paymentAmountTextField.clear();
+        if (invoiceController != null) {
+            paymentAmountTextField.setText(invoiceController.getRemainingAmount());
+        } else {
+            paymentAmountTextField.clear();
+        }
+
         paymentReferenceTextField.clear();
         checkDueDateDatePicker.setValue(LocalDate.now());
         checkStatusComboBox.getSelectionModel().clearSelection();
@@ -175,8 +178,6 @@ public class PaymentController implements Initializable {
         payeeNameTextField.clear();
         senderAccountTextField.clear();
         checkNumberTextField.clear();
-
-        addPaymentButton.setDisable(true);
     }
 
     public void initUpdate(Payment selectedPayment) {
@@ -236,8 +237,22 @@ public class PaymentController implements Initializable {
         });
     }
 
-
     public void setInvoiceController(InvoiceController invoiceController) {
         this.invoiceController = invoiceController;
     }
+
+    public void refreshPaymentAmount() {
+        if (invoiceController != null) {
+            paymentAmountTextField.setText(invoiceController.getRemainingAmount());
+        }
+    }
+
+    private void displaySuccessAlert() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Success");
+        alert.setHeaderText(null);
+        alert.setContentText("Operation effectué avec success");
+        alert.showAndWait();
+    }
+
 }

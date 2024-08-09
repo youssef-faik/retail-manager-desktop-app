@@ -33,5 +33,11 @@ public class Main extends Application {
         ((MainController) fxmlLoader.getController()).listInvoices(null);
 
         stage.show();
+
+        stage.setOnCloseRequest(event -> {
+            HibernateUtil.shutdown();
+            stage.close();
+        });
+
     }
 }

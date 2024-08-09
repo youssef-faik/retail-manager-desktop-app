@@ -7,58 +7,57 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 
 import java.net.URL;
-import java.sql.SQLException;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class ClientController implements Initializable {
+    private Long id;
+    private ListClientsController listClientsController;
+
     @FXML
     private Button saveButton;
     @FXML
     private TextField addressTextField, commonCompanyIdentifierTextField, nameTextField, phoneNumberTextField, taxIdentificationNumberTextField;
-    private int id;
-    private ClientRepository clientRepository;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        clientRepository = new ClientRepository();
-
-        saveButton.setOnAction(e -> {
-            try {
-                saveClient();
-            } catch (SQLException ex) {
-                throw new RuntimeException(ex);
-            }
-        });
+        saveButton.setOnAction(e -> saveClient());
     }
 
-    public void saveClient() throws SQLException {
+    public void saveClient() {
         Client client = mapClient();
-        clientRepository.save(client);
-        displaySuccessAlert();
-        clearTextFields();
-    }
-
-    public void updateClient() throws SQLException {
-        Client client = mapClient();
-        clientRepository.update(client);
-        displaySuccessAlert();
-    }
-
-    public void initClientUpdate(Client client) {
-        this.id = client.getId();
-        this.nameTextField.setText(client.getName());
-        this.phoneNumberTextField.setText(client.getPhoneNumber());
-        this.addressTextField.setText(client.getAddress());
-        this.commonCompanyIdentifierTextField.setText(client.getCommonCompanyIdentifier());
-        this.taxIdentificationNumberTextField.setText(client.getTaxIdentificationNumber());
-
-        saveButton.setOnAction(e -> {
-            try {
-                updateClient();
-            } catch (SQLException ex) {
-                throw new RuntimeException(ex);
+        if (ClientRepository.save(client)) {
+            clearTextFields();
+            if (listClientsController != null) {
+                listClientsController.getClientsTable().getItems().add(client);
             }
-        });
+
+            displaySuccessAlert();
+        } else {
+            displayErrorAlert();
+        }
+    }
+
+    public void updateClient() {
+        Client client = mapClient();
+        Optional<Client> optionalClient = ClientRepository.update(client);
+
+        if (optionalClient.isPresent()) {
+            if (listClientsController != null) {
+                int index = listClientsController.getClientsTable().getItems().indexOf(client);
+
+                if (index != -1) {
+                    Client oldClient = listClientsController.getClientsTable().getItems().get(index);
+
+                    listClientsController.getClientsTable().getItems().remove(oldClient);
+                    listClientsController.getClientsTable().getItems().add(optionalClient.get());
+                }
+            }
+
+            displaySuccessAlert();
+        } else {
+            displayErrorAlert();
+        }
     }
 
     private Client mapClient() {
@@ -71,6 +70,17 @@ public class ClientController implements Initializable {
         client.setTaxIdentificationNumber(taxIdentificationNumberTextField.getText());
 
         return client;
+    }
+
+    public void initClientUpdate(Client client) {
+        this.id = client.getId();
+        this.nameTextField.setText(client.getName());
+        this.phoneNumberTextField.setText(client.getPhoneNumber());
+        this.addressTextField.setText(client.getAddress());
+        this.commonCompanyIdentifierTextField.setText(client.getCommonCompanyIdentifier());
+        this.taxIdentificationNumberTextField.setText(client.getTaxIdentificationNumber());
+
+        saveButton.setOnAction(e -> updateClient());
     }
 
     private void clearTextFields() {
@@ -88,4 +98,18 @@ public class ClientController implements Initializable {
         alert.setContentText("Operation effectué avec success");
         alert.showAndWait();
     }
+
+    private void displayErrorAlert() {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText("Une erreur est survenue lors de l'opération.");
+        alert.showAndWait();
+    }
+
+    public void setListClientsController(ListClientsController listClientsController) {
+        this.listClientsController = listClientsController;
+    }
+
+
 }

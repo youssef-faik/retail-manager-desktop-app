@@ -13,8 +13,6 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
-import java.sql.SQLException;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
@@ -25,35 +23,30 @@ public class ListClientsController implements Initializable {
     @FXML
     private Button deleteButton, updateButton;
 
-    private ClientRepository clientRepository;
-
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        clientRepository = new ClientRepository();
-
         updateButton.setDisable(true);
         deleteButton.setDisable(true);
 
         initClientsTableView();
-
-        try {
-            refreshClientsTable();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        refreshClientsTable();
     }
 
-    public void addClient(ActionEvent actionEvent) throws IOException, SQLException {
-        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("form-client.fxml")));
+    public void addClient(ActionEvent actionEvent) throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("form-client.fxml"));
+        Parent root = fxmlLoader.load();
+
+        ClientController clientController = fxmlLoader.getController();
+        clientController.setListClientsController(this);
+
         Stage stage = new Stage();
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setScene(new Scene(root));
         stage.setResizable(false);
         stage.showAndWait();
-        refreshClientsTable();
     }
 
-    public void updateClient(ActionEvent actionEvent) throws IOException, SQLException {
+    public void updateClient(ActionEvent actionEvent) throws IOException {
         Client selectedClient = clientsTableView.getSelectionModel().getSelectedItem();
         if (selectedClient != null) {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("form-client.fxml"));
@@ -61,17 +54,17 @@ public class ListClientsController implements Initializable {
 
             ClientController clientController = fxmlLoader.getController();
             clientController.initClientUpdate(selectedClient);
+            clientController.setListClientsController(this);
 
             Stage stage = new Stage();
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.setScene(new Scene(root));
             stage.setResizable(false);
             stage.showAndWait();
-            refreshClientsTable();
         }
     }
 
-    public void deleteClient(ActionEvent actionEvent) throws SQLException {
+    public void deleteClient(ActionEvent actionEvent) {
         Client selectedClient = clientsTableView.getSelectionModel().getSelectedItem();
         if (selectedClient != null) {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -81,8 +74,12 @@ public class ListClientsController implements Initializable {
             Optional<ButtonType> result = alert.showAndWait();
 
             if (result.isPresent() && result.get() == ButtonType.OK) {
-                clientRepository.deleteById(selectedClient.getId());
-                refreshClientsTable();
+                if (ClientRepository.deleteById(selectedClient.getId())) {
+                    clientsTableView.getItems().remove(selectedClient);
+                    displaySuccessAlert();
+                } else {
+                    displayErrorAlert();
+                }
             }
         }
     }
@@ -126,11 +123,30 @@ public class ListClientsController implements Initializable {
         clientsTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
     }
 
-    private void refreshClientsTable() throws SQLException {
-        clientsTableView.setItems(clientRepository.findAll());
-
+    public void refreshClientsTable() {
+        clientsTableView.setItems(ClientRepository.findAll());
+        clientsTableView.refresh();
         updateButton.setDisable(true);
         deleteButton.setDisable(true);
     }
 
+    private void displaySuccessAlert() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Success");
+        alert.setHeaderText(null);
+        alert.setContentText("Operation effectué avec success");
+        alert.showAndWait();
+    }
+
+    private void displayErrorAlert() {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText("Une erreur est survenue lors de l'opération.");
+        alert.showAndWait();
+    }
+
+    public TableView<Client> getClientsTable() {
+        return clientsTableView;
+    }
 }

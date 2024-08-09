@@ -1,11 +1,20 @@
 package com.example.gestioncommercial.payment;
 
+import jakarta.persistence.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 /**
  * Represents a bank transfer payment.
  */
+@Entity(name = "BankTransfer")
+@Table(name = "bank_transfer")
+@DiscriminatorValue("BANK_TRANSFER")
+@PrimaryKeyJoinColumn(
+        name = "id",
+        referencedColumnName = "id",
+        foreignKey = @ForeignKey(name = "bank_transfer_payment_fk"))
 public class BankTransfer extends Payment {
     private String bankName;
     private String accountNumber;
@@ -13,17 +22,19 @@ public class BankTransfer extends Payment {
     private String beneficiaryName;
 
     public BankTransfer(
-            long id,
             BigDecimal amount,
             LocalDate paymentDate,
             String accountNumber,
             String transactionId,
             PaymentMethod paymentMethod,
             String bankName) {
-        super(id, amount, paymentDate, paymentMethod);
+        super(amount, paymentDate, paymentMethod);
         this.accountNumber = accountNumber;
         this.bankName = bankName;
         this.transactionId = transactionId;
+    }
+
+    public BankTransfer() {
     }
 
     public String getBankName() {
@@ -48,6 +59,14 @@ public class BankTransfer extends Payment {
 
     public void setTransactionId(String transactionId) {
         this.transactionId = transactionId;
+    }
+
+    public String getBeneficiaryName() {
+        return beneficiaryName;
+    }
+
+    public void setBeneficiaryName(String beneficiaryName) {
+        this.beneficiaryName = beneficiaryName;
     }
 }
 

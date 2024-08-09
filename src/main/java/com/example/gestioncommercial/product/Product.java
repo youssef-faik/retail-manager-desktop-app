@@ -1,10 +1,20 @@
 package com.example.gestioncommercial.product;
 
+import jakarta.persistence.*;
+
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-public class Product {
-    private int id;
+@Table(
+        name = "product",
+        uniqueConstraints = @UniqueConstraint(name = "product_name_unique", columnNames = "name")
+)
+@Entity(name = "Product")
+public class Product implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     private String name;
     private BigDecimal purchasePriceExcludingTax;
     private BigDecimal sellingPriceExcludingTax;
@@ -13,24 +23,13 @@ public class Product {
     private BigDecimal taxRate;
 
     public Product() {
-
     }
 
-    public Product(int id, String name, BigDecimal purchasePriceExcludingTax, BigDecimal sellingPriceExcludingTax, String description, int quantity, BigDecimal taxRate) {
-        this.id = id;
-        this.name = name;
-        this.purchasePriceExcludingTax = purchasePriceExcludingTax;
-        this.sellingPriceExcludingTax = sellingPriceExcludingTax;
-        this.description = description;
-        this.quantity = quantity;
-        this.taxRate = taxRate;
-    }
-
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

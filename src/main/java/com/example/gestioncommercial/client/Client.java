@@ -1,32 +1,45 @@
 package com.example.gestioncommercial.client;
 
+import jakarta.persistence.*;
+
+import java.io.Serializable;
 import java.util.Objects;
 
-public class Client {
-    private int id;
+@Table(
+        name = "client",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "client_name_unique", columnNames = "name"),
+                @UniqueConstraint(name = "client_common_company_identifier_unique", columnNames = "common_company_identifier"),
+                @UniqueConstraint(name = "client_tax_identification_number_unique", columnNames = "tax_identification_number")
+        }
+)
+@Entity(name = "Client")
+public class Client implements Serializable, Cloneable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "name", nullable = false)
     private String name;
+
     private String phoneNumber;
+
     private String address;
+
+    @Column(name = "common_company_identifier")
     private String commonCompanyIdentifier;
+
+    @Column(name = "tax_identification_number")
     private String taxIdentificationNumber;
 
     public Client() {
     }
 
-    public Client(int id, String name, String phoneNumber, String address, String commonCompanyIdentifier, String taxIdentificationNumber) {
-        this.id = id;
-        this.name = name;
-        this.phoneNumber = phoneNumber;
-        this.address = address;
-        this.commonCompanyIdentifier = commonCompanyIdentifier;
-        this.taxIdentificationNumber = taxIdentificationNumber;
-    }
-
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -81,5 +94,10 @@ public class Client {
     @Override
     public int hashCode() {
         return Objects.hashCode(getId());
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 }

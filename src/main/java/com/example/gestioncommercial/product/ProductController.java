@@ -8,41 +8,72 @@ import javafx.scene.control.TextField;
 
 import java.math.BigDecimal;
 import java.net.URL;
-import java.sql.SQLException;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class ProductController implements Initializable {
+    private Long id;
+    private ListProductsController listProductsController;
+
     @FXML
     private Button saveButton;
     @FXML
     private TextField descriptionTextField, nameTextField, purchasePriceExcludingTaxTextField, quantityTextField, sellingPriceExcludingTaxTextField, taxRateTextField;
-    private int id;
-    private ProductRepository productRepository;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        productRepository = new ProductRepository();
+        saveButton.setOnAction(e -> saveProduct());
+    }
 
-        saveButton.setOnAction(e -> {
-            try {
-                saveProduct();
-            } catch (SQLException ex) {
-                throw new RuntimeException(ex);
+    public void saveProduct() {
+        Product product = mapProduct();
+        if (ProductRepository.save(product)) {
+            clearTextFields();
+
+            if (listProductsController != null) {
+                listProductsController.getProductsTable().getItems().add(product);
             }
-        });
+
+            displaySuccessAlert();
+        } else {
+            displayErrorAlert();
+        }
     }
 
-    public void saveProduct() throws SQLException {
+    public void updateProduct() {
         Product product = mapProduct();
-        productRepository.save(product);
-        displaySuccessAlert();
-        clearTextFields();
+        Optional<Product> optionalProduct = ProductRepository.update(product);
+
+        if (optionalProduct.isPresent()) {
+            if (listProductsController != null) {
+                int index = listProductsController.getProductsTable().getItems().indexOf(product);
+
+                if (index != -1) {
+                    Product oldProduct = listProductsController.getProductsTable().getItems().get(index);
+
+                    listProductsController.getProductsTable().getItems().remove(oldProduct);
+                    listProductsController.getProductsTable().getItems().add(optionalProduct.get());
+                }
+            }
+
+            displaySuccessAlert();
+        } else {
+            displayErrorAlert();
+        }
     }
 
-    public void updateProduct() throws SQLException {
-        Product product = mapProduct();
-        productRepository.update(product);
-        displaySuccessAlert();
+    private Product mapProduct() {
+        Product product = new Product();
+
+        product.setId(id);
+        product.setName(nameTextField.getText());
+        product.setDescription(descriptionTextField.getText());
+        product.setSellingPriceExcludingTax(new BigDecimal(sellingPriceExcludingTaxTextField.getText()));
+        product.setPurchasePriceExcludingTax(new BigDecimal(purchasePriceExcludingTaxTextField.getText()));
+        product.setQuantity(Integer.parseInt(quantityTextField.getText()));
+        product.setTaxRate(new BigDecimal(taxRateTextField.getText()).divide(BigDecimal.valueOf(100)));
+
+        return product;
     }
 
     public void initProductUpdate(Product product) {
@@ -52,27 +83,9 @@ public class ProductController implements Initializable {
         this.purchasePriceExcludingTaxTextField.setText(String.valueOf(product.getPurchasePriceExcludingTax()));
         this.sellingPriceExcludingTaxTextField.setText(String.valueOf(product.getSellingPriceExcludingTax()));
         this.quantityTextField.setText(String.valueOf(product.getQuantity()));
-        this.taxRateTextField.setText(String.valueOf(product.getTaxRate()));
+        this.taxRateTextField.setText(String.valueOf(product.getTaxRate().multiply(BigDecimal.valueOf(100L))));
 
-        saveButton.setOnAction(e -> {
-            try {
-                updateProduct();
-            } catch (SQLException ex) {
-                throw new RuntimeException(ex);
-            }
-        });
-    }
-
-    private Product mapProduct() {
-        Product product = new Product();
-        product.setId(id);
-        product.setName(nameTextField.getText());
-        product.setDescription(descriptionTextField.getText());
-        product.setSellingPriceExcludingTax(new BigDecimal(sellingPriceExcludingTaxTextField.getText()));
-        product.setPurchasePriceExcludingTax(new BigDecimal(purchasePriceExcludingTaxTextField.getText()));
-        product.setQuantity(Integer.parseInt(quantityTextField.getText()));
-        product.setTaxRate(new BigDecimal(taxRateTextField.getText()));
-        return product;
+        saveButton.setOnAction(e -> updateProduct());
     }
 
     private void clearTextFields() {
@@ -90,5 +103,17 @@ public class ProductController implements Initializable {
         alert.setHeaderText(null);
         alert.setContentText("Operation effectué avec success");
         alert.showAndWait();
+    }
+
+    private void displayErrorAlert() {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText("Une erreur est survenue lors de l'opération.");
+        alert.showAndWait();
+    }
+
+    public void setListProductsController(ListProductsController listProductsController) {
+        this.listProductsController = listProductsController;
     }
 }

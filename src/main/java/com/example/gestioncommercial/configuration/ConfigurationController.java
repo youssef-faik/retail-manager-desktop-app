@@ -33,7 +33,7 @@ public class ConfigurationController implements Initializable {
     private TextField invoiceNumberTextField;
     @FXML
     private TextField creditInvoiceNumberTextField;
-   @FXML
+    @FXML
     private TextField commercialRegistrationNumberTextField;
     @FXML
     private Button saveButton;
@@ -42,20 +42,23 @@ public class ConfigurationController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         AppConfiguration configuration = AppConfiguration.getInstance();
 
-        allConfigurations = configuration.getAllConfigurations();
+        Thread thread = new Thread(() -> {
+            allConfigurations = configuration.getAllConfigurations();
 
-        companyNameTextField.setText(allConfigurations.get(ConfigKey.COMPANY_NAME));
-        commonCompanyIdentifierTextField.setText(allConfigurations.get(ConfigKey.COMMON_IDENTIFIER_NUMBER));
-        taxIdentificationNumberTextField.setText(allConfigurations.get(ConfigKey.TAX_IDENTIFIER_NUMBER));
-        commercialRegistrationNumberTextField.setText(allConfigurations.get(ConfigKey.COMMERCIAL_REGISTRATION_NUMBER));
-        patentNumberTextField.setText(allConfigurations.get(ConfigKey.COMPANY_PATENT_NUMBER));
-        phoneNumberTextField.setText(allConfigurations.get(ConfigKey.COMPANY_PHONE_NUMBER));
-        fixedPhoneNumberTextField.setText(allConfigurations.get(ConfigKey.COMPANY_FIXED_PHONE_NUMBER));
-        addressTextArea.setText(allConfigurations.get(ConfigKey.BUSINESS_ADDRESS));
-        emailTextField.setText(allConfigurations.get(ConfigKey.COMPANY_EMAIL_ADDRESS));
-        invoiceNumberTextField.setText(allConfigurations.get(ConfigKey.NEXT_INVOICE_NUMBER));
-        creditInvoiceNumberTextField.setText(allConfigurations.get(ConfigKey.NEXT_CREDIT_INVOICE_NUMBER));
+            companyNameTextField.setText(allConfigurations.get(ConfigKey.COMPANY_NAME));
+            commonCompanyIdentifierTextField.setText(allConfigurations.get(ConfigKey.COMMON_IDENTIFIER_NUMBER));
+            taxIdentificationNumberTextField.setText(allConfigurations.get(ConfigKey.TAX_IDENTIFIER_NUMBER));
+            commercialRegistrationNumberTextField.setText(allConfigurations.get(ConfigKey.COMMERCIAL_REGISTRATION_NUMBER));
+            patentNumberTextField.setText(allConfigurations.get(ConfigKey.COMPANY_PATENT_NUMBER));
+            phoneNumberTextField.setText(allConfigurations.get(ConfigKey.COMPANY_PHONE_NUMBER));
+            fixedPhoneNumberTextField.setText(allConfigurations.get(ConfigKey.COMPANY_FIXED_PHONE_NUMBER));
+            addressTextArea.setText(allConfigurations.get(ConfigKey.BUSINESS_ADDRESS));
+            emailTextField.setText(allConfigurations.get(ConfigKey.COMPANY_EMAIL_ADDRESS));
+            invoiceNumberTextField.setText(allConfigurations.get(ConfigKey.NEXT_INVOICE_NUMBER));
+            creditInvoiceNumberTextField.setText(allConfigurations.get(ConfigKey.NEXT_CREDIT_INVOICE_NUMBER));
+        });
 
+        thread.start();
 
         saveButton.setOnAction(event -> {
             allConfigurations.put(ConfigKey.COMPANY_NAME, companyNameTextField.getText());

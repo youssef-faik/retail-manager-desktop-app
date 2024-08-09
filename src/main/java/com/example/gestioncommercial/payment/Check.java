@@ -1,15 +1,30 @@
 package com.example.gestioncommercial.payment;
 
+import jakarta.persistence.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+@Entity(name = "Check")
+@Table(name = "check_payment")
+@DiscriminatorValue("CHECK")
+@PrimaryKeyJoinColumn(
+        name = "id",
+        referencedColumnName = "id",
+        foreignKey = @ForeignKey(name = "check_payment_fk"))
 public class Check extends Payment {
     private String bankName;
     private String checkNumber;
     private String payeeName;
     private String senderAccount;
-    private LocalDate dueDate;
+
+    @Enumerated(EnumType.STRING)
     private CheckStatus checkStatus;
+
+    @Temporal(TemporalType.DATE)
+    private LocalDate dueDate;
+
+    @Temporal(TemporalType.DATE)
     private LocalDate issueDate;
 
 
@@ -24,7 +39,6 @@ public class Check extends Payment {
      * @param status        the status of the check
      */
     public Check(
-            long id,
             BigDecimal amount,
             LocalDate paymentDate,
             String payeeName,
@@ -34,13 +48,16 @@ public class Check extends Payment {
             LocalDate dueDate,
             String bankName,
             CheckStatus status) {
-        super(id, amount, paymentDate, paymentMethod);
+        super(amount, paymentDate, paymentMethod);
         this.dueDate = dueDate;
         this.bankName = bankName;
         this.checkStatus = status;
         this.checkNumber = checkNumber;
         this.payeeName = payeeName;
         this.senderAccount = senderAccount;
+    }
+
+    public Check() {
     }
 
     public String getBankName() {
@@ -89,5 +106,13 @@ public class Check extends Payment {
 
     public void setSenderAccount(String senderAccount) {
         this.senderAccount = senderAccount;
+    }
+
+    public LocalDate getIssueDate() {
+        return issueDate;
+    }
+
+    public void setIssueDate(LocalDate issueDate) {
+        this.issueDate = issueDate;
     }
 }

@@ -39,10 +39,6 @@ public class InvoiceReportManager {
 
         Map<ConfigKey, String> configurations = AppConfiguration.getInstance().getAllConfigurations();
 
-        //SIEGE SOCIEL: CENTRE RIAD NR 61 ANGLE AV LALLA YACOUT & MOSTAPHA EL MAANI, ETG 2 NR 69, CASABLANCA.
-        //R. C. N° 396931 | Patente N° 32285441 | I.F.N°25056198 | ICE N° 002033875000082
-        //Tél: 06.45.22.39.07 | Fix :08.08.61.19.46 | E-mail: ibsyssarl@gmail.com
-
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("id", invoice.getReference());
         parameters.put("issueDate", invoice.getIssueDate());
@@ -59,12 +55,12 @@ public class InvoiceReportManager {
 
         parameters.put("companyName", configurations.get(ConfigKey.COMPANY_NAME));
         parameters.put("companyAddress", configurations.get(ConfigKey.BUSINESS_ADDRESS));
-        parameters.put("rc",     "R.C. N° " + configurations.get(ConfigKey.COMMERCIAL_REGISTRATION_NUMBER));
+        parameters.put("rc", "R.C. N° " + configurations.get(ConfigKey.COMMERCIAL_REGISTRATION_NUMBER));
         parameters.put("patent", "Patente N° " + configurations.get(ConfigKey.COMPANY_PATENT_NUMBER));
-        parameters.put("if",     "I.F. N° " + configurations.get(ConfigKey.TAX_IDENTIFIER_NUMBER));
-        parameters.put("ice",    "I.C.E. N° " + configurations.get(ConfigKey.COMMON_IDENTIFIER_NUMBER));
-        parameters.put("tel",   "Téléphone : " + configurations.get(ConfigKey.COMPANY_PHONE_NUMBER));
-        parameters.put("fax",   "Fax :  " + configurations.get(ConfigKey.COMPANY_FIXED_PHONE_NUMBER));
+        parameters.put("if", "I.F. N° " + configurations.get(ConfigKey.TAX_IDENTIFIER_NUMBER));
+        parameters.put("ice", "I.C.E. N° " + configurations.get(ConfigKey.COMMON_IDENTIFIER_NUMBER));
+        parameters.put("tel", "Téléphone : " + configurations.get(ConfigKey.COMPANY_PHONE_NUMBER));
+        parameters.put("fax", "Fax :  " + configurations.get(ConfigKey.COMPANY_FIXED_PHONE_NUMBER));
         parameters.put("email", "E-mail : " + configurations.get(ConfigKey.COMPANY_EMAIL_ADDRESS));
 
         parameters.put("amountInWords", getMoneyIntoWords(invoice.getTotalIncludingTaxes().toString()));

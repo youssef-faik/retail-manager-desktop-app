@@ -27,7 +27,6 @@ import net.sf.jasperreports.engine.JRException;
 
 import java.io.IOException;
 import java.net.URL;
-import java.sql.SQLException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -35,6 +34,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ListInvoicesController implements Initializable {
+    ObservableList<Invoice> invoiceObservableList;
+    FilteredList<Invoice> filteredInvoiceList;
+    SortedList<Invoice> invoiceSortedList;
     @FXML
     private TableView<Invoice> invoicesTableView;
     @FXML
@@ -42,15 +44,8 @@ public class ListInvoicesController implements Initializable {
     @FXML
     private TextField searchInvoiceTextField;
 
-    private InvoiceRepository invoiceRepository;
-    ObservableList<Invoice> invoiceObservableList;
-    FilteredList<Invoice> filteredInvoiceList;
-    SortedList<Invoice> invoiceSortedList;
-
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        invoiceRepository = new InvoiceRepository();
-
         updateButton.setDisable(true);
         deleteButton.setDisable(true);
 
@@ -72,15 +67,10 @@ public class ListInvoicesController implements Initializable {
                     if (Objects.equals(invoice.getReference(), value)) {
                         return true;
                     }
-                }
-                catch (Exception ignored) {
-                }
-
-                if (invoice.getClient().getName().toLowerCase().contains(lowerCaseFilter)) {
-                    return true;
+                } catch (Exception ignored) {
                 }
 
-                return false;
+                return invoice.getClient().getName().toLowerCase().contains(lowerCaseFilter);
 
             });
         });
@@ -105,7 +95,7 @@ public class ListInvoicesController implements Initializable {
 
             InvoiceController invoiceController = fxmlLoader.getController();
 
-            Invoice invoice = invoiceRepository.findById(selectedInvoice.getId());
+            Invoice invoice = InvoiceRepository.findById(selectedInvoice.getId()).orElseThrow();
             invoiceController.initInvoiceUpdate(invoice);
 
             Stage stage = new Stage();
@@ -118,7 +108,7 @@ public class ListInvoicesController implements Initializable {
         }
     }
 
-    public void deleteInvoice(ActionEvent actionEvent) throws SQLException {
+    public void deleteInvoice(ActionEvent actionEvent) {
         Invoice selectedInvoice = invoicesTableView.getSelectionModel().getSelectedItem();
         if (selectedInvoice != null) {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -128,8 +118,14 @@ public class ListInvoicesController implements Initializable {
             Optional<ButtonType> result = alert.showAndWait();
 
             if (result.isPresent() && result.get() == ButtonType.OK) {
-                invoiceRepository.deleteById(selectedInvoice.getId());
-                refreshInvoicesTable();
+
+                if (InvoiceRepository.deleteById(selectedInvoice.getId())) {
+                    refreshInvoicesTable();
+                    displaySuccessAlert();
+                } else {
+                    displayErrorAlert();
+                }
+
             }
         }
     }
@@ -154,13 +150,8 @@ public class ListInvoicesController implements Initializable {
         statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
         paidAmountColumn.setCellValueFactory(new PropertyValueFactory<>("paidAmount"));
 
-        dueDateColumn.setCellValueFactory(cellData -> {
-            return new SimpleStringProperty(cellData.getValue().getDueDate() == null ? "N/A" : cellData.getValue().getDueDate().toString());
-        });
-
-        referenceColumn.setCellValueFactory(cellData -> {
-            return new SimpleStringProperty(cellData.getValue().getReference() == 0L ? "N/A" : cellData.getValue().getReference().toString());
-        });
+        dueDateColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getDueDate() == null ? "N/A" : cellData.getValue().getDueDate().toString()));
+        referenceColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getReference() == null ? "N/A" : cellData.getValue().getReference().toString()));
 
         idColumn.setVisible(false);
 
@@ -212,7 +203,8 @@ public class ListInvoicesController implements Initializable {
                                         TableRow tableRow = (TableRow) printButton.getParent().getParent().getParent();
                                         Invoice selectedInvoice = (Invoice) tableRow.getItem();
 
-                                        Invoice invoice = invoiceRepository.findById(selectedInvoice.getId());
+                                        Invoice invoice = InvoiceRepository.findById(selectedInvoice.getId()).orElseThrow();
+                                        System.out.println(invoice.getClient());
 
                                         try {
                                             InvoiceReportManager invoiceReportManager = new InvoiceReportManager();
@@ -251,7 +243,7 @@ public class ListInvoicesController implements Initializable {
     }
 
     private void refreshInvoicesTable() {
-        invoiceObservableList = invoiceRepository.findAllJoinClient();
+        invoiceObservableList = InvoiceRepository.findAll();
 
         filteredInvoiceList = new FilteredList<>(invoiceObservableList);
         invoiceSortedList = new SortedList<>(filteredInvoiceList);
@@ -261,4 +253,21 @@ public class ListInvoicesController implements Initializable {
         updateButton.setDisable(true);
         deleteButton.setDisable(true);
     }
+
+    private void displaySuccessAlert() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Success");
+        alert.setHeaderText(null);
+        alert.setContentText("Operation effectué avec success");
+        alert.showAndWait();
+    }
+
+    private void displayErrorAlert() {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText("Une erreur est survenue lors de l'opération.");
+        alert.showAndWait();
+    }
+
 }

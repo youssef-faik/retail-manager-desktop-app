@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<!-- Version 8 MySQL hiberante-cfg.xml example for Hibernate 5 -->
+<hibernate-configuration>
+    <session-factory>
+        <property name="connection.driver_class">com.mysql.cj.jdbc.Driver</property>
+        <property name="connection.url">jdbc:mysql://localhost:3306/gestioncommercial</property>
+        <property name="connection.username">root</property>
+        <property name="connection.password">my-secret-pw</property>
+
+        <property name="show_sql">true</property>
+        <property name="format_sql">true</property>
+        <property name="hbm2ddl.auto">update</property>
+
+        <mapping class="com.example.gestioncommercial.configuration.ConfigOption"/>
+        <mapping class="com.example.gestioncommercial.client.Client"/>
+        <mapping class="com.example.gestioncommercial.product.Product"/>
+        <mapping class="com.example.gestioncommercial.invoice.Invoice"/>
+        <mapping class="com.example.gestioncommercial.invoice.InvoiceItem"/>
+        <mapping class="com.example.gestioncommercial.payment.Payment"/>
+        <mapping class="com.example.gestioncommercial.payment.Check"/>
+        <mapping class="com.example.gestioncommercial.payment.Cash"/>
+        <mapping class="com.example.gestioncommercial.payment.BankTransfer"/>
+    </session-factory>
+</hibernate-configuration>

@@ -24,19 +24,12 @@ public class MainController {
         stage.setScene(new Scene(root));
         stage.setResizable(false);
         stage.showAndWait();
-
-        refreshClientsList();
     }
 
     public void listClients(ActionEvent actionEvent) throws IOException {
-        refreshClientsList();
-    }
-
-    private void refreshClientsList() throws IOException {
         VBox pane = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("client/list-clients.fxml")));
         borderPane.setCenter(pane);
     }
-
 
     public void addProduct(ActionEvent actionEvent) throws IOException {
         Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("product/form-product.fxml")));
@@ -45,15 +38,9 @@ public class MainController {
         stage.setScene(new Scene(root));
         stage.setResizable(false);
         stage.showAndWait();
-
-        refreshProductsList();
     }
 
     public void listProducts(ActionEvent actionEvent) throws IOException {
-        refreshProductsList();
-    }
-
-    private void refreshProductsList() throws IOException {
         VBox pane = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("product/list-products.fxml")));
         borderPane.setCenter(pane);
     }
@@ -64,10 +51,6 @@ public class MainController {
     }
 
     public void listInvoices(ActionEvent actionEvent) throws IOException {
-        refreshInvoicesList();
-    }
-
-    private void refreshInvoicesList() throws IOException {
         VBox pane = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("invoice/list-invoices.fxml")));
         borderPane.setCenter(pane);
     }

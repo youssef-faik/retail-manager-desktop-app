@@ -1,20 +1,28 @@
 package com.example.gestioncommercial.payment;
 
+import jakarta.persistence.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+@Entity(name = "Cash")
+@Table(name = "cash")
+@DiscriminatorValue("CASH")
+@PrimaryKeyJoinColumn(
+        name = "id",
+        referencedColumnName = "id",
+        foreignKey = @ForeignKey(name = "cash_payment_fk"))
 public class Cash extends Payment {
+    @Enumerated(EnumType.STRING)
     private CashFlowType cashFlowType;
 
     public Cash() {
-
     }
 
-    public Cash(long id, BigDecimal amount, LocalDate paymentDate, PaymentMethod paymentMethod, CashFlowType cashFlowType) {
-        super(id, amount, paymentDate, paymentMethod);
+    public Cash(BigDecimal amount, LocalDate paymentDate, PaymentMethod paymentMethod, CashFlowType cashFlowType) {
+        super(amount, paymentDate, paymentMethod);
         this.cashFlowType = cashFlowType;
     }
-
 
     public CashFlowType getCashFlowType() {
         return cashFlowType;

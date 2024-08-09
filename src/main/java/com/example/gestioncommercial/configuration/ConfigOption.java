@@ -1,11 +1,24 @@
 package com.example.gestioncommercial.configuration;
 
+import jakarta.persistence.*;
+
+import java.io.Serializable;
+
 /**
  * The ConfigOption class represents a configuration option with a key and a value.
  */
-public class ConfigOption {
-    private final ConfigKey key;
+@Table(name = "config_option")
+@Entity(name = "ConfigOption")
+public class ConfigOption implements Serializable {
+    @Id
+    @Enumerated(EnumType.STRING)
+    @Column(name = "option_key")
+    private ConfigKey key;
+
     private String value;
+
+    public ConfigOption() {
+    }
 
     /**
      * Constructs a new ConfigOption with the specified key and value.
@@ -27,6 +40,16 @@ public class ConfigOption {
         return key;
     }
 
+
+    /**
+     * Sets the configuration key.
+     *
+     * @param key the new configuration key
+     */
+    public void setKey(ConfigKey key) {
+        this.key = key;
+    }
+
     /**
      * Returns the configuration value.
      *
@@ -43,5 +66,19 @@ public class ConfigOption {
      */
     public void setValue(String value) {
         this.value = value;
+    }
+
+
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ConfigOption that)) return false;
+
+        return getKey() == that.getKey();
+    }
+
+    @Override
+    public int hashCode() {
+        return getKey().hashCode();
     }
 }

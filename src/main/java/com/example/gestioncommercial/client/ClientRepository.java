@@ -1,51 +1,124 @@
 package com.example.gestioncommercial.client;
 
-import com.example.gestioncommercial.DataAccessObject;
+import com.example.gestioncommercial.HibernateUtil;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.resource.transaction.spi.TransactionStatus;
 
-import java.sql.SQLException;
+import java.util.Optional;
 
-public class ClientRepository {
-    private final DataAccessObject dao;
+public interface ClientRepository {
+    SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
 
-    public ClientRepository() {
-        this.dao = new DataAccessObject();
+    static ObservableList<Client> findAll() {
+        ObservableList<Client> clients = FXCollections.observableArrayList();
+
+        Session session = sessionFactory.openSession();
+
+        try (session) {
+            clients.addAll(session.createQuery("select c from Client c", Client.class).list());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return clients;
     }
 
-    public ObservableList<Client> findAll() {
-        String clientQuery = "select * from client";
-        return dao.getClients(clientQuery);
+    static Optional<Client> findById(Long id) {
+        try (Session session = sessionFactory.openSession()) {
+            Client client = session.find(Client.class, id);
+            session.refresh(client);
+
+            return Optional.ofNullable(client);
+        }
     }
 
-    public void save(Client client) throws SQLException {
-        String query = "insert into client(name, phone_number, address, common_company_identifier, tax_identification_number) values('%s', '%s', '%s', '%s', '%s')"
-                .formatted(
-                        client.getName(),
-                        client.getPhoneNumber(),
-                        client.getAddress(),
-                        client.getCommonCompanyIdentifier(),
-                        client.getTaxIdentificationNumber()
-                );
+    static boolean save(Client client) {
+        Session session = sessionFactory.openSession();
 
-        dao.saveData(query);
+        try {
+            session.beginTransaction();
+            session.persist(client);
+            session.getTransaction().commit();
+
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            if (session.getTransaction().getStatus() == TransactionStatus.ACTIVE
+                    || session.getTransaction().getStatus() == TransactionStatus.MARKED_ROLLBACK) {
+                session.getTransaction().rollback();
+            }
+
+            return false;
+        } finally {
+            session.close();
+        }
     }
 
-    public void update(Client client) throws SQLException {
-        String updateClientQuery = "update client set name = '%s', phone_number ='%s', address ='%s', common_company_identifier ='%s', tax_identification_number ='%s' where id = %d"
-                .formatted(
-                        client.getName(),
-                        client.getPhoneNumber(),
-                        client.getAddress(),
-                        client.getCommonCompanyIdentifier(),
-                        client.getTaxIdentificationNumber(),
-                        client.getId()
-                );
+    static Optional<Client> update(Client updatedClient) {
+        Session session = sessionFactory.openSession();
 
-        dao.saveData(updateClientQuery);
+        try {
+            session.beginTransaction();
+
+            Client oldClient = session.find(Client.class, updatedClient.getId());
+
+            if (oldClient == null) {
+                return Optional.empty();
+            }
+
+            oldClient.setName(updatedClient.getName());
+            oldClient.setAddress(updatedClient.getAddress());
+            oldClient.setPhoneNumber(updatedClient.getPhoneNumber());
+            oldClient.setCommonCompanyIdentifier(updatedClient.getCommonCompanyIdentifier());
+            oldClient.setTaxIdentificationNumber(updatedClient.getTaxIdentificationNumber());
+
+            session.getTransaction().commit();
+
+            return Optional.of(oldClient);
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            if (session.getTransaction().getStatus() == TransactionStatus.ACTIVE
+                    || session.getTransaction().getStatus() == TransactionStatus.MARKED_ROLLBACK) {
+                session.getTransaction().rollback();
+            }
+
+            return Optional.empty();
+        } finally {
+            session.close();
+        }
     }
 
-    public void deleteById(int id) throws SQLException {
-        String query = "delete from client where id = " + id;
-        dao.saveData(query);
+    static boolean deleteById(Long id) {
+        Session session = sessionFactory.openSession();
+
+        try {
+            session.beginTransaction();
+
+            Client deletedClient = session.getReference(Client.class, id);
+            if (deletedClient == null) {
+                return false;
+            }
+
+            session.remove(deletedClient);
+            session.getTransaction().commit();
+
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            if (session.getTransaction().getStatus() == TransactionStatus.ACTIVE
+                    || session.getTransaction().getStatus() == TransactionStatus.MARKED_ROLLBACK) {
+                session.getTransaction().rollback();
+            }
+
+            return false;
+        } finally {
+            session.close();
+        }
     }
 }

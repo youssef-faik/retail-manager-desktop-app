@@ -35,7 +35,6 @@ public enum CheckStatus {
     CANCELLED;
 
 
-
     /**
      * Returns the display name of the check status.
      *

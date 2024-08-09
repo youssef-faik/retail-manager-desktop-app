@@ -1,56 +1,77 @@
 package com.example.gestioncommercial.invoice;
 
 import com.example.gestioncommercial.client.Client;
+import com.example.gestioncommercial.payment.BankTransfer;
+import com.example.gestioncommercial.payment.Check;
 import com.example.gestioncommercial.payment.Payment;
+import jakarta.persistence.*;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
-public class Invoice {
-    private final Set<InvoiceItem> invoiceItems = new HashSet<>();
-    private List<Payment> payments = new ArrayList<>();
+
+@Entity(name = "Invoice")
+@Table(name = "invoice")
+public class Invoice implements Serializable, Cloneable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "reference")
     private Long reference;
+
+    @Column(name = "issue_date")
+    @Temporal(TemporalType.DATE)
     private LocalDate issueDate;
+
+    @Column(name = "due_date")
+    @Temporal(TemporalType.DATE)
     private LocalDate dueDate;
-    private Client client;
+
+    @Column(name = "total_excluding_taxes")
     private BigDecimal totalExcludingTaxes = BigDecimal.ZERO;
+
+    @Column(name = "total_including_taxes")
     private BigDecimal totalIncludingTaxes = BigDecimal.ZERO;
+
+    @Column(name = "total_taxes")
     private BigDecimal totalTaxes = BigDecimal.ZERO;
+
+    @Column(name = "paid_amount")
     private BigDecimal paidAmount = BigDecimal.ZERO;
+
+    @Enumerated(EnumType.STRING)
     private InvoiceStatus status = InvoiceStatus.DRAFT;
 
+    @JoinColumn(
+            name = "client_id",
+            referencedColumnName = "id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "invoice_client_fk"))
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.DETACH})
+    private Client client;
+
+    @JoinColumn(
+            name = "invoice_id",
+            referencedColumnName = "id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "payment_invoice_fk"))
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<Payment> payments = new HashSet<>();
+
+    @JoinColumn(
+            name = "invoice_id",
+            referencedColumnName = "id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "invoice_item_invoice_fk"))
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<InvoiceItem> invoiceItems = new HashSet<>();
+
     public Invoice() {
-    }
-
-    public Invoice(Long id, Long reference, LocalDate issueDate, LocalDate dueDate, InvoiceStatus status, BigDecimal paidAmount, Client client, BigDecimal totalExcludingTaxes, BigDecimal totalIncludingTaxes, BigDecimal totalTaxes) {
-        this.id = id;
-        this.reference = reference;
-        this.issueDate = issueDate;
-        this.dueDate = dueDate;
-        this.status = status;
-        this.paidAmount = paidAmount;
-        this.client = client;
-        this.totalExcludingTaxes = totalExcludingTaxes;
-        this.totalIncludingTaxes = totalIncludingTaxes;
-        this.totalTaxes = totalTaxes;
-    }
-
-    public Invoice(Long id, Long reference, LocalDate issueDate, InvoiceStatus status, BigDecimal paidAmount, String clientName, BigDecimal totalExcludingTaxes, BigDecimal totalIncludingTaxes, BigDecimal totalTaxes) {
-        this.id = id;
-        this.reference = reference;
-        this.issueDate = issueDate;
-        this.client = new Client();
-        this.client.setName(clientName);
-        this.status = status;
-        this.paidAmount = paidAmount;
-        this.totalExcludingTaxes = totalExcludingTaxes;
-        this.totalIncludingTaxes = totalIncludingTaxes;
-        this.totalTaxes = totalTaxes;
     }
 
     public Long getId() {
@@ -75,14 +96,6 @@ public class Invoice {
 
     public void setDueDate(LocalDate dueDate) {
         this.dueDate = dueDate;
-    }
-
-    public List<Payment> getPayments() {
-        return payments;
-    }
-
-    public void setPayments(List<Payment> payments) {
-        this.payments = payments;
     }
 
     public Client getClient() {
@@ -117,10 +130,6 @@ public class Invoice {
         this.totalTaxes = totalTaxes;
     }
 
-    public Set<InvoiceItem> getInvoiceItems() {
-        return invoiceItems;
-    }
-
     public BigDecimal getPaidAmount() {
         return paidAmount;
     }
@@ -144,4 +153,100 @@ public class Invoice {
     public void setReference(Long reference) {
         this.reference = reference;
     }
+
+    public Set<InvoiceItem> getInvoiceItems() {
+        return new HashSet<>(this.invoiceItems);
+    }
+
+    public void setInvoiceItems(Set<InvoiceItem> invoiceItems) {
+        this.invoiceItems = invoiceItems;
+    }
+
+    public void clearInvoiceItems() {
+        this.invoiceItems.clear();
+    }
+
+    public void addInvoiceItem(InvoiceItem item) {
+        this.invoiceItems.add(item);
+    }
+
+    public void removeInvoiceItem(InvoiceItem item) {
+        this.invoiceItems.remove(item);
+    }
+
+    public void updateInvoiceItem(InvoiceItem updatedInvoiceItem) {
+        Optional<InvoiceItem> optionalInvoiceItem = invoiceItems.stream().filter(item -> item.equals(updatedInvoiceItem)).findFirst();
+
+        if (optionalInvoiceItem.isPresent()) {
+            InvoiceItem originalInvoiceItem = optionalInvoiceItem.get();
+
+            originalInvoiceItem.setProduct(updatedInvoiceItem.getProduct());
+            originalInvoiceItem.setQuantity(updatedInvoiceItem.getQuantity());
+            originalInvoiceItem.setUnitPriceExcludingTaxes(updatedInvoiceItem.getUnitPriceExcludingTaxes());
+            originalInvoiceItem.setTotalExcludingTaxes(updatedInvoiceItem.getTotalExcludingTaxes());
+            originalInvoiceItem.setTotalIncludingTaxes(updatedInvoiceItem.getTotalIncludingTaxes());
+            originalInvoiceItem.setTotalTaxes(updatedInvoiceItem.getTotalTaxes());
+        }
+    }
+
+    public Set<Payment> getPayments() {
+        return new HashSet<>(payments);
+    }
+
+    public void setPayments(Set<Payment> payments) {
+        this.payments = payments;
+    }
+
+    public void addPayment(Payment payment) {
+        this.payments.add(payment);
+    }
+
+    public void removePayment(Payment payment) {
+        this.payments.remove(payment);
+    }
+
+    public void updatePayment(Payment updatedpayment) {
+        Optional<Payment> optionalPayment = payments.stream().filter(payment -> payment.equals(updatedpayment)).findFirst();
+
+        if (optionalPayment.isPresent()) {
+            Payment originalPayment = optionalPayment.get();
+
+            originalPayment.setAmount(updatedpayment.getAmount());
+            originalPayment.setPaymentDate(updatedpayment.getPaymentDate());
+
+            if (originalPayment instanceof BankTransfer bankTransfer) {
+                BankTransfer payment = (BankTransfer) updatedpayment;
+
+                bankTransfer.setBankName(payment.getBankName());
+                bankTransfer.setTransactionId(payment.getTransactionId());
+                bankTransfer.setBeneficiaryName(payment.getBeneficiaryName());
+                bankTransfer.setAccountNumber(payment.getAccountNumber());
+            }
+
+            if (originalPayment instanceof Check check) {
+                Check payment = (Check) updatedpayment;
+
+                check.setBankName(payment.getBankName());
+                check.setCheckNumber(payment.getCheckNumber());
+                check.setPayeeName(payment.getPayeeName());
+                check.setSenderAccount(payment.getSenderAccount());
+                check.setDueDate(payment.getDueDate());
+                check.setIssueDate(payment.getIssueDate());
+                check.setCheckStatus(payment.getCheckStatus());
+            }
+        }
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        Object cloned = super.clone();
+        Invoice clonedInvoice = (Invoice) cloned;
+
+        clonedInvoice.setClient((Client) client.clone());
+        clonedInvoice.setPayments(getPayments());
+        clonedInvoice.setInvoiceItems(getInvoiceItems());
+
+        return clonedInvoice;
+    }
+
 }

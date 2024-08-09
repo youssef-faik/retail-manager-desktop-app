@@ -1,63 +1,123 @@
 package com.example.gestioncommercial.product;
 
-import com.example.gestioncommercial.DataAccessObject;
+import com.example.gestioncommercial.HibernateUtil;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.resource.transaction.spi.TransactionStatus;
 
-import java.sql.SQLException;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
+import java.util.Optional;
 
-public class ProductRepository {
-    private final DataAccessObject dao;
+public interface ProductRepository {
+    SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
 
-    public ProductRepository() {
-        this.dao = new DataAccessObject();
+    static ObservableList<Product> findAll() {
+        ObservableList<Product> products = FXCollections.observableArrayList();
+
+        Session session = sessionFactory.openSession();
+
+        try (session) {
+            products.addAll(session.createQuery("select P from Product P", Product.class).list());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return products;
     }
 
-    public ObservableList<Product> findAll() {
-        String productsQuery = "select * from product";
-        return dao.getProducts(productsQuery);
+    static Optional<Product> findById(Long id) {
+        try (Session session = sessionFactory.openSession()) {
+            Product product = session.find(Product.class, id);
+            return Optional.ofNullable(product);
+        }
     }
 
-    public void save(Product product) throws SQLException {
-        DecimalFormatSymbols symbols = new DecimalFormatSymbols();
-        symbols.setDecimalSeparator('.');
-        DecimalFormat df = new DecimalFormat("0.00", symbols);
+    static boolean save(Product product) {
+        Session session = sessionFactory.openSession();
 
-        String insertQuery = "insert into product(name, description, selling_price_excluding_tax, purchase_price_excluding_tax, quantity, tax_rate) values('%s', '%s', %s, %s, %d, %s)"
-                .formatted(
-                        product.getName(),
-                        product.getDescription(),
-                        df.format(product.getSellingPriceExcludingTax()),
-                        df.format(product.getPurchasePriceExcludingTax()),
-                        product.getQuantity(),
-                        df.format(product.getTaxRate())
-                );
+        try {
+            session.beginTransaction();
+            session.persist(product);
+            session.getTransaction().commit();
 
-        dao.saveData(insertQuery);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            if (session.getTransaction().getStatus() == TransactionStatus.ACTIVE
+                    || session.getTransaction().getStatus() == TransactionStatus.MARKED_ROLLBACK) {
+                session.getTransaction().rollback();
+            }
+
+            return false;
+        } finally {
+            session.close();
+        }
     }
 
-    public void update(Product product) throws SQLException {
-        DecimalFormatSymbols symbols = new DecimalFormatSymbols();
-        symbols.setDecimalSeparator('.');
-        DecimalFormat df = new DecimalFormat("0.00", symbols);
+    static Optional<Product> update(Product updatedProduct) {
+        Session session = sessionFactory.openSession();
 
-        String updateQuery = "update product set name = '%s', description ='%s', purchase_price_excluding_tax = %s, selling_price_excluding_tax = %s, quantity =%s, tax_rate = %s where id = %d"
-                .formatted(
-                        product.getName(),
-                        product.getDescription(),
-                        df.format(product.getPurchasePriceExcludingTax()),
-                        df.format(product.getSellingPriceExcludingTax()),
-                        product.getQuantity(),
-                        df.format(product.getTaxRate()),
-                        product.getId()
-                );
+        try {
+            session.beginTransaction();
 
-        dao.saveData(updateQuery);
+            Product oldProduct = session.find(Product.class, updatedProduct.getId());
+
+            if (oldProduct == null) {
+                return Optional.empty();
+            }
+
+            oldProduct.setName(updatedProduct.getName());
+            oldProduct.setDescription(updatedProduct.getDescription());
+            oldProduct.setPurchasePriceExcludingTax(updatedProduct.getPurchasePriceExcludingTax());
+            oldProduct.setSellingPriceExcludingTax(updatedProduct.getSellingPriceExcludingTax());
+            oldProduct.setTaxRate(updatedProduct.getTaxRate());
+            oldProduct.setQuantity(updatedProduct.getQuantity());
+
+            session.getTransaction().commit();
+
+            return Optional.of(oldProduct);
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            if (session.getTransaction().getStatus() == TransactionStatus.ACTIVE
+                    || session.getTransaction().getStatus() == TransactionStatus.MARKED_ROLLBACK) {
+                session.getTransaction().rollback();
+            }
+
+            return Optional.empty();
+        } finally {
+            session.close();
+        }
     }
 
-    public void deleteById(int id) throws SQLException {
-        String query = "delete from product where id = " + id;
-        dao.saveData(query);
+    static boolean deleteById(Long id) {
+        Session session = sessionFactory.openSession();
+
+        try {
+            session.beginTransaction();
+
+            Product deletedProduct = session.getReference(Product.class, id);
+            if (deletedProduct == null) {
+                return false;
+            }
+
+            session.remove(deletedProduct);
+            session.getTransaction().commit();
+
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            if (session.getTransaction().getStatus() == TransactionStatus.ACTIVE
+                    || session.getTransaction().getStatus() == TransactionStatus.MARKED_ROLLBACK) {
+                session.getTransaction().rollback();
+            }
+
+            return false;
+        } finally {
+            session.close();
+        }
     }
 }

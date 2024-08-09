@@ -4,55 +4,46 @@ import com.example.gestioncommercial.invoice.Invoice;
 import com.example.gestioncommercial.invoice.InvoiceRepository;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class AppConfiguration {
-    private static ConfigOptionRepository configOptionRepository;
-    private static InvoiceRepository invoiceRepository;
     private static AppConfiguration instance;
 
-    protected AppConfiguration(
-            ConfigOptionRepository configOptionRepository, InvoiceRepository invoiceRepository) {
-        AppConfiguration.configOptionRepository = configOptionRepository;
-        AppConfiguration.invoiceRepository = invoiceRepository;
-
-        if (configOptionRepository.findByKey(ConfigKey.NEXT_INVOICE_NUMBER).isEmpty()) {
-            ConfigOption nextInvoiceNumber = new ConfigOption(ConfigKey.NEXT_INVOICE_NUMBER, "1");
-            AppConfiguration.configOptionRepository.save(nextInvoiceNumber, false);
-        }
-
-        if (configOptionRepository.findByKey(ConfigKey.NEXT_CREDIT_INVOICE_NUMBER).isEmpty()) {
-            ConfigOption nextInvoiceNumber = new ConfigOption(ConfigKey.NEXT_CREDIT_INVOICE_NUMBER, "1");
-            AppConfiguration.configOptionRepository.save(nextInvoiceNumber, false);
-        }
+    protected AppConfiguration() {
+        Set<ConfigOption> configOptions = ConfigOptionRepository.findAll();
 
         for (ConfigKey key : ConfigKey.values()) {
-            if (configOptionRepository.findByKey(key).isEmpty() ) {
-                AppConfiguration.configOptionRepository.save(new ConfigOption(key, ""), false);
+            if (configOptions.stream().filter(configOption -> configOption.getKey() == key).findFirst().isEmpty()) {
+                if (key == ConfigKey.NEXT_INVOICE_NUMBER) {
+                    ConfigOptionRepository.save(new ConfigOption(key, "1"));
+                } else if (key == ConfigKey.NEXT_CREDIT_INVOICE_NUMBER) {
+                    ConfigOptionRepository.save(new ConfigOption(key, "1"));
+                } else {
+                    ConfigOptionRepository.save(new ConfigOption(key, ""));
+                }
             }
         }
-
     }
 
     public static AppConfiguration getInstance() {
         if (instance == null) {
             synchronized (AppConfiguration.class) {
                 if (instance == null) {
-                    instance = new AppConfiguration(new ConfigOptionRepository(), new InvoiceRepository());
+                    instance = new AppConfiguration();
                 }
             }
         }
         return instance;
     }
 
-    private static void validateNextInvoiceNumber(int nextInvoiceNumber) {
+    private static void validateNextInvoiceNumber(Long nextInvoiceNumber) {
         if (nextInvoiceNumber <= 0) {
             throw new RuntimeException("The next invoice number must be strictly greater than 0.");
         }
 
-        if (invoiceRepository.count() > 0) {
-            Invoice invoice = invoiceRepository.findFirstByOrderByIdDesc().orElseThrow();
+        if (InvoiceRepository.count() > 0) {
+            Invoice invoice = InvoiceRepository.findFirstByOrderByIdDesc().orElseThrow();
             if (nextInvoiceNumber <= invoice.getReference()) {
                 throw new RuntimeException(
                         "The next invoice number must be greater than or equal to " + (invoice.getReference() + 1));
@@ -62,7 +53,7 @@ public class AppConfiguration {
 
     private static void updateOptionValue(ConfigKey key, String value) {
         ConfigOption option =
-                configOptionRepository
+                ConfigOptionRepository
                         .findByKey(key)
                         .orElseThrow(
                                 () ->
@@ -70,16 +61,16 @@ public class AppConfiguration {
                                                 "Option not found with key " + key.name()));
 
         option.setValue(value);
-        configOptionRepository.save(option, true);
+        ConfigOptionRepository.update(option);
     }
 
-    private static void updateNextInvoiceNumber(int nextInvoiceNumber) {
+    private static void updateNextInvoiceNumber(Long nextInvoiceNumber) {
         validateNextInvoiceNumber(nextInvoiceNumber);
         updateOptionValue(ConfigKey.NEXT_INVOICE_NUMBER, String.valueOf(nextInvoiceNumber));
     }
 
     public ConfigOption getConfigurationValue(ConfigKey key) {
-        return configOptionRepository
+        return ConfigOptionRepository
                 .findByKey(key)
                 .orElseThrow(
                         () -> new RuntimeException("Option not found with key " + key.name()));
@@ -87,18 +78,17 @@ public class AppConfiguration {
 
     public void setConfigurationValues(Map<ConfigKey, String> configOptions) {
         if (configOptions.containsKey(ConfigKey.NEXT_INVOICE_NUMBER)) {
-            updateNextInvoiceNumber(Integer.parseInt(configOptions.get(ConfigKey.NEXT_INVOICE_NUMBER)));
+            updateNextInvoiceNumber(Long.valueOf((configOptions.get(ConfigKey.NEXT_INVOICE_NUMBER))));
+            configOptions.remove(ConfigKey.NEXT_INVOICE_NUMBER);
         }
 
-        configOptions.forEach((key, value) -> {
-            updateOptionValue(key, String.valueOf(value));
-        });
+        configOptions.forEach((key, value) -> updateOptionValue(key, String.valueOf(value)));
     }
 
     public Map<ConfigKey, String> getAllConfigurations() {
         Map<ConfigKey, String> options = new HashMap<>();
 
-        List<ConfigOption> rawOptions = configOptionRepository.findAll();
+        Set<ConfigOption> rawOptions = ConfigOptionRepository.findAll();
 
         for (ConfigOption option : rawOptions) {
             options.put(option.getKey(), option.getValue());

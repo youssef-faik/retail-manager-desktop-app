@@ -2,10 +2,9 @@ package com.example.gestioncommercial.invoice;
 
 import com.example.gestioncommercial.client.Client;
 import com.example.gestioncommercial.client.ClientRepository;
-import com.example.gestioncommercial.configuration.AppConfiguration;
-import com.example.gestioncommercial.configuration.ConfigKey;
 import com.example.gestioncommercial.payment.*;
 import com.example.gestioncommercial.product.Product;
+import com.example.gestioncommercial.product.ProductRepository;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import javafx.beans.property.SimpleStringProperty;
@@ -30,10 +29,11 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.Map;
+import java.util.HashSet;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class InvoiceController implements Initializable {
     @FXML
@@ -58,25 +58,21 @@ public class InvoiceController implements Initializable {
     private TableView<InvoiceItemEntry> invoiceItemEntryTableView;
 
     @FXML
-    private TableView<Payment> paymentsTableView;
+    private TableView<InvoicePaymentEntry> paymentsTableView;
 
     private Invoice invoice = new Invoice();
     private ObservableList<Product> products;
 
-    private InvoiceRepository invoiceRepository;
-    private ClientRepository clientRepository;
     private InvoiceController invoiceController;
+
     private boolean isEditMode = false;
     private boolean isDraftInvoice = false;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         invoiceController = this;
-        invoiceRepository = new InvoiceRepository();
-        clientRepository = new ClientRepository();
 
-        Thread loadProductsThread = new Thread(() -> products = invoiceRepository.findAll());
-        loadProductsThread.start();
+        products = ProductRepository.findAll();
 
         issueDateDatePicker.setValue(LocalDate.now());
         invoice.setIssueDate(LocalDate.now());
@@ -99,7 +95,7 @@ public class InvoiceController implements Initializable {
             }
         });
 
-        paymentsTableView.getItems().addListener((ListChangeListener<Payment>) c -> refreshPaidAndRemainingAmounts());
+        paymentsTableView.getItems().addListener((ListChangeListener<InvoicePaymentEntry>) c -> refreshPaidAndRemainingAmounts());
 
         addProductButton.setOnAction(event -> {
             InvoiceItemEntry entry = new InvoiceItemEntry(products, this);
@@ -116,6 +112,8 @@ public class InvoiceController implements Initializable {
             }
 
             PaymentController paymentController = fxmlLoader.getController();
+            paymentController.setInvoiceController(this);
+            paymentController.refreshPaymentAmount();
             paymentController.setPaymentsTableView(paymentsTableView);
 
             Stage stage = new Stage();
@@ -139,59 +137,39 @@ public class InvoiceController implements Initializable {
             System.out.println("issueDateDatePicker");
         });
 
-        saveInvoiceButton.setOnAction(e -> {
-            try {
-                addInvoice();
-            } catch (SQLException ex) {
-                throw new RuntimeException(ex);
-            }
-        });
-
+        saveInvoiceButton.setOnAction(e -> addInvoice());
     }
 
-
-    private void addInvoice() throws SQLException {
+    private void addInvoice() {
         mapInvoice();
 
-        if (invoice.getStatus() != InvoiceStatus.DRAFT) {
-            AppConfiguration configuration = AppConfiguration.getInstance();
-            long lastInvoiceNumber = Long.parseLong(configuration.getConfigurationValue(ConfigKey.NEXT_INVOICE_NUMBER).getValue());
-
-            invoice.setReference(lastInvoiceNumber);
-
-            invoiceRepository.save(invoice);
-
-            lastInvoiceNumber++;
-            configuration.setConfigurationValues(Map.of(ConfigKey.NEXT_INVOICE_NUMBER, String.valueOf(lastInvoiceNumber)));
+        if (InvoiceRepository.add(invoice)) {
+            displaySuccessAlert();
         } else {
-            invoiceRepository.save(invoice);
+            displayErrorAlert();
         }
-
-        displaySuccessAlert();
     }
 
     public void updateInvoice() throws SQLException {
         mapInvoice();
-
-        if (isDraftInvoice && invoice.getStatus() != InvoiceStatus.DRAFT) {
-            AppConfiguration configuration = AppConfiguration.getInstance();
-            long lastInvoiceNumber = Long.parseLong(configuration.getConfigurationValue(ConfigKey.NEXT_INVOICE_NUMBER).getValue());
-
-            invoice.setReference(lastInvoiceNumber);
-
-            invoiceRepository.update(invoice);
-
-            lastInvoiceNumber++;
-            configuration.setConfigurationValues(Map.of(ConfigKey.NEXT_INVOICE_NUMBER, String.valueOf(lastInvoiceNumber)));
+        if (InvoiceRepository.update(invoice)) {
+            displaySuccessAlert();
         } else {
-            invoiceRepository.update(invoice);
+            displayErrorAlert();
         }
+    }
 
-        displaySuccessAlert();
+    private void mapInvoice() {
+        invoice.setIssueDate(issueDateDatePicker.getValue());
+        invoice.setDueDate(dueDateDatePicker.getValue());
+        invoice.setPayments(new HashSet<>(paymentsTableView.getItems().stream().map(InvoicePaymentEntry::getPayment).collect(Collectors.toSet())));
+        invoice.setStatus(invoiceStatusComboBox.getValue());
+
+        invoice.clearInvoiceItems();
+        invoiceItemEntryTableView.getItems().forEach(invoiceItemEntry -> invoice.addInvoiceItem(invoiceItemEntry.getInvoiceItem()));
     }
 
     private void initClientComboBox() {
-        clientComboBox.setItems(clientRepository.findAll());
         clientComboBox.setEditable(false);
         clientComboBox.setCellFactory(x -> new ClientComboCell());
         clientComboBox.setButtonCell(new ClientComboCell());
@@ -201,6 +179,9 @@ public class InvoiceController implements Initializable {
             addressTextField.setText(clientComboBox.getSelectionModel().getSelectedItem().getAddress());
             invoice.setClient(clientComboBox.getSelectionModel().getSelectedItem());
         });
+
+        ObservableList<Client> clients = ClientRepository.findAll();
+        clientComboBox.setItems(clients);
     }
 
     private void initInvoiceItemsTableView() {
@@ -231,7 +212,17 @@ public class InvoiceController implements Initializable {
         actionColumn.setResizable(false);
         actionColumn.setReorderable(false);
 
-        invoiceItemEntryTableView.getColumns().addAll(productColumn, quantityColumn, unitPriceColumn, taxRateColumn, totalExcludingTaxesColumn, totalTaxesColumn, totalIncludingTaxesColumn, actionColumn);
+        invoiceItemEntryTableView.getColumns().addAll(
+                productColumn,
+                quantityColumn,
+                unitPriceColumn,
+                taxRateColumn,
+                totalExcludingTaxesColumn,
+                totalTaxesColumn,
+                totalIncludingTaxesColumn,
+                actionColumn
+        );
+
         invoiceItemEntryTableView.setEditable(true);
 
         // delete
@@ -311,23 +302,25 @@ public class InvoiceController implements Initializable {
     }
 
     private void initPaymentsTableView() {
-        TableColumn<Payment, String> paymentMethodColumn = new TableColumn<>("Mode");
-        TableColumn<Payment, String> paymentDateColumn = new TableColumn<>("Date règlement");
-        TableColumn<Payment, String> paymentAmountColumn = new TableColumn<>("Montant");
-//        TableColumn<Payment, String> paymentReferenceColumn = new TableColumn<>("Reference");
-        TableColumn<Payment, String> bankNameColumn = new TableColumn<>("Banque");
-        TableColumn<Payment, String> ckeckDueDateColumn = new TableColumn<>("Date d'échéance");
-        TableColumn<Payment, String> ckeckStatusColumn = new TableColumn<>("Status");
-        TableColumn<Payment, String> actionColumn = new TableColumn<>("Actions");
+        TableColumn<InvoicePaymentEntry, String> paymentMethodColumn = new TableColumn<>("Mode");
+        TableColumn<InvoicePaymentEntry, String> paymentDateColumn = new TableColumn<>("Date règlement");
+        TableColumn<InvoicePaymentEntry, String> paymentAmountColumn = new TableColumn<>("Montant");
+        TableColumn<InvoicePaymentEntry, String> bankNameColumn = new TableColumn<>("Banque");
+        TableColumn<InvoicePaymentEntry, String> checkDueDateColumn = new TableColumn<>("Date d'échéance");
+        TableColumn<InvoicePaymentEntry, String> checkStatusColumn = new TableColumn<>("Status");
+        TableColumn<InvoicePaymentEntry, String> actionColumn = new TableColumn<>("Actions");
+
+        paymentDateColumn.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getPayment().getPaymentDate().toString()));
+        paymentAmountColumn.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getPayment().getAmount().toString()));
 
         paymentMethodColumn.setCellValueFactory(cellData -> {
             String paymentMethod = "";
 
-            if (cellData.getValue() instanceof Cash) {
+            if (cellData.getValue().getPayment() instanceof Cash) {
                 paymentMethod = "Espèce";
-            } else if (cellData.getValue() instanceof BankTransfer) {
+            } else if (cellData.getValue().getPayment() instanceof BankTransfer) {
                 paymentMethod = "Virement";
-            } else if (cellData.getValue() instanceof Check) {
+            } else if (cellData.getValue().getPayment() instanceof Check) {
                 paymentMethod = "Chèque";
             }
 
@@ -337,52 +330,48 @@ public class InvoiceController implements Initializable {
         bankNameColumn.setCellValueFactory(cellData -> {
             String paymentMethod = "";
 
-            if (cellData.getValue() instanceof Cash) {
+            if (cellData.getValue().getPayment() instanceof Cash) {
                 paymentMethod = "N/A";
-            } else if (cellData.getValue() instanceof BankTransfer bankTransfer) {
+            } else if (cellData.getValue().getPayment() instanceof BankTransfer bankTransfer) {
                 paymentMethod = bankTransfer.getBankName();
-            } else if (cellData.getValue() instanceof Check check) {
+            } else if (cellData.getValue().getPayment() instanceof Check check) {
                 paymentMethod = check.getBankName();
             }
 
             return new SimpleStringProperty(paymentMethod);
         });
 
-        ckeckDueDateColumn.setCellValueFactory(cellData -> {
-            String ckeckDueDate = "";
+        checkDueDateColumn.setCellValueFactory(cellData -> {
+            String checkDueDate = "";
 
-            if (cellData.getValue() instanceof Cash) {
-                ckeckDueDate = "N/A";
-            } else if (cellData.getValue() instanceof BankTransfer) {
-                ckeckDueDate = "N/A";
-            } else if (cellData.getValue() instanceof Check check) {
+            if (cellData.getValue().getPayment() instanceof Cash) {
+                checkDueDate = "N/A";
+            } else if (cellData.getValue().getPayment() instanceof BankTransfer) {
+                checkDueDate = "N/A";
+            } else if (cellData.getValue().getPayment() instanceof Check check) {
                 if (check.getDueDate() != null) {
-                    ckeckDueDate = check.getDueDate().toString();
+                    checkDueDate = check.getDueDate().toString();
                 } else {
-                    ckeckDueDate = "N/A";
+                    checkDueDate = "N/A";
                 }
             }
 
-            return new SimpleStringProperty(ckeckDueDate);
+            return new SimpleStringProperty(checkDueDate);
         });
 
-        ckeckStatusColumn.setCellValueFactory(cellData -> {
-            String ckeckStatus = "";
+        checkStatusColumn.setCellValueFactory(cellData -> {
+            String checkStatus = "";
 
-            if (cellData.getValue() instanceof Cash) {
-                ckeckStatus = "N/A";
-            } else if (cellData.getValue() instanceof BankTransfer) {
-                ckeckStatus = "N/A";
-            } else if (cellData.getValue() instanceof Check check) {
-                ckeckStatus = check.getCheckStatus().toString();
+            if (cellData.getValue().getPayment() instanceof Cash) {
+                checkStatus = "N/A";
+            } else if (cellData.getValue().getPayment() instanceof BankTransfer) {
+                checkStatus = "N/A";
+            } else if (cellData.getValue().getPayment() instanceof Check check) {
+                checkStatus = check.getCheckStatus().toString();
             }
 
-            return new SimpleStringProperty(ckeckStatus);
+            return new SimpleStringProperty(checkStatus);
         });
-
-        paymentDateColumn.setCellValueFactory(new PropertyValueFactory<>("paymentDate"));
-        paymentAmountColumn.setCellValueFactory(new PropertyValueFactory<>("amount"));
-//        paymentReferenceColumn.setCellValueFactory(new PropertyValueFactory<>("reference"));
 
         actionColumn.setMinWidth(176);
         actionColumn.setMaxWidth(176);
@@ -398,18 +387,17 @@ public class InvoiceController implements Initializable {
                 paymentMethodColumn,
                 paymentDateColumn,
                 paymentAmountColumn,
-//                paymentReferenceColumn,
                 bankNameColumn,
-                ckeckDueDateColumn,
-                ckeckStatusColumn,
+                checkDueDateColumn,
+                checkStatusColumn,
                 actionColumn
         );
 
         paymentsTableView.setEditable(true);
         paymentsTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-        Callback<TableColumn<Payment, String>, TableCell<Payment, String>> cellFactory =
-                (TableColumn<Payment, String> param) -> new TableCell<>() {
+        Callback<TableColumn<InvoicePaymentEntry, String>, TableCell<InvoicePaymentEntry, String>> cellFactory =
+                (TableColumn<InvoicePaymentEntry, String> param) -> new TableCell<>() {
                     @Override
                     public void updateItem(String item, boolean empty) {
                         super.updateItem(item, empty);
@@ -427,7 +415,7 @@ public class InvoiceController implements Initializable {
                             deleteButton.setOnMouseClicked((MouseEvent event) -> {
                                 try {
                                     TableRow tableRow = (TableRow) deleteButton.getParent().getParent().getParent();
-                                    Payment rowItem = (Payment) tableRow.getItem();
+                                    InvoicePaymentEntry rowItem = (InvoicePaymentEntry) tableRow.getItem();
                                     paymentsTableView.getItems().remove(rowItem);
                                 } catch (Exception ex) {
                                     Logger.getLogger(InvoiceController.class.getName()).log(Level.SEVERE, null, ex);
@@ -447,8 +435,8 @@ public class InvoiceController implements Initializable {
                                 paymentController.setPaymentsTableView(paymentsTableView);
                                 paymentController.setInvoiceController(invoiceController);
                                 TableRow tableRow = (TableRow) editButton.getParent().getParent().getParent();
-                                Payment rowItem = (Payment) tableRow.getItem();
-                                paymentController.initUpdate(rowItem);
+                                InvoicePaymentEntry rowItem = (InvoicePaymentEntry) tableRow.getItem();
+                                paymentController.initUpdate(rowItem.getPayment());
 
                                 Stage stage = new Stage();
                                 stage.initModality(Modality.APPLICATION_MODAL);
@@ -472,35 +460,39 @@ public class InvoiceController implements Initializable {
     }
 
     public void initInvoiceUpdate(Invoice invoice) {
-        this.invoice = invoice;
-
-        if (invoice.getReference() != 0) {
-            this.invoiceReferenceLabel.setText(invoiceReferenceLabel.getText() + " N° : " + invoice.getReference());
+        try {
+            this.invoice = (Invoice) invoice.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
         }
 
-        this.issueDateDatePicker.setValue(invoice.getIssueDate());
-        this.dueDateDatePicker.setValue(invoice.getDueDate());
-        this.totalIncludingTaxesTextField.setText(invoice.getTotalIncludingTaxes().toString());
-        this.totalExcludingTaxesTextField.setText(invoice.getTotalExcludingTaxes().toString());
-        this.totalTaxesTextField.setText(invoice.getTotalTaxes().toString());
+        if (this.invoice.getReference() != null) {
+            this.invoiceReferenceLabel.setText(invoiceReferenceLabel.getText() + " N° : " + this.invoice.getReference());
+        }
 
-        this.clientComboBox.setValue(invoice.getClient());
-        this.commonCompanyIdentifierTextField.setText(invoice.getClient().getCommonCompanyIdentifier());
-        this.addressTextField.setText(invoice.getClient().getAddress());
+        this.issueDateDatePicker.setValue(this.invoice.getIssueDate());
+        this.dueDateDatePicker.setValue(this.invoice.getDueDate());
+        this.totalIncludingTaxesTextField.setText(this.invoice.getTotalIncludingTaxes().toString());
+        this.totalExcludingTaxesTextField.setText(this.invoice.getTotalExcludingTaxes().toString());
+        this.totalTaxesTextField.setText(this.invoice.getTotalTaxes().toString());
+
+        this.clientComboBox.setValue(this.invoice.getClient());
+        this.commonCompanyIdentifierTextField.setText(this.invoice.getClient().getCommonCompanyIdentifier());
+        this.addressTextField.setText(this.invoice.getClient().getAddress());
 
         invoiceStatusComboBox.getItems().clear();
-        invoiceStatusComboBox.getItems().add(invoice.getStatus());
-        this.invoiceStatusComboBox.setValue(invoice.getStatus());
+        invoiceStatusComboBox.getItems().add(this.invoice.getStatus());
+        invoiceStatusComboBox.setValue(this.invoice.getStatus());
 
         isEditMode = true;
-        isDraftInvoice = invoice.getStatus() == InvoiceStatus.DRAFT;
+        isDraftInvoice = this.invoice.getStatus() == InvoiceStatus.DRAFT;
 
         this.invoice.getInvoiceItems().forEach(invoiceItem -> invoiceItemEntryTableView.getItems().add(
                         new InvoiceItemEntry(products, this, invoiceItem)
                 )
         );
 
-        this.invoice.getPayments().forEach(payment -> paymentsTableView.getItems().add(payment));
+        this.invoice.getPayments().forEach(payment -> paymentsTableView.getItems().add(new InvoicePaymentEntry(payment)));
 
         saveInvoiceButton.setOnAction(e -> {
             try {
@@ -514,29 +506,36 @@ public class InvoiceController implements Initializable {
         refreshPaidAndRemainingAmounts();
     }
 
-
-    private void displaySuccessAlert() {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Success");
-        alert.setHeaderText(null);
-        alert.setContentText("Operation effectué avec success");
-        alert.showAndWait();
-    }
-
     private void refreshTableView() {
         invoiceItemEntryTableView.refresh();
     }
 
-    private void updateInvoiceItemTotals(InvoiceItemEntry entry) {
-        // 1. find new entry totals
-        BigDecimal priceExcludingTaxes = entry.getUnitPriceExcludingTaxes().multiply(BigDecimal.valueOf(entry.getQuantity()));
-        BigDecimal taxes = priceExcludingTaxes.multiply(entry.getTaxRate());
-        BigDecimal priceIncludingTaxes = priceExcludingTaxes.add(taxes);
+    public void refreshPaidAndRemainingAmounts() {
+        System.out.println(paymentsTableView.getItems().size());
 
-        // 2. update entry totals
-        entry.setTotalExcludingTaxes(priceExcludingTaxes);
-        entry.setTotalTaxes(taxes);
-        entry.setTotalIncludingTaxes(priceIncludingTaxes);
+        if (paymentsTableView.getItems().isEmpty()) {
+            invoice.setPaidAmount(BigDecimal.ZERO);
+        } else {
+            BigDecimal paidAmount = BigDecimal.ZERO;
+
+            for (InvoicePaymentEntry invoicePaymentEntry : paymentsTableView.getItems()) {
+                if (invoicePaymentEntry.getPayment() instanceof Check check
+                        && check.getCheckStatus() != CheckStatus.CLEARED) {
+                    continue;
+                }
+
+                paidAmount = paidAmount.add(invoicePaymentEntry.getPayment().getAmount());
+            }
+
+            invoice.setPaidAmount(paidAmount);
+        }
+
+        paidAmountTextField.setText(invoice.getPaidAmount().toString());
+        remainingAmountTextField.setText(invoice.getTotalIncludingTaxes().subtract(invoice.getPaidAmount()).toString());
+
+        refreshInvoiceStatus();
+        updateInvoiceStatusDisplay();
+        paymentsTableView.refresh();
     }
 
     public void updateInvoiceTotals() {
@@ -557,50 +556,6 @@ public class InvoiceController implements Initializable {
         totalTaxesTextField.setText(invoice.getTotalTaxes().toString());
 
         refreshPaidAndRemainingAmounts();
-    }
-
-    private void mapInvoice() {
-        invoice.setIssueDate(issueDateDatePicker.getValue());
-        invoice.setDueDate(dueDateDatePicker.getValue());
-        invoice.setPayments(paymentsTableView.getItems());
-        invoice.setStatus(invoiceStatusComboBox.getValue());
-
-        invoice.getInvoiceItems().clear();
-        invoiceItemEntryTableView.getItems().forEach(invoiceItemEntry -> invoice.getInvoiceItems().add(
-                new InvoiceItem(
-                        0L,
-                        invoiceItemEntry.getProductComboBox().getSelectionModel().getSelectedItem(),
-                        invoice,
-                        invoiceItemEntry.getQuantity(),
-                        invoiceItemEntry.getUnitPriceExcludingTaxes(),
-                        invoiceItemEntry.getTotalExcludingTaxes(),
-                        invoiceItemEntry.getTotalIncludingTaxes(),
-                        invoiceItemEntry.getTotalTaxes()
-                )));
-    }
-
-    public void refreshPaidAndRemainingAmounts() {
-        if (paymentsTableView.getItems().isEmpty()) {
-            invoice.setPaidAmount(BigDecimal.ZERO);
-        } else {
-            BigDecimal paidAmount = BigDecimal.ZERO;
-
-            for (Payment payment : paymentsTableView.getItems()) {
-                if (payment instanceof Check check && check.getCheckStatus() != CheckStatus.CLEARED) {
-                    continue;
-                }
-
-                paidAmount = paidAmount.add(payment.getAmount());
-            }
-
-            invoice.setPaidAmount(paidAmount);
-        }
-
-        paidAmountTextField.setText(invoice.getPaidAmount().toString());
-        remainingAmountTextField.setText(invoice.getTotalIncludingTaxes().subtract(invoice.getPaidAmount()).toString());
-
-        refreshInvoiceStatus();
-        updateInvoiceStatusDisplay();
     }
 
     private void updateInvoiceStatusDisplay() {
@@ -649,6 +604,37 @@ public class InvoiceController implements Initializable {
         }
     }
 
+    private void updateInvoiceItemTotals(InvoiceItemEntry entry) {
+        // 1. find new entry totals
+        BigDecimal priceExcludingTaxes = entry.getUnitPriceExcludingTaxes().multiply(BigDecimal.valueOf(entry.getQuantity()));
+        BigDecimal taxes = priceExcludingTaxes.multiply(entry.getTaxRate());
+        BigDecimal priceIncludingTaxes = priceExcludingTaxes.add(taxes);
+
+        // 2. update entry totals
+        entry.setTotalExcludingTaxes(priceExcludingTaxes);
+        entry.setTotalTaxes(taxes);
+        entry.setTotalIncludingTaxes(priceIncludingTaxes);
+    }
+
+    private void displaySuccessAlert() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Success");
+        alert.setHeaderText(null);
+        alert.setContentText("Operation effectué avec success");
+        alert.showAndWait();
+    }
+
+    private void displayErrorAlert() {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText("Une erreur est survenue lors de l'opération.");
+        alert.showAndWait();
+    }
+
+    public String getRemainingAmount() {
+        return remainingAmountTextField.getText();
+    }
 
     private static class ClientComboCell extends ListCell<Client> {
         @Override
