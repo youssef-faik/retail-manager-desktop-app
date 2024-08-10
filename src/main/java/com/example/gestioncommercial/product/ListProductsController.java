@@ -91,19 +91,19 @@ public class ListProductsController implements Initializable {
         TableColumn<Product, Integer> idColumn = new TableColumn<>("ID");
         TableColumn<Product, String> nameColumn = new TableColumn<>("Nom");
         TableColumn<Product, String> descriptionColumn = new TableColumn<>("Description");
-        TableColumn<Product, Integer> quantityColumn = new TableColumn<>("Quantité");
         TableColumn<Product, BigDecimal> purchasePriceExcludingTaxColumn = new TableColumn<>("Prix d'achat (HT)");
         TableColumn<Product, BigDecimal> sellingPriceExcludingTaxColumn = new TableColumn<>("Prix de vente (HT)");
-        TableColumn<Product, String> taxRateColumn = new TableColumn<>("taux TVA");
+        TableColumn<Product, String> taxRateColumn = new TableColumn<>("Taux TVA");
+        TableColumn<Product, String> categoryColumn = new TableColumn<>("Catégorie");
 
         productsTableView.getColumns().addAll(
                 idColumn,
                 nameColumn,
                 descriptionColumn,
+                categoryColumn,
                 purchasePriceExcludingTaxColumn,
                 sellingPriceExcludingTaxColumn,
-                taxRateColumn,
-                quantityColumn
+                taxRateColumn
         );
 
         productsTableView.setOnMouseClicked(e -> {
@@ -122,19 +122,28 @@ public class ListProductsController implements Initializable {
         descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
         sellingPriceExcludingTaxColumn.setCellValueFactory(new PropertyValueFactory<>("sellingPriceExcludingTax"));
         purchasePriceExcludingTaxColumn.setCellValueFactory(new PropertyValueFactory<>("purchasePriceExcludingTax"));
-        taxRateColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getTaxRate().multiply(BigDecimal.valueOf(100)).intValue() + " %"));
-        quantityColumn.setCellValueFactory(new PropertyValueFactory<>("quantity"));
+        categoryColumn.setCellValueFactory(cellData ->
+                {
+                    if (cellData.getValue().getCategory() != null) {
+                        return new SimpleStringProperty(cellData.getValue().getCategory().getName());
+                    }
+                    return new SimpleStringProperty("N/A");
+                }
+        );
+
+        taxRateColumn.setCellValueFactory(cellData ->
+                {
+                    if (cellData.getValue().getTaxRate() != null) {
+                        return new SimpleStringProperty(cellData.getValue().getTaxRate().getValue() + " %");
+                    }
+                    return new SimpleStringProperty("N/A");
+                }
+        );
 
         productsTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-        refreshProductsTable();
-    }
-
-    public void refreshProductsTable() {
         productsTableView.setItems(ProductRepository.findAll());
         productsTableView.refresh();
-        updateButton.setDisable(true);
-        deleteButton.setDisable(true);
     }
 
     private void displaySuccessAlert() {

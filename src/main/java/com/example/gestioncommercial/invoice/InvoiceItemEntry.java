@@ -51,7 +51,7 @@ public class InvoiceItemEntry {
 
             // find new invoice item totals
             BigDecimal priceExcludingTaxes = product.getSellingPriceExcludingTax().multiply(BigDecimal.valueOf(this.invoiceItem.getQuantity()));
-            BigDecimal taxes = priceExcludingTaxes.multiply(product.getTaxRate());
+            BigDecimal taxes = priceExcludingTaxes.multiply(product.getTaxRate().getValue().divide(BigDecimal.valueOf(100)));
             BigDecimal priceIncludingTaxes = priceExcludingTaxes.add(taxes);
 
             // set new totals for InvoiceItem
@@ -91,7 +91,12 @@ public class InvoiceItemEntry {
     }
 
     public BigDecimal getTaxRate() {
-        return invoiceItem.getProduct() == null ? BigDecimal.ZERO : invoiceItem.getProduct().getTaxRate();
+        if (invoiceItem.getProduct() == null
+                || invoiceItem.getProduct().getTaxRate() == null) {
+            return BigDecimal.ZERO;
+        }
+
+        return invoiceItem.getProduct().getTaxRate().getValue().divide(BigDecimal.valueOf(100));
     }
 
     public BigDecimal getTotalIncludingTaxes() {

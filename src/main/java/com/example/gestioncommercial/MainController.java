@@ -45,6 +45,34 @@ public class MainController {
         borderPane.setCenter(pane);
     }
 
+    public void addCategory(ActionEvent actionEvent) throws IOException {
+        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("category/form-category.fxml")));
+        Stage stage = new Stage();
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.setScene(new Scene(root));
+        stage.setResizable(false);
+        stage.showAndWait();
+    }
+
+    public void listCategories(ActionEvent actionEvent) throws IOException {
+        VBox pane = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("category/list-categories.fxml")));
+        borderPane.setCenter(pane);
+    }
+
+    public void addTaxRate(ActionEvent actionEvent) throws IOException {
+        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("taxrate/form-taxrate.fxml")));
+        Stage stage = new Stage();
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.setScene(new Scene(root));
+        stage.setResizable(false);
+        stage.showAndWait();
+    }
+
+    public void listTaxRates(ActionEvent actionEvent) throws IOException {
+        VBox pane = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("taxrate/list-taxrates.fxml")));
+        borderPane.setCenter(pane);
+    }
+
     public void addInvoice(ActionEvent actionEvent) throws IOException {
         VBox pane = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("invoice/form-invoice.fxml")));
         borderPane.setCenter(pane);

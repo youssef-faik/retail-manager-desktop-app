@@ -16,6 +16,10 @@ module com.example.gestioncommercial {
     exports com.example.gestioncommercial.client;
     opens com.example.gestioncommercial.product to javafx.fxml, org.hibernate.orm.core;
     exports com.example.gestioncommercial.product;
+    opens com.example.gestioncommercial.category to javafx.fxml, org.hibernate.orm.core;
+    exports com.example.gestioncommercial.category;
+    opens com.example.gestioncommercial.taxrate to javafx.fxml, org.hibernate.orm.core;
+    exports com.example.gestioncommercial.taxrate;
     opens com.example.gestioncommercial.invoice to javafx.fxml, org.hibernate.orm.core;
     exports com.example.gestioncommercial.invoice;
     opens com.example.gestioncommercial.report to javafx.fxml;

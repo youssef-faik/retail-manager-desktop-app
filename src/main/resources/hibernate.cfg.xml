@@ -17,6 +17,8 @@
         <mapping class="com.example.gestioncommercial.configuration.ConfigOption"/>
         <mapping class="com.example.gestioncommercial.client.Client"/>
         <mapping class="com.example.gestioncommercial.product.Product"/>
+        <mapping class="com.example.gestioncommercial.category.Category"/>
+        <mapping class="com.example.gestioncommercial.taxrate.TaxRate"/>
         <mapping class="com.example.gestioncommercial.invoice.Invoice"/>
         <mapping class="com.example.gestioncommercial.invoice.InvoiceItem"/>
         <mapping class="com.example.gestioncommercial.payment.Payment"/>

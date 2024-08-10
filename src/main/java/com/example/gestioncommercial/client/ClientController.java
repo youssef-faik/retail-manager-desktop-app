@@ -2,9 +2,12 @@ package com.example.gestioncommercial.client;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.stage.Stage;
 
 import java.net.URL;
 import java.util.Optional;
@@ -15,13 +18,19 @@ public class ClientController implements Initializable {
     private ListClientsController listClientsController;
 
     @FXML
-    private Button saveButton;
+    private Button saveButton, cancelButton;
     @FXML
-    private TextField addressTextField, commonCompanyIdentifierTextField, nameTextField, phoneNumberTextField, taxIdentificationNumberTextField;
+    private TextField commonCompanyIdentifierTextField, nameTextField, phoneNumberTextField, taxIdentificationNumberTextField;
+    @FXML
+    private TextArea addressTextArea;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         saveButton.setOnAction(e -> saveClient());
+        cancelButton.setOnAction(e -> {
+            Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
+            stage.close();
+        });
     }
 
     public void saveClient() {
@@ -65,7 +74,7 @@ public class ClientController implements Initializable {
         client.setId(id);
         client.setName(nameTextField.getText());
         client.setPhoneNumber(phoneNumberTextField.getText());
-        client.setAddress(addressTextField.getText());
+        client.setAddress(addressTextArea.getText());
         client.setCommonCompanyIdentifier(commonCompanyIdentifierTextField.getText());
         client.setTaxIdentificationNumber(taxIdentificationNumberTextField.getText());
 
@@ -76,7 +85,7 @@ public class ClientController implements Initializable {
         this.id = client.getId();
         this.nameTextField.setText(client.getName());
         this.phoneNumberTextField.setText(client.getPhoneNumber());
-        this.addressTextField.setText(client.getAddress());
+        this.addressTextArea.setText(client.getAddress());
         this.commonCompanyIdentifierTextField.setText(client.getCommonCompanyIdentifier());
         this.taxIdentificationNumberTextField.setText(client.getTaxIdentificationNumber());
 
@@ -86,7 +95,7 @@ public class ClientController implements Initializable {
     private void clearTextFields() {
         nameTextField.clear();
         phoneNumberTextField.clear();
-        addressTextField.clear();
+        addressTextArea.clear();
         commonCompanyIdentifierTextField.clear();
         taxIdentificationNumberTextField.clear();
     }

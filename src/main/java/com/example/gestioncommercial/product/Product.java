@@ -1,5 +1,7 @@
 package com.example.gestioncommercial.product;
 
+import com.example.gestioncommercial.category.Category;
+import com.example.gestioncommercial.taxrate.TaxRate;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
@@ -19,8 +21,12 @@ public class Product implements Serializable {
     private BigDecimal purchasePriceExcludingTax;
     private BigDecimal sellingPriceExcludingTax;
     private String description;
-    private int quantity;
-    private BigDecimal taxRate;
+
+    @ManyToOne(optional = false)
+    private TaxRate taxRate;
+
+    @ManyToOne
+    private Category category;
 
     public Product() {
     }
@@ -65,20 +71,20 @@ public class Product implements Serializable {
         this.description = description;
     }
 
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
-    public BigDecimal getTaxRate() {
+    public TaxRate getTaxRate() {
         return taxRate;
     }
 
-    public void setTaxRate(BigDecimal taxRate) {
+    public void setTaxRate(TaxRate taxRate) {
         this.taxRate = taxRate;
+    }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
     }
 
     @Override
@@ -86,7 +92,7 @@ public class Product implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Product product = (Product) o;
-        return getId() == product.getId();
+        return Objects.equals(getId(), product.getId());
     }
 
     @Override

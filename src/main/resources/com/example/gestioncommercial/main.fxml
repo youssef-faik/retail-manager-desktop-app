@@ -11,9 +11,8 @@
                     <items>
                         <MenuItem fx:id="addClientMenuItem" mnemonicParsing="false" onAction="#addClient"
                                   text="Nouveau client"/>
-                        <SeparatorMenuItem/>
                         <MenuItem fx:id="listClientsMenuItem" mnemonicParsing="false" onAction="#listClients"
-                                  text="Clients"/>
+                                  text="Liste des clients"/>
                     </items>
                 </Menu>
             </menus>
@@ -22,9 +21,20 @@
                     <items>
                         <MenuItem fx:id="addProductMenuItem" mnemonicParsing="false" onAction="#addProduct"
                                   text="Nouveau produit"/>
-                        <SeparatorMenuItem/>
                         <MenuItem fx:id="listProductsMenuItem" mnemonicParsing="false" onAction="#listProducts"
-                                  text="Produits"/>
+                                  text="Liste des produits"/>
+                        <SeparatorMenuItem/>
+                        <MenuItem fx:id="addCategoryMenuItem" mnemonicParsing="false" onAction="#addCategory"
+                                  text="Nouvelle catégorie"/>
+                        <MenuItem fx:id="listCategoriesMenuItem" mnemonicParsing="false" onAction="#listCategories"
+                                  text="Liste des catégories"/>
+
+                        <SeparatorMenuItem/>
+                        <MenuItem fx:id="addTaxRateMenuItem" mnemonicParsing="false" onAction="#addTaxRate"
+                                  text="Nouveau taux TVA"/>
+                        <MenuItem fx:id="listTaxeRatesMenuItem" mnemonicParsing="false" onAction="#listTaxRates"
+                                  text="Liste des taux TVA"/>
+
                     </items>
                 </Menu>
             </menus>
@@ -33,16 +43,15 @@
                     <items>
                         <MenuItem fx:id="addInvoiceMenuItem" mnemonicParsing="false" onAction="#addInvoice"
                                   text="Nouvelle facture"/>
-                        <SeparatorMenuItem/>
                         <MenuItem fx:id="listInvoicesMenuItem" mnemonicParsing="false" onAction="#listInvoices"
-                                  text="Factures"/>
+                                  text="Liste des factures"/>
                     </items>
                 </Menu>
             </menus>
             <menus>
                 <Menu mnemonicParsing="false" text="Paramètres">
                     <items>
-                        <MenuItem  mnemonicParsing="false" text="Infos et Numérotation" onAction="#editConfig"/>
+                        <MenuItem mnemonicParsing="false" text="Infos et Numérotation" onAction="#editConfig"/>
                     </items>
                 </Menu>
             </menus>

@@ -1,34 +1,57 @@
 package com.example.gestioncommercial.product;
 
+import com.example.gestioncommercial.category.Category;
+import com.example.gestioncommercial.category.CategoryRepository;
+import com.example.gestioncommercial.taxrate.TaxRate;
+import com.example.gestioncommercial.taxrate.TaxRateRepository;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.TextField;
+import javafx.scene.Node;
+import javafx.scene.control.*;
+import javafx.stage.Stage;
+import javafx.util.Pair;
 
 import java.math.BigDecimal;
 import java.net.URL;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.function.Function;
 
 public class ProductController implements Initializable {
+    private final Pair<String, Category> EMPTY_CATEGORY = new Pair<>(null, null);
+    private final Pair<String, TaxRate> EMPTY_TAX_RATE = new Pair<>(null, null);
+
     private Long id;
     private ListProductsController listProductsController;
-
     @FXML
-    private Button saveButton;
+    private Button saveButton, cancelButton;
     @FXML
-    private TextField descriptionTextField, nameTextField, purchasePriceExcludingTaxTextField, quantityTextField, sellingPriceExcludingTaxTextField, taxRateTextField;
+    private TextField nameTextField, purchasePriceExcludingTaxTextField, sellingPriceExcludingTaxTextField;
+    @FXML
+    private TextArea descriptionTextArea;
+    @FXML
+    private ComboBox<Pair<String, TaxRate>> taxRateComboBox;
+    @FXML
+    private ComboBox<Pair<String, Category>> categoryComboBox;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         saveButton.setOnAction(e -> saveProduct());
+        cancelButton.setOnAction(e -> {
+            Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
+            stage.close();
+        });
+
+        initCategoryComboBox();
+        initTaxRatesComboBox();
     }
 
     public void saveProduct() {
         Product product = mapProduct();
         if (ProductRepository.save(product)) {
-            clearTextFields();
+            resetForm();
 
             if (listProductsController != null) {
                 listProductsController.getProductsTable().getItems().add(product);
@@ -53,6 +76,8 @@ public class ProductController implements Initializable {
 
                     listProductsController.getProductsTable().getItems().remove(oldProduct);
                     listProductsController.getProductsTable().getItems().add(optionalProduct.get());
+
+                    listProductsController.getProductsTable().refresh();
                 }
             }
 
@@ -67,11 +92,11 @@ public class ProductController implements Initializable {
 
         product.setId(id);
         product.setName(nameTextField.getText());
-        product.setDescription(descriptionTextField.getText());
+        product.setDescription(descriptionTextArea.getText());
         product.setSellingPriceExcludingTax(new BigDecimal(sellingPriceExcludingTaxTextField.getText()));
         product.setPurchasePriceExcludingTax(new BigDecimal(purchasePriceExcludingTaxTextField.getText()));
-        product.setQuantity(Integer.parseInt(quantityTextField.getText()));
-        product.setTaxRate(new BigDecimal(taxRateTextField.getText()).divide(BigDecimal.valueOf(100)));
+        product.setTaxRate(taxRateComboBox.getValue().getValue());
+        product.setCategory(categoryComboBox.getValue().getValue());
 
         return product;
     }
@@ -79,22 +104,69 @@ public class ProductController implements Initializable {
     public void initProductUpdate(Product product) {
         this.id = product.getId();
         this.nameTextField.setText(product.getName());
-        this.descriptionTextField.setText(product.getDescription());
+        this.descriptionTextArea.setText(product.getDescription());
         this.purchasePriceExcludingTaxTextField.setText(String.valueOf(product.getPurchasePriceExcludingTax()));
         this.sellingPriceExcludingTaxTextField.setText(String.valueOf(product.getSellingPriceExcludingTax()));
-        this.quantityTextField.setText(String.valueOf(product.getQuantity()));
-        this.taxRateTextField.setText(String.valueOf(product.getTaxRate().multiply(BigDecimal.valueOf(100L))));
+
+        if (product.getCategory() != null) {
+            categoryComboBox.getItems()
+                    .stream()
+                    .filter(pair -> Objects.equals(pair.getValue(), product.getCategory()))
+                    .findFirst()
+                    .ifPresent(value -> categoryComboBox.setValue(value));
+        } else {
+            categoryComboBox.setValue(EMPTY_CATEGORY);
+        }
+
+        if (product.getTaxRate() != null) {
+            taxRateComboBox.getItems()
+                    .stream()
+                    .filter(pair -> Objects.equals(pair.getValue(), product.getTaxRate()))
+                    .findFirst()
+                    .ifPresent(value -> taxRateComboBox.setValue(value));
+        } else {
+            taxRateComboBox.setValue(EMPTY_TAX_RATE);
+        }
 
         saveButton.setOnAction(e -> updateProduct());
     }
 
-    private void clearTextFields() {
+    private void resetForm() {
         nameTextField.clear();
-        descriptionTextField.clear();
+        descriptionTextArea.clear();
         sellingPriceExcludingTaxTextField.clear();
         purchasePriceExcludingTaxTextField.clear();
-        quantityTextField.clear();
-        taxRateTextField.clear();
+
+        categoryComboBox.getSelectionModel().selectFirst();
+        taxRateComboBox.getSelectionModel().clearSelection();
+    }
+
+    private void initCategoryComboBox() {
+        categoryComboBox.setEditable(false);
+
+        categoryComboBox.setCellFactory(x -> new CategoryComboCell());
+        categoryComboBox.setButtonCell(new CategoryComboCell());
+
+        ObservableList<Category> categories = CategoryRepository.findAll();
+        Function<Category, Pair<String, Category>> categoryObjectFunction = category -> new Pair<>(category.getName(), category);
+
+        categoryComboBox.getItems().add(EMPTY_CATEGORY);
+        categoryComboBox.getItems().addAll(categories.stream().map(categoryObjectFunction).toList());
+        categoryComboBox.getSelectionModel().selectFirst();
+    }
+
+    private void initTaxRatesComboBox() {
+        taxRateComboBox.setEditable(false);
+
+        taxRateComboBox.setCellFactory(x -> new TaxRateComboCell());
+        taxRateComboBox.setButtonCell(new TaxRateComboCell());
+
+        ObservableList<TaxRate> taxRates = TaxRateRepository.findAll();
+        Function<TaxRate, Pair<String, TaxRate>> taxRateObjectFunction = taxRate -> new Pair<>(taxRate.getLabel(), taxRate);
+
+        taxRateComboBox.getItems().add(EMPTY_TAX_RATE);
+        taxRateComboBox.getItems().addAll(taxRates.stream().map(taxRateObjectFunction).toList());
+        taxRateComboBox.getSelectionModel().selectFirst();
     }
 
     private void displaySuccessAlert() {
@@ -115,5 +187,21 @@ public class ProductController implements Initializable {
 
     public void setListProductsController(ListProductsController listProductsController) {
         this.listProductsController = listProductsController;
+    }
+
+    private static class CategoryComboCell extends ListCell<Pair<String, Category>> {
+        @Override
+        protected void updateItem(Pair<String, Category> pair, boolean bln) {
+            super.updateItem(pair, bln);
+            setText(pair != null ? (pair.getValue() != null ? pair.getValue().getName() : "Choisissez une catégorie") : null);
+        }
+    }
+
+    private static class TaxRateComboCell extends ListCell<Pair<String, TaxRate>> {
+        @Override
+        protected void updateItem(Pair<String, TaxRate> pair, boolean bln) {
+            super.updateItem(pair, bln);
+            setText(pair != null ? (pair.getValue() != null ? pair.getValue().getValue().intValue() + " %" : "Choisissez un taux de TVA") : null);
+        }
     }
 }

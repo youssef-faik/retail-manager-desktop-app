@@ -6,9 +6,11 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 import java.math.BigDecimal;
 import java.net.URL;
@@ -17,7 +19,7 @@ import java.util.ResourceBundle;
 
 public class PaymentController implements Initializable {
     @FXML
-    private Button addPaymentButton;
+    private Button addButton, cancelButton;
 
     @FXML
     private HBox bankHBox, checkDueDateHBox, checkStatusHBox, referenceHBox, checkNumberHBox, senderAccountHBox, payeeNameHBox, paymentMethodHBox;
@@ -56,7 +58,12 @@ public class PaymentController implements Initializable {
             paymentAmountTextField.setText(invoiceController.getRemainingAmount());
         }
 
-        addPaymentButton.setOnAction(e -> {
+        cancelButton.setOnAction(e -> {
+            Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
+            stage.close();
+        });
+
+        addButton.setOnAction(e -> {
             switch (paymentMethodComboBox.getSelectionModel().getSelectedItem()) {
                 case CASH:
                     Cash cash = new Cash(
@@ -106,7 +113,7 @@ public class PaymentController implements Initializable {
 
         paymentMethodComboBox.setOnAction(e -> {
             if (paymentMethodComboBox.getSelectionModel().getSelectedItem() != null) {
-                addPaymentButton.setDisable(false);
+                addButton.setDisable(false);
                 VBox parentVBox = (VBox) paymentMethodHBox.getParent();
 
                 switch (paymentMethodComboBox.getSelectionModel().getSelectedItem()) {
@@ -204,10 +211,10 @@ public class PaymentController implements Initializable {
         }
 
         paymentMethodComboBox.setDisable(true);
-        addPaymentButton.setDisable(false);
+        addButton.setDisable(false);
 
-        addPaymentButton.setText("Modifier");
-        addPaymentButton.setOnAction(e -> {
+        addButton.setText("Modifier");
+        addButton.setOnAction(e -> {
             this.selectedPayment.setPaymentDate(paymentDateDatePicker.getValue());
             this.selectedPayment.setAmount(BigDecimal.valueOf(Double.parseDouble(paymentAmountTextField.getText())));
 

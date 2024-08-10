@@ -1,4 +1,4 @@
-package com.example.gestioncommercial.product;
+package com.example.gestioncommercial.category;
 
 import com.example.gestioncommercial.HibernateUtil;
 import javafx.collections.FXCollections;
@@ -9,36 +9,29 @@ import org.hibernate.resource.transaction.spi.TransactionStatus;
 
 import java.util.Optional;
 
-public interface ProductRepository {
+public interface CategoryRepository {
     SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
 
-    static ObservableList<Product> findAll() {
-        ObservableList<Product> products = FXCollections.observableArrayList();
+    static ObservableList<Category> findAll() {
+        ObservableList<Category> categories = FXCollections.observableArrayList();
 
         Session session = sessionFactory.openSession();
 
         try (session) {
-            products.addAll(session.createQuery("select P from Product P", Product.class).list());
+            categories.addAll(session.createQuery("select C from Category C", Category.class).list());
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return products;
+        return categories;
     }
 
-    static Optional<Product> findById(Long id) {
-        try (Session session = sessionFactory.openSession()) {
-            Product product = session.find(Product.class, id);
-            return Optional.ofNullable(product);
-        }
-    }
-
-    static boolean save(Product product) {
+    static boolean save(Category category) {
         Session session = sessionFactory.openSession();
 
         try {
             session.beginTransaction();
-            session.persist(product);
+            session.persist(category);
             session.getTransaction().commit();
 
             return true;
@@ -56,28 +49,24 @@ public interface ProductRepository {
         }
     }
 
-    static Optional<Product> update(Product updatedProduct) {
+    static Optional<Category> update(Category updatedCategory) {
         Session session = sessionFactory.openSession();
 
         try {
             session.beginTransaction();
 
-            Product oldProduct = session.find(Product.class, updatedProduct.getId());
+            Category Category = session.find(Category.class, updatedCategory.getId());
 
-            if (oldProduct == null) {
+            if (Category == null) {
                 return Optional.empty();
             }
 
-            oldProduct.setName(updatedProduct.getName());
-            oldProduct.setDescription(updatedProduct.getDescription());
-            oldProduct.setPurchasePriceExcludingTax(updatedProduct.getPurchasePriceExcludingTax());
-            oldProduct.setSellingPriceExcludingTax(updatedProduct.getSellingPriceExcludingTax());
-            oldProduct.setTaxRate(updatedProduct.getTaxRate());
-            oldProduct.setCategory(updatedProduct.getCategory());
+            Category.setName(updatedCategory.getName());
+            Category.setDescription(updatedCategory.getDescription());
 
             session.getTransaction().commit();
 
-            return Optional.of(oldProduct);
+            return Optional.of(Category);
         } catch (Exception e) {
             e.printStackTrace();
 
@@ -98,12 +87,12 @@ public interface ProductRepository {
         try {
             session.beginTransaction();
 
-            Product deletedProduct = session.getReference(Product.class, id);
-            if (deletedProduct == null) {
+            Category deletedCategory = session.getReference(Category.class, id);
+            if (deletedCategory == null) {
                 return false;
             }
 
-            session.remove(deletedProduct);
+            session.remove(deletedCategory);
             session.getTransaction().commit();
 
             return true;
