@@ -5,9 +5,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.example</groupId>
-    <artifactId>gestion-commercial</artifactId>
+    <artifactId>sales-management</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <name>gestion-commercial</name>
+    <name>sales-management</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -84,7 +84,7 @@
                         <!-- Default configuration for running with: mvn clean javafx:run -->
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>com.example.gestioncommercial/com.example.gestioncommercial.Main
+                            <mainClass>com.example.salesmanagement/com.example.salesmanagement.Main
                             </mainClass>
                             <launcher>app</launcher>
                             <jlinkZipName>app</jlinkZipName>

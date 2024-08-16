@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.BorderPane?>
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:id="borderPane" prefHeight="480.0" prefWidth="640.0"
+            xmlns="http://javafx.com/javafx/17.0.6" fx:controller="com.example.salesmanagement.MainController">
+    <top>
+        <MenuBar prefHeight="25.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+            <menus>
+                <Menu mnemonicParsing="false" text="Clients">
+                    <items>
+                        <MenuItem fx:id="addClientMenuItem" mnemonicParsing="false" onAction="#addClient"
+                                  text="Nouveau client"/>
+                        <MenuItem fx:id="listClientsMenuItem" mnemonicParsing="false" onAction="#listClients"
+                                  text="Liste des clients"/>
+                    </items>
+                </Menu>
+            </menus>
+            <menus>
+                <Menu mnemonicParsing="false" text="Produits">
+                    <items>
+                        <MenuItem fx:id="addProductMenuItem" mnemonicParsing="false" onAction="#addProduct"
+                                  text="Nouveau produit"/>
+                        <MenuItem fx:id="listProductsMenuItem" mnemonicParsing="false" onAction="#listProducts"
+                                  text="Liste des produits"/>
+                        <SeparatorMenuItem/>
+                        <MenuItem fx:id="addCategoryMenuItem" mnemonicParsing="false" onAction="#addCategory"
+                                  text="Nouvelle catégorie"/>
+                        <MenuItem fx:id="listCategoriesMenuItem" mnemonicParsing="false" onAction="#listCategories"
+                                  text="Liste des catégories"/>
+
+                        <SeparatorMenuItem/>
+                        <MenuItem fx:id="addTaxRateMenuItem" mnemonicParsing="false" onAction="#addTaxRate"
+                                  text="Nouveau taux TVA"/>
+                        <MenuItem fx:id="listTaxeRatesMenuItem" mnemonicParsing="false" onAction="#listTaxRates"
+                                  text="Liste des taux TVA"/>
+
+                    </items>
+                </Menu>
+            </menus>
+            <menus>
+                <Menu mnemonicParsing="false" text="Factures">
+                    <items>
+                        <MenuItem fx:id="addInvoiceMenuItem" mnemonicParsing="false" onAction="#addInvoice"
+                                  text="Nouvelle facture"/>
+                        <MenuItem fx:id="listInvoicesMenuItem" mnemonicParsing="false" onAction="#listInvoices"
+                                  text="Liste des factures"/>
+                    </items>
+                </Menu>
+            </menus>
+            <menus>
+                <Menu mnemonicParsing="false" text="Paramètres">
+                    <items>
+                        <MenuItem mnemonicParsing="false" text="Infos et Numérotation" onAction="#editConfig"/>
+                    </items>
+                </Menu>
+            </menus>
+        </MenuBar>
+    </top>
+</BorderPane>

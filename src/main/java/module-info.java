@@ -1,4 +1,4 @@
-module com.example.gestioncommercial {
+module com.example.salesmanagement {
     requires javafx.controls;
     requires javafx.fxml;
     requires java.sql;
@@ -10,23 +10,23 @@ module com.example.gestioncommercial {
     requires java.naming;
 
 
-    opens com.example.gestioncommercial to javafx.fxml;
-    exports com.example.gestioncommercial;
-    opens com.example.gestioncommercial.client to javafx.fxml, org.hibernate.orm.core;
-    exports com.example.gestioncommercial.client;
-    opens com.example.gestioncommercial.product to javafx.fxml, org.hibernate.orm.core;
-    exports com.example.gestioncommercial.product;
-    opens com.example.gestioncommercial.category to javafx.fxml, org.hibernate.orm.core;
-    exports com.example.gestioncommercial.category;
-    opens com.example.gestioncommercial.taxrate to javafx.fxml, org.hibernate.orm.core;
-    exports com.example.gestioncommercial.taxrate;
-    opens com.example.gestioncommercial.invoice to javafx.fxml, org.hibernate.orm.core;
-    exports com.example.gestioncommercial.invoice;
-    opens com.example.gestioncommercial.report to javafx.fxml;
-    exports com.example.gestioncommercial.report;
-    opens com.example.gestioncommercial.payment to javafx.fxml, org.hibernate.orm.core;
-    exports com.example.gestioncommercial.payment;
-    opens com.example.gestioncommercial.configuration to javafx.fxml, org.hibernate.orm.core;
-    exports com.example.gestioncommercial.configuration;
+    opens com.example.salesmanagement to javafx.fxml;
+    exports com.example.salesmanagement;
+    opens com.example.salesmanagement.client to javafx.fxml, org.hibernate.orm.core;
+    exports com.example.salesmanagement.client;
+    opens com.example.salesmanagement.product to javafx.fxml, org.hibernate.orm.core;
+    exports com.example.salesmanagement.product;
+    opens com.example.salesmanagement.category to javafx.fxml, org.hibernate.orm.core;
+    exports com.example.salesmanagement.category;
+    opens com.example.salesmanagement.taxrate to javafx.fxml, org.hibernate.orm.core;
+    exports com.example.salesmanagement.taxrate;
+    opens com.example.salesmanagement.invoice to javafx.fxml, org.hibernate.orm.core;
+    exports com.example.salesmanagement.invoice;
+    opens com.example.salesmanagement.report to javafx.fxml;
+    exports com.example.salesmanagement.report;
+    opens com.example.salesmanagement.payment to javafx.fxml, org.hibernate.orm.core;
+    exports com.example.salesmanagement.payment;
+    opens com.example.salesmanagement.configuration to javafx.fxml, org.hibernate.orm.core;
+    exports com.example.salesmanagement.configuration;
 
 }
