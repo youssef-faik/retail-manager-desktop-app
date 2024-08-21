@@ -1,14 +1,14 @@
-package com.example.salesmanagement.invoice;
+package com.example.salesmanagement.salesdocument;
 
 import com.example.salesmanagement.payment.Payment;
 
-public class InvoicePaymentEntry {
+public class PaymentFormEntry {
     private Payment payment;
 
-    public InvoicePaymentEntry() {
+    public PaymentFormEntry() {
     }
 
-    public InvoicePaymentEntry(Payment payment) {
+    public PaymentFormEntry(Payment payment) {
         this.payment = payment;
     }
 

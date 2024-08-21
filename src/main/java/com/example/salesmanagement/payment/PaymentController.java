@@ -1,7 +1,7 @@
 package com.example.salesmanagement.payment;
 
-import com.example.salesmanagement.invoice.InvoiceController;
-import com.example.salesmanagement.invoice.InvoicePaymentEntry;
+import com.example.salesmanagement.salesdocument.PaymentFormEntry;
+import com.example.salesmanagement.salesdocument.SalesDocumentController;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -36,9 +36,9 @@ public class PaymentController implements Initializable {
     @FXML
     private ComboBox<PaymentMethod> paymentMethodComboBox;
 
-    private TableView<InvoicePaymentEntry> paymentsTableView;
+    private TableView<PaymentFormEntry> paymentsTableView;
     private Payment selectedPayment;
-    private InvoiceController invoiceController;
+    private SalesDocumentController salesDocumentController;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -54,8 +54,8 @@ public class PaymentController implements Initializable {
         referenceHBox.setVisible(false);
 
         paymentDateDatePicker.setValue(LocalDate.now());
-        if (invoiceController != null) {
-            paymentAmountTextField.setText(invoiceController.getRemainingAmount());
+        if (salesDocumentController != null) {
+            paymentAmountTextField.setText(salesDocumentController.getRemainingAmount());
         }
 
         cancelButton.setOnAction(e -> {
@@ -64,30 +64,39 @@ public class PaymentController implements Initializable {
         });
 
         addButton.setOnAction(e -> {
+            BigDecimal paymentAmount = BigDecimal.valueOf(Double.parseDouble(paymentAmountTextField.getText()));
+            BigDecimal remainingAmount = BigDecimal.valueOf(Double.parseDouble(salesDocumentController.getRemainingAmount()));
+
+            if (salesDocumentController != null
+                    && paymentAmount.compareTo(remainingAmount) > 0 || paymentAmount.compareTo(BigDecimal.ZERO) <= 0) {
+                displayErrorAlert("Le montant saisie est invalide");
+                return;
+            }
+
             switch (paymentMethodComboBox.getSelectionModel().getSelectedItem()) {
                 case CASH:
                     Cash cash = new Cash(
-                            BigDecimal.valueOf(Double.parseDouble(paymentAmountTextField.getText())),
+                            paymentAmount,
                             paymentDateDatePicker.getValue(),
                             PaymentMethod.CASH,
                             CashFlowType.REVENUE
                     );
-                    paymentsTableView.getItems().add(new InvoicePaymentEntry(cash));
+                    paymentsTableView.getItems().add(new PaymentFormEntry(cash));
                     break;
                 case BANK_TRANSFER:
                     BankTransfer bankTransfer = new BankTransfer(
-                            BigDecimal.valueOf(Double.parseDouble(paymentAmountTextField.getText())),
+                            paymentAmount,
                             paymentDateDatePicker.getValue(),
                             "",
                             paymentReferenceTextField.getText(),
                             PaymentMethod.BANK_TRANSFER,
                             bankNameTextField.getText()
                     );
-                    paymentsTableView.getItems().add(new InvoicePaymentEntry(bankTransfer));
+                    paymentsTableView.getItems().add(new PaymentFormEntry(bankTransfer));
                     break;
                 case CHECK:
                     Check check = new Check(
-                            BigDecimal.valueOf(Double.parseDouble(paymentAmountTextField.getText())),
+                            paymentAmount,
                             paymentDateDatePicker.getValue(),
                             payeeNameTextField.getText(),
                             senderAccountTextField.getText(),
@@ -97,12 +106,18 @@ public class PaymentController implements Initializable {
                             bankNameTextField.getText(),
                             checkStatusComboBox.getSelectionModel().getSelectedItem()
                     );
-                    paymentsTableView.getItems().add(new InvoicePaymentEntry(check));
+                    paymentsTableView.getItems().add(new PaymentFormEntry(check));
                     break;
             }
 
+            remainingAmount = BigDecimal.valueOf(Double.parseDouble(salesDocumentController.getRemainingAmount()));
             resetForm();
             displaySuccessAlert();
+
+            if (salesDocumentController != null && remainingAmount.compareTo(BigDecimal.ZERO) <= 0) {
+                Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
+                stage.close();
+            }
         });
     }
 
@@ -154,8 +169,8 @@ public class PaymentController implements Initializable {
                         break;
                 }
 
-                if (invoiceController != null) {
-                    paymentAmountTextField.setText(invoiceController.getRemainingAmount());
+                if (salesDocumentController != null) {
+                    paymentAmountTextField.setText(salesDocumentController.getRemainingAmount());
                 }
             }
         });
@@ -163,7 +178,7 @@ public class PaymentController implements Initializable {
         paymentMethodComboBox.getSelectionModel().selectFirst();
     }
 
-    public void setPaymentsTableView(TableView<InvoicePaymentEntry> paymentsTableView) {
+    public void setPaymentsTableView(TableView<PaymentFormEntry> paymentsTableView) {
         this.paymentsTableView = paymentsTableView;
     }
 
@@ -172,8 +187,9 @@ public class PaymentController implements Initializable {
         paymentMethodComboBox.getSelectionModel().selectFirst();
 
         paymentDateDatePicker.setValue(LocalDate.now());
-        if (invoiceController != null) {
-            paymentAmountTextField.setText(invoiceController.getRemainingAmount());
+
+        if (salesDocumentController != null) {
+            paymentAmountTextField.setText(salesDocumentController.getRemainingAmount());
         } else {
             paymentAmountTextField.clear();
         }
@@ -238,21 +254,35 @@ public class PaymentController implements Initializable {
             }
 
             paymentsTableView.refresh();
-            invoiceController.refreshPaidAndRemainingAmounts();
+            salesDocumentController.updatePaidAndRemainingAmounts();
 
             displaySuccessAlert();
         });
     }
 
-    public void setInvoiceController(InvoiceController invoiceController) {
-        this.invoiceController = invoiceController;
+    public void setSalesDocumentController(SalesDocumentController salesDocumentController) {
+        this.salesDocumentController = salesDocumentController;
     }
 
     public void refreshPaymentAmount() {
-        if (invoiceController != null) {
-            paymentAmountTextField.setText(invoiceController.getRemainingAmount());
+        if (salesDocumentController != null) {
+            paymentAmountTextField.setText(salesDocumentController.getRemainingAmount());
         }
     }
+
+
+    private void displayErrorAlert() {
+        displayErrorAlert("Une erreur est survenue lors de l'opération.");
+    }
+
+    private void displayErrorAlert(String contentText) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText(contentText);
+        alert.showAndWait();
+    }
+
 
     private void displaySuccessAlert() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);

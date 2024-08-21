@@ -2,43 +2,49 @@
 
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
-
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="616.0" prefWidth="1260.0" spacing="10.0" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.salesmanagement.client.ListClientsController">
+<VBox xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+      minWidth="-Infinity"
+      prefHeight="616.0" prefWidth="1260.0" spacing="10.0" xmlns="http://javafx.com/javafx/22"
+      fx:controller="com.example.salesmanagement.client.ListClientsController">
     <Label layoutX="14.0" layoutY="14.0" text="Clients">
         <font>
-            <Font name="System Bold" size="24.0" />
+            <Font name="System Bold" size="32.0"/>
         </font>
-      <VBox.margin>
-         <Insets />
-      </VBox.margin>
+        <VBox.margin>
+            <Insets bottom="16.0"/>
+        </VBox.margin>
     </Label>
-   <HBox alignment="TOP_RIGHT" spacing="8.0">
-      <children>
-           <Button fx:id="newButton" mnemonicParsing="false" onAction="#addClient" prefHeight="25.0" prefWidth="90.0" text="Nouveau">
-            <graphic>
-               <FontAwesomeIconView glyphName="PLUS" />
-            </graphic></Button>
-           <Button fx:id="updateButton" mnemonicParsing="false" onAction="#updateClient" prefHeight="25.0" prefWidth="90.0" text="Modifier">
-            <graphic>
-               <FontAwesomeIconView glyphName="EDIT" />
-            </graphic></Button>
-           <Button fx:id="deleteButton" mnemonicParsing="false" onAction="#deleteClient" prefHeight="25.0" prefWidth="90.0" text="Supprimer">
-            <graphic>
-               <FontAwesomeIconView glyphName="TRASH" />
-            </graphic></Button>
-      </children>
-      <VBox.margin>
-         <Insets />
-      </VBox.margin>
-   </HBox>
-    <TableView fx:id="clientsTableView" prefHeight="523.0" prefWidth="1260.0" />
-   <padding>
-      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-   </padding>
+    <HBox alignment="TOP_RIGHT" spacing="8.0">
+        <children>
+            <Button fx:id="newButton" mnemonicParsing="false" onAction="#addClient" prefHeight="25.0" prefWidth="90.0"
+                    text="Nouveau">
+                <graphic>
+                    <FontAwesomeIconView glyphName="PLUS"/>
+                </graphic>
+            </Button>
+            <Button fx:id="updateButton" mnemonicParsing="false" onAction="#updateClient" prefHeight="25.0"
+                    prefWidth="90.0" text="Modifier">
+                <graphic>
+                    <FontAwesomeIconView glyphName="EDIT"/>
+                </graphic>
+            </Button>
+            <Button fx:id="deleteButton" mnemonicParsing="false" onAction="#deleteClient" prefHeight="25.0"
+                    prefWidth="90.0" text="Supprimer">
+                <graphic>
+                    <FontAwesomeIconView glyphName="TRASH"/>
+                </graphic>
+            </Button>
+        </children>
+        <VBox.margin>
+            <Insets/>
+        </VBox.margin>
+    </HBox>
+    <TableView fx:id="clientsTableView" prefHeight="523.0" prefWidth="1260.0"/>
+    <padding>
+        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+    </padding>
 </VBox>

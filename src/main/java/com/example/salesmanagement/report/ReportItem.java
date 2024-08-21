@@ -2,16 +2,16 @@ package com.example.salesmanagement.report;
 
 import java.math.BigDecimal;
 
-public class InvoiceReportItem {
+public class ReportItem {
     private String productDesignation;
     private int quantity;
-    private BigDecimal unitPriceExcludingTaxes;
     private int taxRate;
+    private BigDecimal unitPriceExcludingTaxes;
     private BigDecimal totalExcludingTaxes;
     private BigDecimal totalIncludingTaxes;
     private BigDecimal totalTaxes;
 
-    public InvoiceReportItem(String productDesignation, int quantity, BigDecimal unitPriceExcludingTaxes, int taxRate, BigDecimal totalExcludingTaxes, BigDecimal totalIncludingTaxes, BigDecimal totalTaxes) {
+    public ReportItem(String productDesignation, int quantity, BigDecimal unitPriceExcludingTaxes, int taxRate, BigDecimal totalExcludingTaxes, BigDecimal totalIncludingTaxes, BigDecimal totalTaxes) {
         this.productDesignation = productDesignation;
         this.quantity = quantity;
         this.unitPriceExcludingTaxes = unitPriceExcludingTaxes;

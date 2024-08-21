@@ -11,10 +11,10 @@
       fx:controller="com.example.salesmanagement.taxrate.ListTaxRatesController">
     <Label layoutX="14.0" layoutY="14.0" text="Taux TVA">
         <font>
-            <Font name="System Bold" size="24.0"/>
+            <Font name="System Bold" size="32.0"/>
         </font>
         <VBox.margin>
-            <Insets/>
+            <Insets bottom="16.0"/>
         </VBox.margin>
     </Label>
     <HBox alignment="TOP_RIGHT" spacing="8.0">

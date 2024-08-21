@@ -138,7 +138,7 @@ public class ProductController implements Initializable {
         purchasePriceExcludingTaxTextField.clear();
 
         categoryComboBox.getSelectionModel().selectFirst();
-        taxRateComboBox.getSelectionModel().clearSelection();
+        taxRateComboBox.getSelectionModel().selectFirst();
     }
 
     private void initCategoryComboBox() {

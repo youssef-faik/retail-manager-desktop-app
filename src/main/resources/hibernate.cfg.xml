@@ -19,8 +19,12 @@
         <mapping class="com.example.salesmanagement.product.Product"/>
         <mapping class="com.example.salesmanagement.category.Category"/>
         <mapping class="com.example.salesmanagement.taxrate.TaxRate"/>
-        <mapping class="com.example.salesmanagement.invoice.Invoice"/>
-        <mapping class="com.example.salesmanagement.invoice.InvoiceItem"/>
+        <mapping class="com.example.salesmanagement.salesdocument.SalesDocument"/>
+        <mapping class="com.example.salesmanagement.salesdocument.SalesDocumentItem"/>
+        <mapping class="com.example.salesmanagement.salesdocument.Quotation"/>
+        <mapping class="com.example.salesmanagement.salesdocument.DeliveryNote"/>
+        <mapping class="com.example.salesmanagement.salesdocument.Invoice"/>
+        <mapping class="com.example.salesmanagement.salesdocument.CreditInvoice"/>
         <mapping class="com.example.salesmanagement.payment.Payment"/>
         <mapping class="com.example.salesmanagement.payment.Check"/>
         <mapping class="com.example.salesmanagement.payment.Cash"/>

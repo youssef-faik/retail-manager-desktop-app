@@ -3,7 +3,9 @@ package com.example.salesmanagement.report;
 
 import com.example.salesmanagement.configuration.AppConfiguration;
 import com.example.salesmanagement.configuration.ConfigKey;
-import com.example.salesmanagement.invoice.Invoice;
+import com.example.salesmanagement.salesdocument.DeliveryNote;
+import com.example.salesmanagement.salesdocument.SalesDocument;
+import jakarta.persistence.Entity;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.view.JasperViewer;
@@ -18,12 +20,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class InvoiceReportManager {
-    private JasperPrint generateInvoice(Invoice invoice) throws JRException {
-        List<InvoiceReportItem> invoiceReportItems = new ArrayList<>();
-        invoice.getInvoiceItems().forEach(item -> {
-            InvoiceReportItem invoiceReportItem =
-                    new InvoiceReportItem(
+public class SalesDocumentReportManager {
+    private JasperPrint generateSalesDocumentReport(SalesDocument salesDocument) throws JRException {
+        List<ReportItem> reportItems = new ArrayList<>();
+        salesDocument.getItems().forEach(item -> {
+            ReportItem reportItem =
+                    new ReportItem(
                             item.getProduct().getName(),
                             item.getQuantity(),
                             item.getUnitPriceExcludingTaxes().setScale(2, RoundingMode.DOWN),
@@ -32,28 +34,37 @@ public class InvoiceReportManager {
                             item.getTotalIncludingTaxes().setScale(2, RoundingMode.DOWN),
                             item.getTotalTaxes().setScale(2, RoundingMode.DOWN));
 
-            invoiceReportItems.add(invoiceReportItem);
+            reportItems.add(reportItem);
         });
 
-        JRBeanCollectionDataSource invoiceItemsDataSet = new JRBeanCollectionDataSource(invoiceReportItems);
+        JRBeanCollectionDataSource salesDocumentItemsDataSet = new JRBeanCollectionDataSource(reportItems);
 
         Map<ConfigKey, String> configurations = AppConfiguration.getInstance().getAllConfigurations();
 
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("id", invoice.getReference());
-        parameters.put("issueDate", invoice.getIssueDate());
 
-        parameters.put("name", invoice.getClient().getName());
-        parameters.put("address", invoice.getClient().getAddress());
-        parameters.put("client_ice", invoice.getClient().getCommonCompanyIdentifier());
+        parameters.put("document_type", switch (salesDocument.getClass().getSimpleName()) {
+            case "Quotation" -> "Devis";
+            case "Invoice" -> "Facture";
+            case "DeliveryNote" -> "Bon de livraison";
+            case "CreditInvoice" -> "Facture d'avoir";
+            default -> throw new IllegalStateException("Unexpected value: " + salesDocument.getClass().getSimpleName());
+        });
 
-        parameters.put("invoiceItemsDataSet", invoiceItemsDataSet);
+        parameters.put("id", salesDocument.getReference());
+        parameters.put("issueDate", salesDocument.getIssueDate());
 
-        parameters.put("totalHT", invoice.getTotalExcludingTaxes());
-        parameters.put("totalTaxes", invoice.getTotalTaxes());
-        parameters.put("totalTTC", invoice.getTotalIncludingTaxes());
+        parameters.put("client_name", salesDocument.getClient().getName());
+        parameters.put("client_address", salesDocument.getClient().getAddress());
+        parameters.put("client_ice", salesDocument.getClient().getCommonCompanyIdentifier());
 
-        parameters.put("print_invoice_heading", Boolean.parseBoolean(configurations.get(ConfigKey.PRINT_INVOICE_HEADING)));
+        parameters.put("salesDocumentItemsDataSet", salesDocumentItemsDataSet);
+
+        parameters.put("totalHT", salesDocument.getTotalExcludingTaxes());
+        parameters.put("totalTaxes", salesDocument.getTotalTaxes());
+        parameters.put("totalTTC", salesDocument.getTotalIncludingTaxes());
+
+        parameters.put("print_sales_document_heading", Boolean.parseBoolean(configurations.get(ConfigKey.PRINT_SALES_DOCUMENT_HEADING)));
         parameters.put("companyName", configurations.get(ConfigKey.COMPANY_NAME));
         parameters.put("companyAddress", configurations.get(ConfigKey.BUSINESS_ADDRESS));
         parameters.put("rc", configurations.get(ConfigKey.COMMERCIAL_REGISTRATION_NUMBER));
@@ -64,12 +75,19 @@ public class InvoiceReportManager {
         parameters.put("fixed_phone_number", configurations.get(ConfigKey.COMPANY_FIXED_PHONE_NUMBER));
         parameters.put("email", configurations.get(ConfigKey.COMPANY_EMAIL_ADDRESS));
 
-        parameters.put("amountInWords", getMoneyIntoWords(invoice.getTotalIncludingTaxes().toString()));
+        parameters.put("amountInWords", getMoneyIntoWords(salesDocument.getTotalIncludingTaxes().toString()));
 
-        String filePath = "/templates/invoiceReport.jrxml";
+        String filePath;
+
+        if (salesDocument instanceof DeliveryNote) {
+            filePath = "/templates/deliverNoteSalesDocumentReport_" + (
+                    Boolean.parseBoolean(configurations.get(ConfigKey.PRINT_DELIVERY_NOTE_UNIT_PRICE)) ? "withPrice.jrxml" : "withoutPrice.jrxml");
+        } else {
+            filePath = "/templates/salesDocumentReport.jrxml";
+        }
 
         JasperReport report = null;
-        try (InputStream inputStream = InvoiceReportManager.class.getResourceAsStream(filePath)) {
+        try (InputStream inputStream = SalesDocumentReportManager.class.getResourceAsStream(filePath)) {
             if (inputStream != null) {
                 // Process the input stream
                 report = JasperCompileManager.compileReport(inputStream);
@@ -84,10 +102,11 @@ public class InvoiceReportManager {
         return JasperFillManager.fillReport(report, parameters, new JREmptyDataSource());
     }
 
-    public void displayInvoiceReport(Invoice invoice) throws JRException {
-        JasperViewer jasperViewer = new JasperViewer(generateInvoice(invoice), false);
+    public void displaySalesDocumentReport(SalesDocument salesDocument) throws JRException {
+        JasperViewer jasperViewer = new JasperViewer(generateSalesDocumentReport(salesDocument), false);
         jasperViewer.setVisible(true);
-        jasperViewer.setTitle("Facture N° " + invoice.getId());
+        jasperViewer.setTitle(salesDocument.getClass().getAnnotation(Entity.class).name() +
+                " N° " + salesDocument.getId());
         jasperViewer.setFitPageZoomRatio();
     }
 

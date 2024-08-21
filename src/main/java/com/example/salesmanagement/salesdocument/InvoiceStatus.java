@@ -1,4 +1,4 @@
-package com.example.salesmanagement.invoice;
+package com.example.salesmanagement.salesdocument;
 
 /**
  * Enum representing the status of an invoice.
@@ -74,12 +74,10 @@ public enum InvoiceStatus {
      */
     CANCELLED;
 
-
     /**
      * Returns a string representation of the invoice status.
      *
      * @return a string that represents the current status of the invoice
-     * @throws IllegalArgumentException if the status is not recognized
      */
     @Override
     public String toString() {

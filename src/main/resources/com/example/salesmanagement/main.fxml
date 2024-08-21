@@ -39,12 +39,44 @@
                 </Menu>
             </menus>
             <menus>
+                <Menu mnemonicParsing="false" text="Devis">
+                    <items>
+                        <MenuItem fx:id="addQuotationMenuItem" mnemonicParsing="false" onAction="#addQuotation"
+                                  text="Nouveau devis"/>
+                        <MenuItem fx:id="listQuotationsMenuItem" mnemonicParsing="false" onAction="#listQuotations"
+                                  text="Liste des devis"/>
+                    </items>
+                </Menu>
+            </menus>
+            <menus>
+                <Menu mnemonicParsing="false" text="Bon de livraison">
+                    <items>
+                        <MenuItem fx:id="addDeliveryNoteMenuItem" mnemonicParsing="false" onAction="#addDeliveryNote"
+                                  text="Nouveau bon de livraison"/>
+                        <MenuItem fx:id="listDeliveryNotesMenuItem" mnemonicParsing="false"
+                                  onAction="#listDeliveryNotes"
+                                  text="Liste des bons de livraison"/>
+                    </items>
+                </Menu>
+            </menus>
+            <menus>
                 <Menu mnemonicParsing="false" text="Factures">
                     <items>
                         <MenuItem fx:id="addInvoiceMenuItem" mnemonicParsing="false" onAction="#addInvoice"
                                   text="Nouvelle facture"/>
                         <MenuItem fx:id="listInvoicesMenuItem" mnemonicParsing="false" onAction="#listInvoices"
                                   text="Liste des factures"/>
+                    </items>
+                </Menu>
+            </menus>
+            <menus>
+                <Menu mnemonicParsing="false" text="Factures avoir">
+                    <items>
+                        <MenuItem fx:id="addCreditInvoiceMenuItem" mnemonicParsing="false" onAction="#addCreditInvoice"
+                                  text="Nouvelle facture d'avoir"/>
+                        <MenuItem fx:id="listCreditInvoicesMenuItem" mnemonicParsing="false"
+                                  onAction="#listCreditInvoices"
+                                  text="Liste des factures d'avoir"/>
                     </items>
                 </Menu>
             </menus>

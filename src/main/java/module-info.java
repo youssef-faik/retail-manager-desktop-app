@@ -20,8 +20,8 @@ module com.example.salesmanagement {
     exports com.example.salesmanagement.category;
     opens com.example.salesmanagement.taxrate to javafx.fxml, org.hibernate.orm.core;
     exports com.example.salesmanagement.taxrate;
-    opens com.example.salesmanagement.invoice to javafx.fxml, org.hibernate.orm.core;
-    exports com.example.salesmanagement.invoice;
+    opens com.example.salesmanagement.salesdocument to javafx.fxml, org.hibernate.orm.core;
+    exports com.example.salesmanagement.salesdocument;
     opens com.example.salesmanagement.report to javafx.fxml;
     exports com.example.salesmanagement.report;
     opens com.example.salesmanagement.payment to javafx.fxml, org.hibernate.orm.core;

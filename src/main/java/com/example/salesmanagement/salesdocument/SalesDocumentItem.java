@@ -1,4 +1,4 @@
-package com.example.salesmanagement.invoice;
+package com.example.salesmanagement.salesdocument;
 
 import com.example.salesmanagement.product.Product;
 import jakarta.persistence.*;
@@ -6,9 +6,9 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-@Entity(name = "InvoiceItem")
-@Table(name = "invoice_item")
-public class InvoiceItem {
+@Entity(name = "SalesDocumentItem")
+@Table(name = "sales_document_item")
+public class SalesDocumentItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,11 +22,11 @@ public class InvoiceItem {
     @JoinColumn(
             name = "product_id",
             referencedColumnName = "id",
-            foreignKey = @ForeignKey(name = "invoice_item_product_fk"))
+            foreignKey = @ForeignKey(name = "sales_document_item_product_fk"))
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     private Product product;
 
-    public InvoiceItem() {
+    public SalesDocumentItem() {
         this.quantity = 0;
         this.unitPriceExcludingTaxes = BigDecimal.ZERO;
         this.totalExcludingTaxes = BigDecimal.ZERO;
@@ -94,7 +94,7 @@ public class InvoiceItem {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        InvoiceItem that = (InvoiceItem) o;
+        SalesDocumentItem that = (SalesDocumentItem) o;
         return Objects.equals(getId(), that.getId());
     }
 
