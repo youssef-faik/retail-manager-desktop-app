@@ -1,4 +1,4 @@
-package com.example.salesmanagement.salesdocument;
+package com.example.salesmanagement.document;
 
 import com.example.salesmanagement.product.Product;
 import jakarta.persistence.*;
@@ -6,9 +6,9 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-@Entity(name = "SalesDocumentItem")
-@Table(name = "sales_document_item")
-public class SalesDocumentItem {
+@Entity(name = "DocumentItem")
+@Table(name = "document_item")
+public class DocumentItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,11 +22,11 @@ public class SalesDocumentItem {
     @JoinColumn(
             name = "product_id",
             referencedColumnName = "id",
-            foreignKey = @ForeignKey(name = "sales_document_item_product_fk"))
+            foreignKey = @ForeignKey(name = "document_item_product_fk"))
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     private Product product;
 
-    public SalesDocumentItem() {
+    public DocumentItem() {
         this.quantity = 0;
         this.unitPriceExcludingTaxes = BigDecimal.ZERO;
         this.totalExcludingTaxes = BigDecimal.ZERO;
@@ -94,7 +94,7 @@ public class SalesDocumentItem {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        SalesDocumentItem that = (SalesDocumentItem) o;
+        DocumentItem that = (DocumentItem) o;
         return Objects.equals(getId(), that.getId());
     }
 

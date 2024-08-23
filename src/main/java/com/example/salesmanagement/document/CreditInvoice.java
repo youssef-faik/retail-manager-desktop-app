@@ -1,4 +1,4 @@
-package com.example.salesmanagement.salesdocument;
+package com.example.salesmanagement.document;
 
 import com.example.salesmanagement.client.Client;
 import com.example.salesmanagement.payment.BankTransfer;
@@ -7,58 +7,36 @@ import com.example.salesmanagement.payment.Payment;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-
-@Entity(name = "Invoice")
-@Table(name = "invoice")
-@DiscriminatorValue("INVOICE")
+@Entity(name = "CreditInvoice")
+@Table(name = "credit_invoice")
+@DiscriminatorValue("CREDIT_INVOICE")
 @PrimaryKeyJoinColumn(
         name = "id",
         referencedColumnName = "id",
-        foreignKey = @ForeignKey(name = "invoice_sales_document_fk"))
-public class Invoice extends SalesDocument implements Cloneable {
-    @Column(name = "due_date")
-    @Temporal(TemporalType.DATE)
-    private LocalDate dueDate;
+        foreignKey = @ForeignKey(name = "credit_invoice_sales_document_fk"))
+public class CreditInvoice extends SalesDocument implements Cloneable {
+    @Enumerated(EnumType.STRING)
+    private CreditInvoiceStatus status = CreditInvoiceStatus.DRAFT;
 
     @Column(name = "paid_amount")
     private BigDecimal paidAmount = BigDecimal.ZERO;
-
-    @Enumerated(EnumType.STRING)
-    private InvoiceStatus status = InvoiceStatus.DRAFT;
 
     @Column(nullable = false)
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<Payment> payments = new HashSet<>();
 
-    public Invoice() {
+    public CreditInvoice() {
     }
 
-    public LocalDate getDueDate() {
-        return dueDate;
-    }
-
-    public void setDueDate(LocalDate dueDate) {
-        this.dueDate = dueDate;
-    }
-
-    public BigDecimal getPaidAmount() {
-        return paidAmount;
-    }
-
-    public void setPaidAmount(BigDecimal paidAmount) {
-        this.paidAmount = paidAmount;
-    }
-
-    public InvoiceStatus getStatus() {
+    public CreditInvoiceStatus getStatus() {
         return status;
     }
 
-    public void setStatus(InvoiceStatus status) {
+    public void setStatus(CreditInvoiceStatus status) {
         this.status = status;
     }
 
@@ -110,16 +88,23 @@ public class Invoice extends SalesDocument implements Cloneable {
         }
     }
 
+    public BigDecimal getPaidAmount() {
+        return paidAmount;
+    }
+
+    public void setPaidAmount(BigDecimal paidAmount) {
+        this.paidAmount = paidAmount;
+    }
+
     @Override
     public Object clone() throws CloneNotSupportedException {
         Object cloned = super.clone();
-        Invoice clonedInvoice = (Invoice) cloned;
+        CreditInvoice clonedCreditInvoice = (CreditInvoice) cloned;
 
-        clonedInvoice.setClient((Client) getClient().clone());
-        clonedInvoice.setPayments(getPayments());
-        clonedInvoice.setItems(getItems());
+        clonedCreditInvoice.setClient((Client) getClient().clone());
+        clonedCreditInvoice.setItems(getItems());
+        clonedCreditInvoice.setStatus(status);
 
-        return clonedInvoice;
+        return clonedCreditInvoice;
     }
-
 }

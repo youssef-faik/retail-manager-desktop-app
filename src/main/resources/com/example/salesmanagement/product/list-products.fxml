@@ -7,10 +7,13 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="616.0" prefWidth="1260.0" spacing="10.0" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.salesmanagement.product.ListProductsController">
-    <Label layoutX="14.0" layoutY="14.0" text="Produits">
+    <Label graphicTextGap="8.0" layoutX="14.0" layoutY="14.0" text="Produits">
         <font>
             <Font name="System Bold" size="32.0"/>
         </font>
+        <graphic>
+            <FontAwesomeIconView glyphName="CUBES"/>
+        </graphic>
         <VBox.margin>
             <Insets bottom="16.0"/>
         </VBox.margin>

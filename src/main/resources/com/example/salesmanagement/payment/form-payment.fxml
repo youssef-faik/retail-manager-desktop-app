@@ -7,10 +7,14 @@
 <?import javafx.scene.text.Font?>
 <VBox maxHeight="-Infinity" maxWidth="-Infinity" prefWidth="368.0" spacing="8.0" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.salesmanagement.payment.PaymentController">
     <children>
-        <Label text="Règlement">
+
+        <Label text="Règlement" graphicTextGap="8.0">
             <font>
                 <Font name="System Bold" size="32.0"/>
             </font>
+            <graphic>
+                <FontAwesomeIconView glyphName="DONATE"/>
+            </graphic>
             <VBox.margin>
                 <Insets bottom="16.0" />
             </VBox.margin>

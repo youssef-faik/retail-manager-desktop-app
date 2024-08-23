@@ -1,7 +1,7 @@
 package com.example.salesmanagement.payment;
 
-import com.example.salesmanagement.salesdocument.PaymentFormEntry;
-import com.example.salesmanagement.salesdocument.SalesDocumentController;
+import com.example.salesmanagement.document.DocumentController;
+import com.example.salesmanagement.document.PaymentFormEntry;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -38,7 +38,7 @@ public class PaymentController implements Initializable {
 
     private TableView<PaymentFormEntry> paymentsTableView;
     private Payment selectedPayment;
-    private SalesDocumentController salesDocumentController;
+    private DocumentController documentController;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -54,8 +54,8 @@ public class PaymentController implements Initializable {
         referenceHBox.setVisible(false);
 
         paymentDateDatePicker.setValue(LocalDate.now());
-        if (salesDocumentController != null) {
-            paymentAmountTextField.setText(salesDocumentController.getRemainingAmount());
+        if (documentController != null) {
+            paymentAmountTextField.setText(documentController.getRemainingAmount());
         }
 
         cancelButton.setOnAction(e -> {
@@ -65,9 +65,9 @@ public class PaymentController implements Initializable {
 
         addButton.setOnAction(e -> {
             BigDecimal paymentAmount = BigDecimal.valueOf(Double.parseDouble(paymentAmountTextField.getText()));
-            BigDecimal remainingAmount = BigDecimal.valueOf(Double.parseDouble(salesDocumentController.getRemainingAmount()));
+            BigDecimal remainingAmount = BigDecimal.valueOf(Double.parseDouble(documentController.getRemainingAmount()));
 
-            if (salesDocumentController != null
+            if (documentController != null
                     && paymentAmount.compareTo(remainingAmount) > 0 || paymentAmount.compareTo(BigDecimal.ZERO) <= 0) {
                 displayErrorAlert("Le montant saisie est invalide");
                 return;
@@ -110,11 +110,11 @@ public class PaymentController implements Initializable {
                     break;
             }
 
-            remainingAmount = BigDecimal.valueOf(Double.parseDouble(salesDocumentController.getRemainingAmount()));
+            remainingAmount = BigDecimal.valueOf(Double.parseDouble(documentController.getRemainingAmount()));
             resetForm();
             displaySuccessAlert();
 
-            if (salesDocumentController != null && remainingAmount.compareTo(BigDecimal.ZERO) <= 0) {
+            if (documentController != null && remainingAmount.compareTo(BigDecimal.ZERO) <= 0) {
                 Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
                 stage.close();
             }
@@ -169,8 +169,8 @@ public class PaymentController implements Initializable {
                         break;
                 }
 
-                if (salesDocumentController != null) {
-                    paymentAmountTextField.setText(salesDocumentController.getRemainingAmount());
+                if (documentController != null) {
+                    paymentAmountTextField.setText(documentController.getRemainingAmount());
                 }
             }
         });
@@ -188,8 +188,8 @@ public class PaymentController implements Initializable {
 
         paymentDateDatePicker.setValue(LocalDate.now());
 
-        if (salesDocumentController != null) {
-            paymentAmountTextField.setText(salesDocumentController.getRemainingAmount());
+        if (documentController != null) {
+            paymentAmountTextField.setText(documentController.getRemainingAmount());
         } else {
             paymentAmountTextField.clear();
         }
@@ -254,22 +254,21 @@ public class PaymentController implements Initializable {
             }
 
             paymentsTableView.refresh();
-            salesDocumentController.updatePaidAndRemainingAmounts();
+            documentController.updatePaidAndRemainingAmounts();
 
             displaySuccessAlert();
         });
     }
 
-    public void setSalesDocumentController(SalesDocumentController salesDocumentController) {
-        this.salesDocumentController = salesDocumentController;
+    public void setSalesDocumentController(DocumentController documentController) {
+        this.documentController = documentController;
     }
 
     public void refreshPaymentAmount() {
-        if (salesDocumentController != null) {
-            paymentAmountTextField.setText(salesDocumentController.getRemainingAmount());
+        if (documentController != null) {
+            paymentAmountTextField.setText(documentController.getRemainingAmount());
         }
     }
-
 
     private void displayErrorAlert() {
         displayErrorAlert("Une erreur est survenue lors de l'opération.");

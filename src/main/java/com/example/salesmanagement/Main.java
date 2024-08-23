@@ -30,7 +30,7 @@ public class Main extends Application {
 
         stage.setScene(scene);
 
-        ((MainController) fxmlLoader.getController()).listInvoices();
+        ((MainController) fxmlLoader.getController()).listPurchaseOrders();
 
         stage.show();
 

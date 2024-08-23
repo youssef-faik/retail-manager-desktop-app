@@ -3,8 +3,10 @@ package com.example.salesmanagement.report;
 
 import com.example.salesmanagement.configuration.AppConfiguration;
 import com.example.salesmanagement.configuration.ConfigKey;
-import com.example.salesmanagement.salesdocument.DeliveryNote;
-import com.example.salesmanagement.salesdocument.SalesDocument;
+import com.example.salesmanagement.document.DeliveryNote;
+import com.example.salesmanagement.document.Document;
+import com.example.salesmanagement.document.PurchaseDocument;
+import com.example.salesmanagement.document.SalesDocument;
 import jakarta.persistence.Entity;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
@@ -20,21 +22,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SalesDocumentReportManager {
-    private JasperPrint generateSalesDocumentReport(SalesDocument salesDocument) throws JRException {
+public class DocumentReportManager {
+    private JasperPrint generateSalesDocumentReport(Document document) throws JRException {
         List<ReportItem> reportItems = new ArrayList<>();
-        salesDocument.getItems().forEach(item -> {
-            ReportItem reportItem =
-                    new ReportItem(
-                            item.getProduct().getName(),
-                            item.getQuantity(),
-                            item.getUnitPriceExcludingTaxes().setScale(2, RoundingMode.DOWN),
-                            item.getTotalTaxes().multiply(BigDecimal.valueOf(10L)).toBigInteger().intValueExact(),
-                            item.getTotalExcludingTaxes().setScale(2, RoundingMode.DOWN),
-                            item.getTotalIncludingTaxes().setScale(2, RoundingMode.DOWN),
-                            item.getTotalTaxes().setScale(2, RoundingMode.DOWN));
-
-            reportItems.add(reportItem);
+        document.getItems().forEach(item -> {
+            reportItems.add(new ReportItem(
+                    item.getProduct().getName(),
+                    item.getQuantity(),
+                    item.getUnitPriceExcludingTaxes().setScale(2, RoundingMode.DOWN),
+                    item.getTotalTaxes().multiply(BigDecimal.valueOf(10L)).toBigInteger().intValueExact(),
+                    item.getTotalExcludingTaxes().setScale(2, RoundingMode.DOWN),
+                    item.getTotalIncludingTaxes().setScale(2, RoundingMode.DOWN),
+                    item.getTotalTaxes().setScale(2, RoundingMode.DOWN)));
         });
 
         JRBeanCollectionDataSource salesDocumentItemsDataSet = new JRBeanCollectionDataSource(reportItems);
@@ -43,26 +42,28 @@ public class SalesDocumentReportManager {
 
         Map<String, Object> parameters = new HashMap<>();
 
-        parameters.put("document_type", switch (salesDocument.getClass().getSimpleName()) {
+        parameters.put("document_type", switch (document.getClass().getSimpleName()) {
+            case "PurchaseOrder" -> "Bon de commande";
+            case "PurchaseDeliveryNote" -> "Bon de réception";
             case "Quotation" -> "Devis";
-            case "Invoice" -> "Facture";
             case "DeliveryNote" -> "Bon de livraison";
+            case "Invoice" -> "Facture";
             case "CreditInvoice" -> "Facture d'avoir";
-            default -> throw new IllegalStateException("Unexpected value: " + salesDocument.getClass().getSimpleName());
+            default -> throw new IllegalStateException("Unexpected value: " + document.getClass().getSimpleName());
         });
 
-        parameters.put("id", salesDocument.getReference());
-        parameters.put("issueDate", salesDocument.getIssueDate());
+        parameters.put("id", document.getReference());
+        parameters.put("issueDate", document.getIssueDate());
 
-        parameters.put("client_name", salesDocument.getClient().getName());
-        parameters.put("client_address", salesDocument.getClient().getAddress());
-        parameters.put("client_ice", salesDocument.getClient().getCommonCompanyIdentifier());
+        parameters.put("client_name", (document instanceof SalesDocument salesDocument) ? salesDocument.getClient().getName() : ((PurchaseDocument) document).getSupplier().getName());
+        parameters.put("client_address", (document instanceof SalesDocument salesDocument) ? salesDocument.getClient().getAddress() : ((PurchaseDocument) document).getSupplier().getAddress());
+        parameters.put("client_ice", (document instanceof SalesDocument salesDocument) ? salesDocument.getClient().getCommonCompanyIdentifier() : ((PurchaseDocument) document).getSupplier().getCommonCompanyIdentifier());
 
         parameters.put("salesDocumentItemsDataSet", salesDocumentItemsDataSet);
 
-        parameters.put("totalHT", salesDocument.getTotalExcludingTaxes());
-        parameters.put("totalTaxes", salesDocument.getTotalTaxes());
-        parameters.put("totalTTC", salesDocument.getTotalIncludingTaxes());
+        parameters.put("totalHT", document.getTotalExcludingTaxes());
+        parameters.put("totalTaxes", document.getTotalTaxes());
+        parameters.put("totalTTC", document.getTotalIncludingTaxes());
 
         parameters.put("print_sales_document_heading", Boolean.parseBoolean(configurations.get(ConfigKey.PRINT_SALES_DOCUMENT_HEADING)));
         parameters.put("companyName", configurations.get(ConfigKey.COMPANY_NAME));
@@ -75,19 +76,19 @@ public class SalesDocumentReportManager {
         parameters.put("fixed_phone_number", configurations.get(ConfigKey.COMPANY_FIXED_PHONE_NUMBER));
         parameters.put("email", configurations.get(ConfigKey.COMPANY_EMAIL_ADDRESS));
 
-        parameters.put("amountInWords", getMoneyIntoWords(salesDocument.getTotalIncludingTaxes().toString()));
+        parameters.put("amountInWords", getMoneyIntoWords(document.getTotalIncludingTaxes().toString()));
 
         String filePath;
 
-        if (salesDocument instanceof DeliveryNote) {
+        if (document instanceof DeliveryNote) {
             filePath = "/templates/deliverNoteSalesDocumentReport_" + (
                     Boolean.parseBoolean(configurations.get(ConfigKey.PRINT_DELIVERY_NOTE_UNIT_PRICE)) ? "withPrice.jrxml" : "withoutPrice.jrxml");
         } else {
-            filePath = "/templates/salesDocumentReport.jrxml";
+            filePath = "/templates/documentReport.jrxml";
         }
 
         JasperReport report = null;
-        try (InputStream inputStream = SalesDocumentReportManager.class.getResourceAsStream(filePath)) {
+        try (InputStream inputStream = DocumentReportManager.class.getResourceAsStream(filePath)) {
             if (inputStream != null) {
                 // Process the input stream
                 report = JasperCompileManager.compileReport(inputStream);
@@ -102,12 +103,12 @@ public class SalesDocumentReportManager {
         return JasperFillManager.fillReport(report, parameters, new JREmptyDataSource());
     }
 
-    public void displaySalesDocumentReport(SalesDocument salesDocument) throws JRException {
+    public void displayDocumentReport(Document salesDocument) throws JRException {
         JasperViewer jasperViewer = new JasperViewer(generateSalesDocumentReport(salesDocument), false);
         jasperViewer.setVisible(true);
-        jasperViewer.setTitle(salesDocument.getClass().getAnnotation(Entity.class).name() +
-                " N° " + salesDocument.getId());
+        jasperViewer.setTitle(salesDocument.getClass().getAnnotation(Entity.class).name() + (salesDocument.getReference() == null ? " - DRAFT" : " N° " + salesDocument.getReference()));
         jasperViewer.setFitPageZoomRatio();
+        jasperViewer.toFront();
     }
 
     private String getMoneyIntoWords(String input) {

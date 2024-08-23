@@ -1,4 +1,4 @@
-package com.example.salesmanagement.salesdocument;
+package com.example.salesmanagement.document;
 
 /**
  * Represents the possible statuses for a quotation in the sales management system.

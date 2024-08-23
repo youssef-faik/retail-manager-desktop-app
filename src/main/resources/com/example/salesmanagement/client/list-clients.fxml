@@ -10,10 +10,13 @@
       minWidth="-Infinity"
       prefHeight="616.0" prefWidth="1260.0" spacing="10.0" xmlns="http://javafx.com/javafx/22"
       fx:controller="com.example.salesmanagement.client.ListClientsController">
-    <Label layoutX="14.0" layoutY="14.0" text="Clients">
+    <Label graphicTextGap="8.0" layoutX="14.0" layoutY="14.0" text="Clients">
         <font>
             <Font name="System Bold" size="32.0"/>
         </font>
+        <graphic>
+            <FontAwesomeIconView glyphName="USERS"/>
+        </graphic>
         <VBox.margin>
             <Insets bottom="16.0"/>
         </VBox.margin>

@@ -1,11 +1,13 @@
-package com.example.salesmanagement.salesdocument;
+package com.example.salesmanagement.document;
 
 import com.example.salesmanagement.client.Client;
 import com.example.salesmanagement.client.ClientRepository;
 import com.example.salesmanagement.payment.*;
 import com.example.salesmanagement.product.Product;
 import com.example.salesmanagement.product.ProductRepository;
-import com.example.salesmanagement.report.SalesDocumentReportManager;
+import com.example.salesmanagement.report.DocumentReportManager;
+import com.example.salesmanagement.supplier.Supplier;
+import com.example.salesmanagement.supplier.SupplierRepository;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
@@ -42,45 +44,48 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-public class SalesDocumentController implements Initializable {
+public class DocumentController implements Initializable {
     @FXML
     public VBox paymentsHBox;
+
     @FXML
     public HBox statusHBox, remainingAmountHBox, paidAmountHBox, headerHBox;
+
     @FXML
     private Separator totalSeparator;
+
     @FXML
     private TextField totalExcludingTaxesTextField, totalTaxesTextField, totalIncludingTaxesTextField, addressTextField, commonCompanyIdentifierTextField, remainingAmountTextField, paidAmountTextField;
 
     @FXML
-    private Label salesDocumentReferenceLabel, dueDateLabel;
+    private Label documentDetailsLabel, documentReferenceLabel, dueDateLabel, comboBoxLabel;
 
     @FXML
-    private Button addProductButton, saveSalesDocumentButton, addPaymentButton, printSalesDocumentButton;
+    private Button addProductButton, saveDocumentButton, addPaymentButton, printDocumentButton;
 
     @FXML
     private DatePicker issueDateDatePicker, dueDateDatePicker;
 
     @FXML
-    private ComboBox<Client> clientComboBox;
+    private ComboBox comboBox;
 
     @FXML
-    private ComboBox salesDocumentStatusComboBox;
+    private ComboBox documentStatusComboBox;
 
     @FXML
-    private TableView<SalesDocumentItemFormEntry> salesDocumentItemEntryTableView;
+    private TableView<DocumentItemFormEntry> documentItemEntryTableView;
 
     @FXML
     private TableView<PaymentFormEntry> paymentsTableView;
 
-    private SalesDocument salesDocument;
+    private Document document;
     private ObservableList<Product> products;
-    private SalesDocumentController salesDocumentController;
+    private DocumentController documentController;
     private boolean isEditMode = false, isDraftDocument = false, originalSalesHasReference;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        salesDocumentController = this;
+        documentController = this;
 
         products = ProductRepository.findAll();
 
@@ -89,42 +94,41 @@ public class SalesDocumentController implements Initializable {
         totalIncludingTaxesTextField.setText("0");
         totalTaxesTextField.setText("0");
 
-        initClientComboBox();
-        initSalesDocumentItemsTableView();
+        initDocumentItemsTableView();
         updatePaidAndRemainingAmounts();
 
-        saveSalesDocumentButton.setDisable(true);
+        saveDocumentButton.setDisable(true);
 
-        salesDocumentItemEntryTableView.getItems().addListener((ListChangeListener<SalesDocumentItemFormEntry>) c -> {
+        documentItemEntryTableView.getItems().addListener((ListChangeListener<DocumentItemFormEntry>) c -> {
             c.next();
 
             if (!c.wasAdded()) {
                 updatePaidAndRemainingAmounts();
             }
 
-            saveSalesDocumentButton.setDisable(
+            saveDocumentButton.setDisable(
                     !isItemTableViewValide()
-                            || salesDocument.getTotalIncludingTaxes().compareTo(BigDecimal.ZERO) == 0
-                            || clientComboBox.getSelectionModel().getSelectedItem() == null
+                            || document.getTotalIncludingTaxes().compareTo(BigDecimal.ZERO) == 0
+                            || comboBox.getSelectionModel().getSelectedItem() == null
             );
         });
 
         paymentsTableView.getItems().addListener((ListChangeListener<PaymentFormEntry>) c -> updatePaidAndRemainingAmounts());
 
         addProductButton.setOnAction(event -> {
-            SalesDocumentItemFormEntry entry = new SalesDocumentItemFormEntry(products, this);
-            salesDocumentItemEntryTableView.getItems().add(entry);
+            DocumentItemFormEntry entry = new DocumentItemFormEntry(products, this);
+            documentItemEntryTableView.getItems().add(entry);
         });
 
-        saveSalesDocumentButton.setOnAction(e -> addSalesDocument());
+        saveDocumentButton.setOnAction(e -> addDocument());
     }
 
     private boolean isItemTableViewValide() {
-        if (salesDocumentItemEntryTableView.getItems().isEmpty()) {
+        if (documentItemEntryTableView.getItems().isEmpty()) {
             return false;
         }
 
-        for (SalesDocumentItemFormEntry entry : salesDocumentItemEntryTableView.getItems()) {
+        for (DocumentItemFormEntry entry : documentItemEntryTableView.getItems()) {
             if (entry.getProductComboBox().getSelectionModel().getSelectedItem() == null) {
                 return false;
             }
@@ -132,42 +136,42 @@ public class SalesDocumentController implements Initializable {
         return true;
     }
 
-    private void addSalesDocument() {
-        mapSalesDocument();
+    private void addDocument() {
+        mapDocument();
 
-        Optional<SalesDocument> optionalSalesDocument = SalesDocumentRepository.add(salesDocument);
+        Optional<Document> optionalDocument = DocumentRepository.add(document);
 
-        if (optionalSalesDocument.isPresent()) {
-            SalesDocument document = optionalSalesDocument.get();
+        if (optionalDocument.isPresent()) {
+            Document document = optionalDocument.get();
 
             if (document.getReference() != null) {
-                this.salesDocumentReferenceLabel.setText(salesDocumentReferenceLabel.getText() + " N° : " + document.getReference());
+                this.documentReferenceLabel.setText(documentReferenceLabel.getText() + " N° : " + document.getReference());
             }
 
-            initSalesDocumentUpdate(document);
+            initDocumentUpdateForm(document);
 
-            saveSalesDocumentButton.setText("Modifier");
+            saveDocumentButton.setText("Modifier");
             Text icon = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.EDIT);
-            saveSalesDocumentButton.setGraphic(icon);
+            saveDocumentButton.setGraphic(icon);
 
-            saveSalesDocumentButton.setOnAction(
+            saveDocumentButton.setOnAction(
                     e -> {
                         try {
-                            updateSalesDocument();
+                            updateDocument();
                         } catch (SQLException ex) {
                             throw new RuntimeException(ex);
                         }
                     }
             );
 
-            printSalesDocumentButton.setVisible(true);
-            printSalesDocumentButton.setOnAction(
+            printDocumentButton.setVisible(true);
+            printDocumentButton.setOnAction(
                     event -> {
                         try {
-                            SalesDocumentReportManager salesDocumentReportManager = new SalesDocumentReportManager();
-                            salesDocumentReportManager.displaySalesDocumentReport(document);
+                            DocumentReportManager documentReportManager = new DocumentReportManager();
+                            documentReportManager.displayDocumentReport(document);
                         } catch (Exception ex) {
-                            Logger.getLogger(SalesDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+                            Logger.getLogger(DocumentController.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
             );
@@ -178,28 +182,28 @@ public class SalesDocumentController implements Initializable {
         }
     }
 
-    public void updateSalesDocument() throws SQLException {
-        mapSalesDocument();
+    public void updateDocument() throws SQLException {
+        mapDocument();
 
-        Optional<SalesDocument> optionalSalesDocument = SalesDocumentRepository.update(salesDocument);
+        Optional<Document> optionalDocument = DocumentRepository.update(document);
 
-        if (optionalSalesDocument.isPresent()) {
-            SalesDocument document = optionalSalesDocument.get();
+        if (optionalDocument.isPresent()) {
+            Document document = optionalDocument.get();
             if (document.getReference() != null && originalSalesHasReference) {
-                this.salesDocumentReferenceLabel.setText(salesDocumentReferenceLabel.getText() + " N° : " + document.getReference());
+                this.documentReferenceLabel.setText(documentReferenceLabel.getText() + " N° : " + document.getReference());
             }
 
             isDraftDocument = isDraftStatus(document);
             updatePaidAndRemainingAmounts();
             originalSalesHasReference = document.getReference() == null;
 
-            printSalesDocumentButton.setOnAction(
+            printDocumentButton.setOnAction(
                     event -> {
                         try {
-                            SalesDocumentReportManager salesDocumentReportManager = new SalesDocumentReportManager();
-                            salesDocumentReportManager.displaySalesDocumentReport(document);
+                            DocumentReportManager documentReportManager = new DocumentReportManager();
+                            documentReportManager.displayDocumentReport(document);
                         } catch (Exception ex) {
-                            Logger.getLogger(SalesDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+                            Logger.getLogger(DocumentController.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
             );
@@ -210,14 +214,27 @@ public class SalesDocumentController implements Initializable {
         }
     }
 
-    private void mapSalesDocument() {
-        salesDocument.setIssueDate(issueDateDatePicker.getValue());
-        salesDocument.clearItems();
-        salesDocumentItemEntryTableView.getItems().forEach(salesDocumentItemFormEntry -> salesDocument.addItem(salesDocumentItemFormEntry.getInvoiceItem()));
+    private void mapDocument() {
+        document.setIssueDate(issueDateDatePicker.getValue());
+        document.clearItems();
+        documentItemEntryTableView.getItems().forEach(documentItemFormEntry -> document.addItem(documentItemFormEntry.getInvoiceItem()));
 
-        if (salesDocument instanceof Invoice invoice) {
+        if (document instanceof Quotation quotation) {
+            quotation.setValidUntil(dueDateDatePicker.getValue());
+            quotation.setStatus((QuotationStatus) documentStatusComboBox.getValue());
+        }
+        if (document instanceof DeliveryNote deliveryNote) {
+            deliveryNote.setStatus((DeliveryNoteStatus) documentStatusComboBox.getValue());
+        }
+        if (document instanceof PurchaseOrder purchaseOrder) {
+            purchaseOrder.setStatus((PurchaseOrderStatus) documentStatusComboBox.getValue());
+        }
+        if (document instanceof PurchaseDeliveryNote purchaseDeliveryNote) {
+            purchaseDeliveryNote.setStatus((PurchaseDeliveryNoteStatus) documentStatusComboBox.getValue());
+        }
+        if (document instanceof Invoice invoice) {
             invoice.setDueDate(dueDateDatePicker.getValue());
-            invoice.setStatus((InvoiceStatus) salesDocumentStatusComboBox.getValue());
+            invoice.setStatus((InvoiceStatus) documentStatusComboBox.getValue());
 
             Set<Payment> payments = paymentsTableView.getItems()
                     .stream()
@@ -226,15 +243,8 @@ public class SalesDocumentController implements Initializable {
 
             invoice.setPayments(new HashSet<>(payments));
         }
-        if (salesDocument instanceof Quotation quotation) {
-            quotation.setValidUntil(dueDateDatePicker.getValue());
-            quotation.setStatus((QuotationStatus) salesDocumentStatusComboBox.getValue());
-        }
-        if (salesDocument instanceof DeliveryNote deliveryNote) {
-            deliveryNote.setStatus((DeliveryNoteStatus) salesDocumentStatusComboBox.getValue());
-        }
-        if (salesDocument instanceof CreditInvoice creditInvoice) {
-            creditInvoice.setStatus((CreditInvoiceStatus) salesDocumentStatusComboBox.getValue());
+        if (document instanceof CreditInvoice creditInvoice) {
+            creditInvoice.setStatus((CreditInvoiceStatus) documentStatusComboBox.getValue());
 
             Set<Payment> payments = paymentsTableView.getItems()
                     .stream()
@@ -245,34 +255,53 @@ public class SalesDocumentController implements Initializable {
         }
     }
 
-    private void initClientComboBox() {
-        clientComboBox.setEditable(false);
-        clientComboBox.setCellFactory(x -> new ClientComboCell());
-        clientComboBox.setButtonCell(new ClientComboCell());
+    private void initComboBox() {
+        comboBox.setEditable(false);
 
-        clientComboBox.setOnAction(event -> {
-            commonCompanyIdentifierTextField.setText(clientComboBox.getSelectionModel().getSelectedItem().getCommonCompanyIdentifier());
-            addressTextField.setText(clientComboBox.getSelectionModel().getSelectedItem().getAddress());
-            salesDocument.setClient(clientComboBox.getSelectionModel().getSelectedItem());
+        comboBox.setOnAction(event -> {
+            Object selectedItem = comboBox.getSelectionModel().getSelectedItem();
 
-            saveSalesDocumentButton.setDisable(!isItemTableViewValide() ||
-                    salesDocument.getTotalIncludingTaxes().compareTo(BigDecimal.ZERO) == 0
-                    || clientComboBox.getSelectionModel().getSelectedItem() == null);
+            if (selectedItem instanceof Client client) {
+                commonCompanyIdentifierTextField.setText(client.getCommonCompanyIdentifier());
+                addressTextField.setText(client.getAddress());
+                ((SalesDocument) document).setClient(client);
+            } else if (selectedItem instanceof Supplier supplier) {
+                commonCompanyIdentifierTextField.setText(supplier.getCommonCompanyIdentifier());
+                addressTextField.setText(supplier.getAddress());
+                ((PurchaseDocument) document).setSupplier(supplier);
+            }
+
+            saveDocumentButton.setDisable(!isItemTableViewValide() ||
+                    document.getTotalIncludingTaxes().compareTo(BigDecimal.ZERO) == 0 || selectedItem == null);
         });
 
-        ObservableList<Client> clients = ClientRepository.findAll();
-        clientComboBox.setItems(clients);
+        if (document instanceof SalesDocument) {
+            comboBox.setCellFactory(x -> new ClientComboCell());
+            comboBox.setButtonCell(new ClientComboCell());
+
+            ObservableList<Client> clients = ClientRepository.findAll();
+            comboBox.setItems(clients);
+        } else {
+            comboBox.setCellFactory(x -> new SupplierComboCell());
+            comboBox.setButtonCell(new SupplierComboCell());
+
+            ObservableList<Supplier> suppliers = SupplierRepository.findAll();
+            comboBox.setItems(suppliers);
+
+            comboBoxLabel.setText("Details du fournisseur");
+            comboBox.setPromptText("Choisissez un fournisseur");
+        }
     }
 
-    private void initSalesDocumentItemsTableView() {
-        TableColumn<SalesDocumentItemFormEntry, String> productColumn = new TableColumn<>("Produit");
-        TableColumn<SalesDocumentItemFormEntry, String> quantityColumn = new TableColumn<>("Quantité");
-        TableColumn<SalesDocumentItemFormEntry, String> unitPriceColumn = new TableColumn<>("Prix unitaire (HT)");
-        TableColumn<SalesDocumentItemFormEntry, String> taxRateColumn = new TableColumn<>("Taux TVA");
-        TableColumn<SalesDocumentItemFormEntry, String> totalIncludingTaxesColumn = new TableColumn<>("Total (TTC)");
-        TableColumn<SalesDocumentItemFormEntry, String> totalExcludingTaxesColumn = new TableColumn<>("Total (HT)");
-        TableColumn<SalesDocumentItemFormEntry, String> totalTaxesColumn = new TableColumn<>("Total TVA");
-        TableColumn<SalesDocumentItemFormEntry, String> actionColumn = new TableColumn<>("Actions");
+    private void initDocumentItemsTableView() {
+        TableColumn<DocumentItemFormEntry, String> productColumn = new TableColumn<>("Produit");
+        TableColumn<DocumentItemFormEntry, String> quantityColumn = new TableColumn<>("Quantité");
+        TableColumn<DocumentItemFormEntry, String> unitPriceColumn = new TableColumn<>("Prix unitaire (HT)");
+        TableColumn<DocumentItemFormEntry, String> taxRateColumn = new TableColumn<>("Taux TVA");
+        TableColumn<DocumentItemFormEntry, String> totalIncludingTaxesColumn = new TableColumn<>("Total (TTC)");
+        TableColumn<DocumentItemFormEntry, String> totalExcludingTaxesColumn = new TableColumn<>("Total (HT)");
+        TableColumn<DocumentItemFormEntry, String> totalTaxesColumn = new TableColumn<>("Total TVA");
+        TableColumn<DocumentItemFormEntry, String> actionColumn = new TableColumn<>("Actions");
 
         productColumn.setCellValueFactory(new PropertyValueFactory<>("productComboBox"));
         quantityColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getQuantity() + ""));
@@ -292,7 +321,7 @@ public class SalesDocumentController implements Initializable {
         actionColumn.setResizable(false);
         actionColumn.setReorderable(false);
 
-        salesDocumentItemEntryTableView.getColumns().addAll(
+        documentItemEntryTableView.getColumns().addAll(
                 productColumn,
                 quantityColumn,
                 unitPriceColumn,
@@ -303,11 +332,11 @@ public class SalesDocumentController implements Initializable {
                 actionColumn
         );
 
-        salesDocumentItemEntryTableView.setEditable(true);
+        documentItemEntryTableView.setEditable(true);
 
         // delete
-        Callback<TableColumn<SalesDocumentItemFormEntry, String>, TableCell<SalesDocumentItemFormEntry, String>> cellFactory =
-                (TableColumn<SalesDocumentItemFormEntry, String> param) -> {
+        Callback<TableColumn<DocumentItemFormEntry, String>, TableCell<DocumentItemFormEntry, String>> cellFactory =
+                (TableColumn<DocumentItemFormEntry, String> param) -> {
                     // make cell containing button
 
                     return new TableCell<>() {
@@ -326,11 +355,11 @@ public class SalesDocumentController implements Initializable {
                                 deleteButton.setOnMouseClicked((MouseEvent event) -> {
                                     try {
                                         TableRow tableRow = (TableRow) deleteButton.getParent().getParent().getParent();
-                                        SalesDocumentItemFormEntry rowItem = (SalesDocumentItemFormEntry) tableRow.getItem();
-                                        salesDocumentItemEntryTableView.getItems().remove(rowItem);
+                                        DocumentItemFormEntry rowItem = (DocumentItemFormEntry) tableRow.getItem();
+                                        documentItemEntryTableView.getItems().remove(rowItem);
                                         updateTotals();
                                     } catch (Exception ex) {
-                                        Logger.getLogger(SalesDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+                                        Logger.getLogger(DocumentController.class.getName()).log(Level.SEVERE, null, ex);
                                     }
                                 });
 
@@ -352,7 +381,7 @@ public class SalesDocumentController implements Initializable {
         unitPriceColumn.setCellFactory(TextFieldTableCell.forTableColumn());
 
         quantityColumn.setOnEditCommit(event -> {
-            SalesDocumentItemFormEntry entry = event.getTableView().getItems().get(event.getTablePosition().getRow());
+            DocumentItemFormEntry entry = event.getTableView().getItems().get(event.getTablePosition().getRow());
             try {
                 entry.setQuantity(Integer.parseInt(event.getNewValue()));
                 updateItemTotals(entry);
@@ -361,14 +390,14 @@ public class SalesDocumentController implements Initializable {
                 refreshTableView();
             } catch (NumberFormatException e) {
                 // Handle the case where the input is not a valid integer
-                salesDocumentItemEntryTableView.refresh();
+                documentItemEntryTableView.refresh();
                 System.out.println("Invalid input: " + event.getNewValue());
                 displayErrorAlert("valeur de quantité incorrecte: " + event.getNewValue());
             }
         });
 
         unitPriceColumn.setOnEditCommit(event -> {
-            SalesDocumentItemFormEntry entry = event.getTableView().getItems().get(event.getTablePosition().getRow());
+            DocumentItemFormEntry entry = event.getTableView().getItems().get(event.getTablePosition().getRow());
             try {
                 entry.setUnitPriceExcludingTaxes(BigDecimal.valueOf(Double.parseDouble(event.getNewValue())));
                 updateItemTotals(entry);
@@ -377,9 +406,7 @@ public class SalesDocumentController implements Initializable {
                 refreshTableView();
             } catch (NumberFormatException e) {
                 // Handle the case where the input is not a valid integer
-//                entry.setUnitPriceExcludingTaxes(BigDecimal.valueOf(Double.parseDouble(event.getOldValue())));
-
-                salesDocumentItemEntryTableView.refresh();
+                documentItemEntryTableView.refresh();
                 System.out.println("Invalid input: " + event.getNewValue());
                 displayErrorAlert("valeur de prix unitaire incorrecte: " + event.getNewValue());
             }
@@ -504,7 +531,7 @@ public class SalesDocumentController implements Initializable {
                                     PaymentFormEntry rowItem = (PaymentFormEntry) tableRow.getItem();
                                     paymentsTableView.getItems().remove(rowItem);
                                 } catch (Exception ex) {
-                                    Logger.getLogger(SalesDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+                                    Logger.getLogger(DocumentController.class.getName()).log(Level.SEVERE, null, ex);
                                 }
                             });
 
@@ -519,7 +546,7 @@ public class SalesDocumentController implements Initializable {
 
                                 PaymentController paymentController = fxmlLoader.getController();
                                 paymentController.setPaymentsTableView(paymentsTableView);
-                                paymentController.setSalesDocumentController(salesDocumentController);
+                                paymentController.setSalesDocumentController(documentController);
                                 TableRow tableRow = (TableRow) editButton.getParent().getParent().getParent();
                                 PaymentFormEntry rowItem = (PaymentFormEntry) tableRow.getItem();
                                 paymentController.initUpdate(rowItem.getPayment());
@@ -545,141 +572,157 @@ public class SalesDocumentController implements Initializable {
         actionColumn.setCellFactory(cellFactory);
     }
 
-    public void initSalesDocumentUpdate(SalesDocument salesDocumentOriginal) {
+    public void initDocumentUpdateForm(Document originalDocument) {
         // get a clone of the orignal sales document
-        if (salesDocumentOriginal instanceof Invoice invoice) {
+        if (originalDocument instanceof PurchaseOrder purchaseOrder) {
             try {
-                salesDocument = (SalesDocument) invoice.clone();
+                document = (Document) purchaseOrder.clone();
             } catch (CloneNotSupportedException e) {
                 throw new RuntimeException(e);
             }
         }
 
-        if (salesDocumentOriginal instanceof Quotation quotation) {
+        if (originalDocument instanceof PurchaseDeliveryNote purchaseDeliveryNote) {
             try {
-                salesDocument = (SalesDocument) quotation.clone();
+                document = (Document) purchaseDeliveryNote.clone();
             } catch (CloneNotSupportedException e) {
                 throw new RuntimeException(e);
             }
         }
 
-        if (salesDocumentOriginal instanceof DeliveryNote deliveryNote) {
+        if (originalDocument instanceof Quotation quotation) {
             try {
-                salesDocument = (SalesDocument) deliveryNote.clone();
+                document = (Document) quotation.clone();
             } catch (CloneNotSupportedException e) {
                 throw new RuntimeException(e);
             }
         }
 
-        if (salesDocumentOriginal instanceof CreditInvoice creditInvoice) {
+        if (originalDocument instanceof DeliveryNote deliveryNote) {
             try {
-                salesDocument = (SalesDocument) creditInvoice.clone();
+                document = (Document) deliveryNote.clone();
+            } catch (CloneNotSupportedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        if (originalDocument instanceof Invoice invoice) {
+            try {
+                document = (Document) invoice.clone();
+            } catch (CloneNotSupportedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        if (originalDocument instanceof CreditInvoice creditInvoice) {
+            try {
+                document = (Document) creditInvoice.clone();
             } catch (CloneNotSupportedException e) {
                 throw new RuntimeException(e);
             }
         }
 
         // set commun attributs
-        this.issueDateDatePicker.setValue(salesDocumentOriginal.getIssueDate());
-        this.totalIncludingTaxesTextField.setText(salesDocumentOriginal.getTotalIncludingTaxes().toString());
-        this.totalExcludingTaxesTextField.setText(salesDocumentOriginal.getTotalExcludingTaxes().toString());
-        this.totalTaxesTextField.setText(salesDocumentOriginal.getTotalTaxes().toString());
+        this.issueDateDatePicker.setValue(originalDocument.getIssueDate());
+        this.totalIncludingTaxesTextField.setText(originalDocument.getTotalIncludingTaxes().toString());
+        this.totalExcludingTaxesTextField.setText(originalDocument.getTotalExcludingTaxes().toString());
+        this.totalTaxesTextField.setText(originalDocument.getTotalTaxes().toString());
 
-        this.clientComboBox.setValue(salesDocumentOriginal.getClient());
-        this.commonCompanyIdentifierTextField.setText(salesDocumentOriginal.getClient().getCommonCompanyIdentifier());
-        this.addressTextField.setText(salesDocumentOriginal.getClient().getAddress());
+        // set client/supplier ComboBox
+        if (originalDocument instanceof PurchaseDocument purchaseDocument) {
+            this.comboBox.setValue(purchaseDocument.getSupplier());
+            this.commonCompanyIdentifierTextField.setText(purchaseDocument.getSupplier().getCommonCompanyIdentifier());
+            this.addressTextField.setText(purchaseDocument.getSupplier().getAddress());
+        } else if (originalDocument instanceof SalesDocument salesDocument) {
+            this.comboBox.setValue(salesDocument.getClient());
+            this.commonCompanyIdentifierTextField.setText(salesDocument.getClient().getCommonCompanyIdentifier());
+            this.addressTextField.setText(salesDocument.getClient().getAddress());
+        }
 
         isEditMode = true;
-        originalSalesHasReference = salesDocument.getReference() == null;
-        printSalesDocumentButton.setVisible(true);
 
-        printSalesDocumentButton.setOnAction(
+        originalSalesHasReference = document.getReference() == null;
+        printDocumentButton.setVisible(true);
+
+        printDocumentButton.setOnAction(
                 event -> {
                     try {
-                        SalesDocumentReportManager salesDocumentReportManager = new SalesDocumentReportManager();
-                        salesDocumentReportManager.displaySalesDocumentReport(salesDocument);
+                        DocumentReportManager documentReportManager = new DocumentReportManager();
+                        documentReportManager.displayDocumentReport(document);
                     } catch (Exception ex) {
-                        Logger.getLogger(SalesDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(DocumentController.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
         );
 
-        salesDocumentItemEntryTableView.getItems().clear();
-        salesDocumentOriginal.getItems().forEach(invoiceItem -> salesDocumentItemEntryTableView.getItems().add(
-                new SalesDocumentItemFormEntry(products, this, invoiceItem)
+        documentItemEntryTableView.getItems().clear();
+        originalDocument.getItems().forEach(
+                invoiceItem -> documentItemEntryTableView.getItems().add(
+                        new DocumentItemFormEntry(products, this, invoiceItem)
                 )
         );
 
-        refreshTableView();
+        documentItemEntryTableView.refresh();
 
-        saveSalesDocumentButton.setOnAction(e -> {
+        saveDocumentButton.setOnAction(e -> {
             try {
-                updateSalesDocument();
+                updateDocument();
             } catch (SQLException ex) {
                 throw new RuntimeException(ex);
             }
         });
 
-        if (salesDocumentOriginal instanceof Invoice invoice) {
-            this.salesDocumentReferenceLabel.setText(invoice.getReference() == null ? "Facture" : "Facture N° : " + invoice.getReference());
+        documentStatusComboBox.getItems().clear();
+
+        if (originalDocument instanceof PurchaseOrder purchaseOrder) {
+            this.documentReferenceLabel.setText(purchaseOrder.getReference() == null ? "Bon de commande" : "Bon de commande N° : " + purchaseOrder.getReference());
+
+            documentStatusComboBox.getItems().add(purchaseOrder.getStatus());
+            documentStatusComboBox.setValue(purchaseOrder.getStatus());
+        } else if (originalDocument instanceof PurchaseDeliveryNote purchaseDeliveryNote) {
+            this.documentReferenceLabel.setText(purchaseDeliveryNote.getReference() == null ? "Bon de réception" : "Bon de réception N° : " + purchaseDeliveryNote.getReference());
+
+            documentStatusComboBox.getItems().add(purchaseDeliveryNote.getStatus());
+            documentStatusComboBox.setValue(purchaseDeliveryNote.getStatus());
+        } else if (originalDocument instanceof Quotation quotation) {
+            this.documentReferenceLabel.setText(quotation.getReference() == null ? "Devis" : "Devis N° : " + quotation.getReference());
+            this.dueDateDatePicker.setValue(quotation.getValidUntil());
+
+            documentStatusComboBox.getItems().add(quotation.getStatus());
+            documentStatusComboBox.setValue(quotation.getStatus());
+        } else if (originalDocument instanceof DeliveryNote deliveryNote) {
+            this.documentReferenceLabel.setText(deliveryNote.getReference() == null ? "Bon de livraison" : "Bon de livraison N° : " + deliveryNote.getReference());
+
+            documentStatusComboBox.getItems().add(deliveryNote.getStatus());
+            documentStatusComboBox.setValue(deliveryNote.getStatus());
+        } else if (originalDocument instanceof Invoice invoice) {
+            this.documentReferenceLabel.setText(invoice.getReference() == null ? "Facture" : "Facture N° : " + invoice.getReference());
             this.dueDateDatePicker.setValue(invoice.getDueDate());
 
-            salesDocumentStatusComboBox.getItems().clear();
-            salesDocumentStatusComboBox.getItems().add(invoice.getStatus());
-            salesDocumentStatusComboBox.setValue(invoice.getStatus());
+            documentStatusComboBox.getItems().add(invoice.getStatus());
+            documentStatusComboBox.setValue(invoice.getStatus());
 
             paymentsTableView.getItems().clear();
             invoice.getPayments().forEach(payment -> paymentsTableView.getItems().add(new PaymentFormEntry(payment)));
-        } else if (salesDocumentOriginal instanceof CreditInvoice creditInvoice) {
-            this.salesDocumentReferenceLabel.setText(creditInvoice.getReference() == null ? "Facture avoir" : "Facture avoir N° : " + creditInvoice.getReference());
+        } else if (originalDocument instanceof CreditInvoice creditInvoice) {
+            this.documentReferenceLabel.setText(creditInvoice.getReference() == null ? "Facture avoir" : "Facture avoir N° : " + creditInvoice.getReference());
 
-            salesDocumentStatusComboBox.getItems().clear();
-            salesDocumentStatusComboBox.getItems().add(creditInvoice.getStatus());
-            salesDocumentStatusComboBox.setValue(creditInvoice.getStatus());
+            documentStatusComboBox.getItems().add(creditInvoice.getStatus());
+            documentStatusComboBox.setValue(creditInvoice.getStatus());
 
             paymentsTableView.getItems().clear();
             creditInvoice.getPayments().forEach(payment -> paymentsTableView.getItems().add(new PaymentFormEntry(payment)));
-        } else if (salesDocumentOriginal instanceof Quotation quotation) {
-            this.salesDocumentReferenceLabel.setText(quotation.getReference() == null ? "Devis" : "Devis N° : " + quotation.getReference());
-            this.dueDateDatePicker.setValue(quotation.getValidUntil());
-
-            salesDocumentStatusComboBox.getItems().clear();
-            salesDocumentStatusComboBox.getItems().addAll(QuotationStatus.values());
-            salesDocumentStatusComboBox.setValue(quotation.getStatus());
-        } else if (salesDocumentOriginal instanceof DeliveryNote deliveryNote) {
-            this.salesDocumentReferenceLabel.setText(deliveryNote.getReference() == null ? "Bon de livraison" : "Bon de livraison N° : " + deliveryNote.getReference());
-
-            salesDocumentStatusComboBox.getItems().clear();
-            salesDocumentStatusComboBox.getItems().addAll(QuotationStatus.values());
-            salesDocumentStatusComboBox.setValue(deliveryNote.getStatus());
         }
 
-        isDraftDocument = isDraftStatus(salesDocumentOriginal);
+        isDraftDocument = isDraftStatus(originalDocument);
         updatePaidAndRemainingAmounts();
-
-        if (isDraftDocument) {
-            if (salesDocumentOriginal instanceof Quotation) {
-                salesDocumentStatusComboBox.setValue(QuotationStatus.DRAFT);
-            }
-            if (salesDocumentOriginal instanceof DeliveryNote) {
-                salesDocumentStatusComboBox.setValue(QuotationStatus.DRAFT);
-            }
-            if (salesDocumentOriginal instanceof Invoice) {
-                salesDocumentStatusComboBox.setValue(InvoiceStatus.DRAFT);
-            }
-            if (salesDocumentOriginal instanceof CreditInvoice) {
-                salesDocumentStatusComboBox.setValue(CreditInvoiceStatus.DRAFT);
-            }
-
-
-        }
     }
 
     private void refreshTableView() {
-        salesDocumentItemEntryTableView.refresh();
+        documentItemEntryTableView.refresh();
     }
 
-    private void updateItemTotals(SalesDocumentItemFormEntry entry) {
+    private void updateItemTotals(DocumentItemFormEntry entry) {
         // 1. find new entry totals
         BigDecimal priceExcludingTaxes = entry.getUnitPriceExcludingTaxes().multiply(BigDecimal.valueOf(entry.getQuantity()));
         BigDecimal taxes = priceExcludingTaxes.multiply(entry.getTaxRate());
@@ -692,27 +735,27 @@ public class SalesDocumentController implements Initializable {
     }
 
     public void updateTotals() {
-        // update salesdocument totals
-        salesDocument.setTotalExcludingTaxes(BigDecimal.ZERO);
-        salesDocument.setTotalTaxes(BigDecimal.ZERO);
-        salesDocument.setTotalIncludingTaxes(BigDecimal.ZERO);
+        // update document totals
+        document.setTotalExcludingTaxes(BigDecimal.ZERO);
+        document.setTotalTaxes(BigDecimal.ZERO);
+        document.setTotalIncludingTaxes(BigDecimal.ZERO);
 
-        for (SalesDocumentItemFormEntry itemEntry : salesDocumentItemEntryTableView.getItems()) {
-            salesDocument.setTotalExcludingTaxes(salesDocument.getTotalExcludingTaxes().add(itemEntry.getTotalExcludingTaxes()));
-            salesDocument.setTotalTaxes(salesDocument.getTotalTaxes().add(itemEntry.getTotalTaxes()));
-            salesDocument.setTotalIncludingTaxes(salesDocument.getTotalIncludingTaxes().add(itemEntry.getTotalIncludingTaxes()));
+        for (DocumentItemFormEntry itemEntry : documentItemEntryTableView.getItems()) {
+            document.setTotalExcludingTaxes(document.getTotalExcludingTaxes().add(itemEntry.getTotalExcludingTaxes()));
+            document.setTotalTaxes(document.getTotalTaxes().add(itemEntry.getTotalTaxes()));
+            document.setTotalIncludingTaxes(document.getTotalIncludingTaxes().add(itemEntry.getTotalIncludingTaxes()));
         }
 
         // update total display
-        totalExcludingTaxesTextField.setText(salesDocument.getTotalExcludingTaxes().toString());
-        totalIncludingTaxesTextField.setText(salesDocument.getTotalIncludingTaxes().toString());
-        totalTaxesTextField.setText(salesDocument.getTotalTaxes().toString());
+        totalExcludingTaxesTextField.setText(document.getTotalExcludingTaxes().toString());
+        totalIncludingTaxesTextField.setText(document.getTotalIncludingTaxes().toString());
+        totalTaxesTextField.setText(document.getTotalTaxes().toString());
 
         updatePaidAndRemainingAmounts();
     }
 
     public void updatePaidAndRemainingAmounts() {
-        if (salesDocument instanceof Invoice invoice) {
+        if (document instanceof Invoice invoice) {
             if (paymentsTableView.getItems().isEmpty()) {
                 invoice.setPaidAmount(BigDecimal.ZERO);
             } else {
@@ -735,7 +778,7 @@ public class SalesDocumentController implements Initializable {
 
             paymentsTableView.refresh();
         }
-        if (salesDocument instanceof CreditInvoice creditInvoice) {
+        if (document instanceof CreditInvoice creditInvoice) {
             if (paymentsTableView.getItems().isEmpty()) {
                 creditInvoice.setPaidAmount(BigDecimal.ZERO);
             } else {
@@ -763,96 +806,176 @@ public class SalesDocumentController implements Initializable {
     }
 
     private void updateDocumentStatus() {
-        saveSalesDocumentButton.setDisable(!isItemTableViewValide() ||
-                salesDocument.getTotalIncludingTaxes().compareTo(BigDecimal.ZERO) == 0
-                || clientComboBox.getSelectionModel().getSelectedItem() == null);
+        saveDocumentButton.setDisable(!isItemTableViewValide() ||
+                document.getTotalIncludingTaxes().compareTo(BigDecimal.ZERO) == 0
+                || comboBox.getSelectionModel().getSelectedItem() == null);
 
-        if (salesDocument instanceof Quotation quotation) {
+        if (document instanceof PurchaseOrder purchaseOrder) {
+            // update Status Display
+            PurchaseOrderStatus selectedStatus = (PurchaseOrderStatus) documentStatusComboBox.getSelectionModel().getSelectedItem();
+
+            documentStatusComboBox.getItems().clear();
+            documentStatusComboBox.getItems().add(purchaseOrder.getStatus());
+
+            if (selectedStatus != null) {
+                if (!isEditMode) {
+                    // insert mode
+
+                    if (!documentStatusComboBox.getItems().contains(PurchaseOrderStatus.DRAFT)) {
+                        documentStatusComboBox.getItems().add(PurchaseOrderStatus.DRAFT);
+                    }
+
+                    if (isItemTableViewValide()
+                            && document.getTotalIncludingTaxes().compareTo(BigDecimal.ZERO) != 0
+                            && comboBox.getSelectionModel().getSelectedItem() != null) {
+                        if (!documentStatusComboBox.getItems().contains(PurchaseOrderStatus.SENT_TO_SUPPLIER)) {
+                            documentStatusComboBox.getItems().add(PurchaseOrderStatus.SENT_TO_SUPPLIER);
+                        }
+                        if (!documentStatusComboBox.getItems().contains(PurchaseOrderStatus.RECEIVED_ORDER)) {
+                            documentStatusComboBox.getItems().add(PurchaseOrderStatus.RECEIVED_ORDER);
+                        }
+                    }
+                } else {
+                    // update mode
+                    documentStatusComboBox.getItems().remove(purchaseOrder.getStatus());
+
+                    if (isDraftDocument) {
+                        documentStatusComboBox.getItems().addAll(PurchaseOrderStatus.DRAFT, PurchaseOrderStatus.SENT_TO_SUPPLIER, PurchaseOrderStatus.RECEIVED_ORDER);
+                    } else {
+                        documentStatusComboBox.getItems().addAll(PurchaseOrderStatus.SENT_TO_SUPPLIER, PurchaseOrderStatus.RECEIVED_ORDER, PurchaseOrderStatus.CANCELLED);
+                    }
+                }
+            }
+
+            int index = documentStatusComboBox.getItems().indexOf(purchaseOrder.getStatus());
+            documentStatusComboBox.getSelectionModel().select(index);
+        }
+
+        if (document instanceof PurchaseDeliveryNote purchaseDeliveryNote) {
+            // update Status Display
+            PurchaseDeliveryNoteStatus selectedStatus = (PurchaseDeliveryNoteStatus) documentStatusComboBox.getSelectionModel().getSelectedItem();
+
+            documentStatusComboBox.getItems().clear();
+            documentStatusComboBox.getItems().add(purchaseDeliveryNote.getStatus());
+
+            if (selectedStatus != null) {
+                if (!isEditMode) {
+                    // insert mode
+
+                    if (!documentStatusComboBox.getItems().contains(PurchaseDeliveryNoteStatus.DRAFT)) {
+                        documentStatusComboBox.getItems().add(PurchaseDeliveryNoteStatus.DRAFT);
+                    }
+
+                    if (isItemTableViewValide()
+                            && document.getTotalIncludingTaxes().compareTo(BigDecimal.ZERO) != 0
+                            && comboBox.getSelectionModel().getSelectedItem() != null) {
+                        if (!documentStatusComboBox.getItems().contains(PurchaseDeliveryNoteStatus.RECEIVED)) {
+                            documentStatusComboBox.getItems().add(PurchaseDeliveryNoteStatus.RECEIVED);
+                        }
+                    }
+                } else {
+                    // update mode
+                    documentStatusComboBox.getItems().remove(purchaseDeliveryNote.getStatus());
+
+                    if (isDraftDocument) {
+                        documentStatusComboBox.getItems().addAll(PurchaseDeliveryNoteStatus.DRAFT, PurchaseDeliveryNoteStatus.RECEIVED);
+                    } else {
+                        documentStatusComboBox.getItems().addAll(PurchaseDeliveryNoteStatus.RECEIVED, PurchaseDeliveryNoteStatus.CANCELLED);
+                    }
+                }
+            }
+
+            int index = documentStatusComboBox.getItems().indexOf(purchaseDeliveryNote.getStatus());
+            documentStatusComboBox.getSelectionModel().select(index);
+        }
+
+        if (document instanceof Quotation quotation) {
             if (quotation.getStatus() == QuotationStatus.SENT
                     && quotation.getValidUntil() != null && quotation.getValidUntil().isBefore(LocalDate.now())) {
                 quotation.setStatus(QuotationStatus.EXPIRED);
             }
 
             // update Status Display
-            QuotationStatus selectedStatus = (QuotationStatus) salesDocumentStatusComboBox.getSelectionModel().getSelectedItem();
+            QuotationStatus selectedStatus = (QuotationStatus) documentStatusComboBox.getSelectionModel().getSelectedItem();
 
-            salesDocumentStatusComboBox.getItems().clear();
-            salesDocumentStatusComboBox.getItems().add(quotation.getStatus());
+            documentStatusComboBox.getItems().clear();
+            documentStatusComboBox.getItems().add(quotation.getStatus());
 
             if (selectedStatus != null) {
                 if (!isEditMode) {
-                    if (!salesDocumentStatusComboBox.getItems().contains(QuotationStatus.DRAFT)) {
-                        salesDocumentStatusComboBox.getItems().add(QuotationStatus.DRAFT);
+                    if (!documentStatusComboBox.getItems().contains(QuotationStatus.DRAFT)) {
+                        documentStatusComboBox.getItems().add(QuotationStatus.DRAFT);
                     }
-                    if (!salesDocumentStatusComboBox.getItems().contains(QuotationStatus.SENT) && quotation.getTotalIncludingTaxes().compareTo(BigDecimal.ZERO) != 0) {
-                        salesDocumentStatusComboBox.getItems().add(QuotationStatus.SENT);
+                    if (!documentStatusComboBox.getItems().contains(QuotationStatus.SENT) && quotation.getTotalIncludingTaxes().compareTo(BigDecimal.ZERO) != 0) {
+                        documentStatusComboBox.getItems().add(QuotationStatus.SENT);
                     }
                 } else {
                     if (isDraftDocument) {
-                        salesDocumentStatusComboBox.getItems().add(QuotationStatus.SENT);
+                        documentStatusComboBox.getItems().add(QuotationStatus.SENT);
                     } else {
-                        if (salesDocumentStatusComboBox.getItems().contains(QuotationStatus.SENT)) {
-                            salesDocumentStatusComboBox.getItems().addAll(QuotationStatus.ACCEPTED, QuotationStatus.REJECTED);
+                        if (documentStatusComboBox.getItems().contains(QuotationStatus.SENT)) {
+                            documentStatusComboBox.getItems().addAll(QuotationStatus.ACCEPTED, QuotationStatus.REJECTED);
                         } else {
-                            if (!salesDocumentStatusComboBox.getItems().contains(QuotationStatus.REJECTED))
-                                salesDocumentStatusComboBox.getItems().add(QuotationStatus.REJECTED);
+                            if (!documentStatusComboBox.getItems().contains(QuotationStatus.REJECTED))
+                                documentStatusComboBox.getItems().add(QuotationStatus.REJECTED);
                             else
-                                salesDocumentStatusComboBox.getItems().add(QuotationStatus.ACCEPTED);
+                                documentStatusComboBox.getItems().add(QuotationStatus.ACCEPTED);
                         }
                     }
                 }
             }
 
             if (selectedStatus == QuotationStatus.SENT) {
-                salesDocumentStatusComboBox.setValue(QuotationStatus.SENT);
+                documentStatusComboBox.setValue(QuotationStatus.SENT);
             } else if (selectedStatus == QuotationStatus.DRAFT) {
-                salesDocumentStatusComboBox.setValue(QuotationStatus.DRAFT);
+                documentStatusComboBox.setValue(QuotationStatus.DRAFT);
             } else {
-                salesDocumentStatusComboBox.setValue(quotation.getStatus());
+                documentStatusComboBox.setValue(quotation.getStatus());
             }
         }
 
-        if (salesDocument instanceof DeliveryNote deliveryNote) {
+        if (document instanceof DeliveryNote deliveryNote) {
             // update Status Display
-            DeliveryNoteStatus selectedStatus = (DeliveryNoteStatus) salesDocumentStatusComboBox.getSelectionModel().getSelectedItem();
+            DeliveryNoteStatus selectedStatus = (DeliveryNoteStatus) documentStatusComboBox.getSelectionModel().getSelectedItem();
 
-            salesDocumentStatusComboBox.getItems().clear();
-            salesDocumentStatusComboBox.getItems().add(deliveryNote.getStatus());
+            documentStatusComboBox.getItems().clear();
+            documentStatusComboBox.getItems().add(deliveryNote.getStatus());
 
             if (selectedStatus != null) {
                 if (!isEditMode) {
                     // insert mode
 
-                    if (!salesDocumentStatusComboBox.getItems().contains(DeliveryNoteStatus.DRAFT)) {
-                        salesDocumentStatusComboBox.getItems().add(DeliveryNoteStatus.DRAFT);
+                    if (!documentStatusComboBox.getItems().contains(DeliveryNoteStatus.DRAFT)) {
+                        documentStatusComboBox.getItems().add(DeliveryNoteStatus.DRAFT);
                     }
 
                     if (isItemTableViewValide()
-                            && salesDocument.getTotalIncludingTaxes().compareTo(BigDecimal.ZERO) != 0
-                            && clientComboBox.getSelectionModel().getSelectedItem() != null) {
-                        if (!salesDocumentStatusComboBox.getItems().contains(DeliveryNoteStatus.DISPATCHED)) {
-                            salesDocumentStatusComboBox.getItems().add(DeliveryNoteStatus.DISPATCHED);
+                            && document.getTotalIncludingTaxes().compareTo(BigDecimal.ZERO) != 0
+                            && comboBox.getSelectionModel().getSelectedItem() != null) {
+                        if (!documentStatusComboBox.getItems().contains(DeliveryNoteStatus.DISPATCHED)) {
+                            documentStatusComboBox.getItems().add(DeliveryNoteStatus.DISPATCHED);
                         }
-                        if (!salesDocumentStatusComboBox.getItems().contains(DeliveryNoteStatus.DELIVERED)) {
-                            salesDocumentStatusComboBox.getItems().add(DeliveryNoteStatus.DELIVERED);
+                        if (!documentStatusComboBox.getItems().contains(DeliveryNoteStatus.DELIVERED)) {
+                            documentStatusComboBox.getItems().add(DeliveryNoteStatus.DELIVERED);
                         }
                     }
                 } else {
                     // update mode
-                    salesDocumentStatusComboBox.getItems().remove(deliveryNote.getStatus());
+                    documentStatusComboBox.getItems().remove(deliveryNote.getStatus());
 
                     if (isDraftDocument) {
-                        salesDocumentStatusComboBox.getItems().addAll(DeliveryNoteStatus.DISPATCHED, DeliveryNoteStatus.DELIVERED);
+                        documentStatusComboBox.getItems().addAll(DeliveryNoteStatus.DISPATCHED, DeliveryNoteStatus.DELIVERED);
                     } else {
-                        salesDocumentStatusComboBox.getItems().addAll(DeliveryNoteStatus.DISPATCHED, DeliveryNoteStatus.DELIVERED, DeliveryNoteStatus.CANCELLED);
+                        documentStatusComboBox.getItems().addAll(DeliveryNoteStatus.DISPATCHED, DeliveryNoteStatus.DELIVERED, DeliveryNoteStatus.CANCELLED);
                     }
                 }
             }
 
-            salesDocumentStatusComboBox.setValue(deliveryNote.getStatus());
+            int index = documentStatusComboBox.getItems().indexOf(deliveryNote.getStatus());
+            documentStatusComboBox.getSelectionModel().select(index);
         }
 
-        if (salesDocument instanceof Invoice invoice) {
+        if (document instanceof Invoice invoice) {
             if (invoice.getTotalIncludingTaxes().compareTo(invoice.getPaidAmount()) == 0
                     && invoice.getTotalIncludingTaxes().compareTo(BigDecimal.ZERO) == 0) {
                 if (invoice.getDueDate() != null) {
@@ -869,36 +992,38 @@ public class SalesDocumentController implements Initializable {
             }
 
             // update Status Display
-            InvoiceStatus selectedStatus = (InvoiceStatus) salesDocumentStatusComboBox.getSelectionModel().getSelectedItem();
+            InvoiceStatus selectedStatus = (InvoiceStatus) documentStatusComboBox.getSelectionModel().getSelectedItem();
 
-            salesDocumentStatusComboBox.getItems().clear();
-            salesDocumentStatusComboBox.getItems().add(invoice.getStatus());
+            documentStatusComboBox.getItems().clear();
+            documentStatusComboBox.getItems().add(invoice.getStatus());
 
             if (selectedStatus != null) {
                 if (!isEditMode) {
-                    if (!salesDocumentStatusComboBox.getItems().contains(InvoiceStatus.DRAFT)) {
-                        salesDocumentStatusComboBox.getItems().add(InvoiceStatus.DRAFT);
+                    if (!documentStatusComboBox.getItems().contains(InvoiceStatus.DRAFT)) {
+                        documentStatusComboBox.getItems().add(InvoiceStatus.DRAFT);
                     }
                 } else {
                     if (isDraftDocument) {
-                        salesDocumentStatusComboBox.getItems().add(InvoiceStatus.DRAFT);
+                        documentStatusComboBox.getItems().add(InvoiceStatus.DRAFT);
                     } else {
-                        salesDocumentStatusComboBox.getItems().add(InvoiceStatus.CANCELLED);
+                        documentStatusComboBox.getItems().add(InvoiceStatus.CANCELLED);
                     }
                 }
             }
 
+            int index;
             if (selectedStatus == InvoiceStatus.CANCELLED) {
-                salesDocumentStatusComboBox.setValue(InvoiceStatus.CANCELLED);
+                index = documentStatusComboBox.getItems().indexOf(InvoiceStatus.CANCELLED);
             } else if (selectedStatus == InvoiceStatus.DRAFT) {
-                salesDocumentStatusComboBox.setValue(InvoiceStatus.DRAFT);
+                index = documentStatusComboBox.getItems().indexOf(InvoiceStatus.DRAFT);
             } else {
-                salesDocumentStatusComboBox.setValue(invoice.getStatus());
+                index = documentStatusComboBox.getItems().indexOf(invoice.getStatus());
             }
 
+            documentStatusComboBox.getSelectionModel().select(index);
         }
 
-        if (salesDocument instanceof CreditInvoice creditInvoice) {
+        if (document instanceof CreditInvoice creditInvoice) {
             if (creditInvoice.getTotalIncludingTaxes().compareTo(creditInvoice.getPaidAmount()) == 0
                     && creditInvoice.getTotalIncludingTaxes().compareTo(BigDecimal.ZERO) == 0) {
                 creditInvoice.setStatus(CreditInvoiceStatus.DRAFT);
@@ -911,58 +1036,66 @@ public class SalesDocumentController implements Initializable {
             }
 
             // update Status Display
-            CreditInvoiceStatus selectedStatus = (CreditInvoiceStatus) salesDocumentStatusComboBox.getSelectionModel().getSelectedItem();
+            CreditInvoiceStatus selectedStatus = (CreditInvoiceStatus) documentStatusComboBox.getSelectionModel().getSelectedItem();
 
-            salesDocumentStatusComboBox.getItems().clear();
-            salesDocumentStatusComboBox.getItems().add(creditInvoice.getStatus());
+            documentStatusComboBox.getItems().clear();
+            documentStatusComboBox.getItems().add(creditInvoice.getStatus());
 
             if (selectedStatus != null) {
                 if (!isEditMode) {
-                    if (!salesDocumentStatusComboBox.getItems().contains(CreditInvoiceStatus.DRAFT)) {
-                        salesDocumentStatusComboBox.getItems().add(CreditInvoiceStatus.DRAFT);
+                    if (!documentStatusComboBox.getItems().contains(CreditInvoiceStatus.DRAFT)) {
+                        documentStatusComboBox.getItems().add(CreditInvoiceStatus.DRAFT);
                     }
                 } else {
                     if (isDraftDocument) {
                         // insert mode
-                        if (!salesDocumentStatusComboBox.getItems().contains(CreditInvoiceStatus.DRAFT)) {
-                            salesDocumentStatusComboBox.getItems().add(CreditInvoiceStatus.DRAFT);
+                        if (!documentStatusComboBox.getItems().contains(CreditInvoiceStatus.DRAFT)) {
+                            documentStatusComboBox.getItems().add(CreditInvoiceStatus.DRAFT);
                         }
                     } else {
                         // update mode
-                        salesDocumentStatusComboBox.getItems().add(CreditInvoiceStatus.CANCELLED);
+                        documentStatusComboBox.getItems().add(CreditInvoiceStatus.CANCELLED);
                     }
                 }
             }
 
             // select document status
+            int index;
+
             if (selectedStatus == CreditInvoiceStatus.CANCELLED) {
-                salesDocumentStatusComboBox.setValue(CreditInvoiceStatus.CANCELLED);
+                index = documentStatusComboBox.getItems().indexOf(CreditInvoiceStatus.CANCELLED);
             } else if (selectedStatus == CreditInvoiceStatus.DRAFT) {
-                salesDocumentStatusComboBox.setValue(CreditInvoiceStatus.DRAFT);
+                index = documentStatusComboBox.getItems().indexOf(CreditInvoiceStatus.DRAFT);
             } else {
-                salesDocumentStatusComboBox.setValue(creditInvoice.getStatus());
+                index = documentStatusComboBox.getItems().indexOf(creditInvoice.getStatus());
             }
 
+            documentStatusComboBox.getSelectionModel().select(index);
         }
     }
 
-    private boolean isDraftStatus(SalesDocument salesDocument) {
-        if (salesDocument instanceof Quotation quotation) {
+    private boolean isDraftStatus(Document document) {
+        if (document instanceof PurchaseOrder purchaseOrder) {
+            return purchaseOrder.getStatus() == PurchaseOrderStatus.DRAFT;
+        } else if (document instanceof PurchaseDeliveryNote purchaseDeliveryNote) {
+            return purchaseDeliveryNote.getStatus() == PurchaseDeliveryNoteStatus.DRAFT;
+        } else if (document instanceof Quotation quotation) {
             return quotation.getStatus() == QuotationStatus.DRAFT;
-        } else if (salesDocument instanceof DeliveryNote deliveryNote) {
+        } else if (document instanceof DeliveryNote deliveryNote) {
             return deliveryNote.getStatus() == DeliveryNoteStatus.DRAFT;
-        } else if (salesDocument instanceof Invoice invoice) {
+        } else if (document instanceof Invoice invoice) {
             return invoice.getStatus() == InvoiceStatus.DRAFT;
-        } else if (salesDocument instanceof CreditInvoice creditInvoice) {
+        } else if (document instanceof CreditInvoice creditInvoice) {
             return creditInvoice.getStatus() == CreditInvoiceStatus.DRAFT;
         }
         return false;
     }
 
-    public void setSalesDocumentType(Class<? extends SalesDocument> documentClass) {
+    public void setDocumentType(Class<? extends Document> documentClass) {
         if (documentClass == Invoice.class) {
-            salesDocument = new Invoice();
-            salesDocumentReferenceLabel.setText("Facture");
+            document = new Invoice();
+            documentReferenceLabel.setText("Facture");
+            documentDetailsLabel.setText("Details de la Facture");
 
             addPaymentButton.setOnAction(e -> {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/example/salesmanagement/payment/form-payment.fxml"));
@@ -986,19 +1119,20 @@ public class SalesDocumentController implements Initializable {
             });
 
             dueDateDatePicker.setOnAction(event -> {
-                ((Invoice) salesDocument).setDueDate(dueDateDatePicker.getValue());
+                ((Invoice) document).setDueDate(dueDateDatePicker.getValue());
                 updateDocumentStatus();
             });
 
             initPaymentsTableView();
-            salesDocumentStatusComboBox.getItems().addAll(InvoiceStatus.values());
+            documentStatusComboBox.getItems().addAll(InvoiceStatus.values());
 
             updatePaidAndRemainingAmounts();
         }
 
         if (documentClass == CreditInvoice.class) {
-            salesDocument = new CreditInvoice();
-            salesDocumentReferenceLabel.setText("Facture Avoir");
+            document = new CreditInvoice();
+            documentReferenceLabel.setText("Facture Avoir");
+            documentDetailsLabel.setText("Details de la Facture avoir");
 
             addPaymentButton.setOnAction(e -> {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/example/salesmanagement/payment/form-payment.fxml"));
@@ -1024,55 +1158,102 @@ public class SalesDocumentController implements Initializable {
             ((VBox) dueDateLabel.getParent().getParent()).getChildren().remove(dueDateLabel.getParent());
 
             initPaymentsTableView();
-            salesDocumentStatusComboBox.getItems().addAll(CreditInvoiceStatus.values());
-            salesDocumentStatusComboBox.setValue(CreditInvoiceStatus.DRAFT);
+            documentStatusComboBox.getItems().addAll(CreditInvoiceStatus.values());
+            documentStatusComboBox.setValue(CreditInvoiceStatus.DRAFT);
 
             updatePaidAndRemainingAmounts();
         }
 
         if (documentClass == Quotation.class) {
-            salesDocument = new Quotation();
-            salesDocumentReferenceLabel.setText("Devis");
+            document = new Quotation();
+            documentReferenceLabel.setText("Devis");
             dueDateLabel.setText("Valide jusqu'au");
+            documentDetailsLabel.setText("Details du devis");
 
             HBox parent = (HBox) paymentsHBox.getParent();
             parent.getChildren().remove(paymentsHBox);
             parent.setAlignment(Pos.BOTTOM_RIGHT);
 
             ((VBox) paidAmountHBox.getParent()).getChildren().removeAll(totalSeparator, paidAmountHBox, remainingAmountHBox);
-            salesDocumentItemEntryTableView.setPrefHeight(salesDocumentItemEntryTableView.getPrefHeight() + 100);
+            documentItemEntryTableView.setPrefHeight(documentItemEntryTableView.getPrefHeight() + 100);
 
-            salesDocumentStatusComboBox.getItems().addAll(QuotationStatus.values());
-            salesDocumentStatusComboBox.setValue(QuotationStatus.DRAFT);
+            documentStatusComboBox.getItems().addAll(QuotationStatus.values());
+            documentStatusComboBox.setValue(QuotationStatus.DRAFT);
+
             updateDocumentStatus();
         }
 
         if (documentClass == DeliveryNote.class) {
-            salesDocument = new DeliveryNote();
-            salesDocumentReferenceLabel.setText("Bon de livraison");
+            document = new DeliveryNote();
+            documentReferenceLabel.setText("Bon de livraison");
+            documentDetailsLabel.setText("Details du bon de livraison");
 
             HBox parent = (HBox) paymentsHBox.getParent();
             parent.getChildren().remove(paymentsHBox);
             parent.setAlignment(Pos.BOTTOM_RIGHT);
 
             ((VBox) paidAmountHBox.getParent()).getChildren().removeAll(totalSeparator, paidAmountHBox, remainingAmountHBox);
-            salesDocumentItemEntryTableView.setPrefHeight(salesDocumentItemEntryTableView.getPrefHeight() + 100);
+            documentItemEntryTableView.setPrefHeight(documentItemEntryTableView.getPrefHeight() + 100);
 
             ((VBox) dueDateLabel.getParent().getParent()).getChildren().remove(dueDateLabel.getParent());
 
 
-            salesDocumentStatusComboBox.getItems().addAll(DeliveryNoteStatus.values());
-            salesDocumentStatusComboBox.setValue(DeliveryNoteStatus.DRAFT);
-            updateDocumentStatus();
+            documentStatusComboBox.getItems().addAll(DeliveryNoteStatus.values());
+            documentStatusComboBox.setValue(DeliveryNoteStatus.DRAFT);
 
+            updateDocumentStatus();
         }
 
-        salesDocument.setIssueDate(LocalDate.now());
+        if (documentClass == PurchaseOrder.class) {
+            document = new PurchaseOrder();
+            documentReferenceLabel.setText("Bon de commande");
+            documentDetailsLabel.setText("Details du bon de commande");
+
+            HBox parent = (HBox) paymentsHBox.getParent();
+            parent.getChildren().remove(paymentsHBox);
+            parent.setAlignment(Pos.BOTTOM_RIGHT);
+
+            ((VBox) paidAmountHBox.getParent()).getChildren().removeAll(totalSeparator, paidAmountHBox, remainingAmountHBox);
+            documentItemEntryTableView.setPrefHeight(documentItemEntryTableView.getPrefHeight() + 100);
+
+            ((VBox) dueDateLabel.getParent().getParent()).getChildren().remove(dueDateLabel.getParent());
+
+
+            documentStatusComboBox.getItems().addAll(PurchaseOrderStatus.values());
+            documentStatusComboBox.setValue(PurchaseOrderStatus.DRAFT);
+
+            updateDocumentStatus();
+        }
+
+        if (documentClass == PurchaseDeliveryNote.class) {
+            document = new PurchaseDeliveryNote();
+            documentReferenceLabel.setText("Bon de réception");
+            documentDetailsLabel.setText("Details du bon de réception");
+
+            HBox parent = (HBox) paymentsHBox.getParent();
+            parent.getChildren().remove(paymentsHBox);
+            parent.setAlignment(Pos.BOTTOM_RIGHT);
+
+            ((VBox) paidAmountHBox.getParent()).getChildren().removeAll(totalSeparator, paidAmountHBox, remainingAmountHBox);
+            documentItemEntryTableView.setPrefHeight(documentItemEntryTableView.getPrefHeight() + 100);
+
+            ((VBox) dueDateLabel.getParent().getParent()).getChildren().remove(dueDateLabel.getParent());
+
+
+            documentStatusComboBox.getItems().addAll(PurchaseDeliveryNoteStatus.values());
+            documentStatusComboBox.setValue(PurchaseDeliveryNoteStatus.DRAFT);
+
+            updateDocumentStatus();
+        }
+
+        document.setIssueDate(LocalDate.now());
 
         issueDateDatePicker.setOnAction(event -> {
-            salesDocument.setIssueDate(issueDateDatePicker.getValue());
+            document.setIssueDate(issueDateDatePicker.getValue());
             updateDocumentStatus();
         });
+
+        initComboBox();
     }
 
     private void displaySuccessAlert() {
@@ -1104,6 +1285,14 @@ public class SalesDocumentController implements Initializable {
         protected void updateItem(Client client, boolean bln) {
             super.updateItem(client, bln);
             setText(client != null ? client.getName() : null);
+        }
+    }
+
+    private static class SupplierComboCell extends ListCell<Supplier> {
+        @Override
+        protected void updateItem(Supplier supplier, boolean bln) {
+            super.updateItem(supplier, bln);
+            setText(supplier != null ? supplier.getName() : null);
         }
     }
 

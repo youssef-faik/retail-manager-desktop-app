@@ -1,6 +1,6 @@
 package com.example.salesmanagement;
 
-import com.example.salesmanagement.salesdocument.*;
+import com.example.salesmanagement.document.*;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -16,6 +16,20 @@ import java.util.Objects;
 public class MainController {
     @FXML
     private BorderPane borderPane;
+
+    public void addSupplier() throws IOException {
+        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("supplier/form-supplier.fxml")));
+        Stage stage = new Stage();
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.setScene(new Scene(root));
+        stage.setResizable(false);
+        stage.showAndWait();
+    }
+
+    public void listSuppliers() throws IOException {
+        VBox pane = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("supplier/list-suppliers.fxml")));
+        borderPane.setCenter(pane);
+    }
 
     public void addClient() throws IOException {
         Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("client/form-client.fxml")));
@@ -73,82 +87,122 @@ public class MainController {
         borderPane.setCenter(pane);
     }
 
-    public void listQuotations() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("salesdocument/list-sales-documents.fxml"));
+    public void addPurchaseOrder() throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("document/form-document.fxml"));
         VBox pane = fxmlLoader.load();
 
-        SalesDocumentsController salesDocumentsController = fxmlLoader.getController();
-        salesDocumentsController.setFormClass(Quotation.class);
+        DocumentController documentController = fxmlLoader.getController();
+        documentController.setDocumentType(PurchaseOrder.class);
+
+        borderPane.setCenter(pane);
+    }
+
+    public void listPurchaseOrders() throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("document/documents.fxml"));
+        VBox pane = fxmlLoader.load();
+
+        DocumentsController documentsController = fxmlLoader.getController();
+        documentsController.setFormClass(PurchaseOrder.class);
+
+        borderPane.setCenter(pane);
+    }
+
+    public void addPurchaseDeliveryNote() throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("document/form-document.fxml"));
+        VBox pane = fxmlLoader.load();
+
+        DocumentController documentController = fxmlLoader.getController();
+        documentController.setDocumentType(PurchaseDeliveryNote.class);
+
+        borderPane.setCenter(pane);
+    }
+
+    public void listPurchaseDeliveryNotes() throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("document/documents.fxml"));
+        VBox pane = fxmlLoader.load();
+
+        DocumentsController documentsController = fxmlLoader.getController();
+        documentsController.setFormClass(PurchaseDeliveryNote.class);
+
+        borderPane.setCenter(pane);
+    }
+
+    public void listQuotations() throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("document/documents.fxml"));
+        VBox pane = fxmlLoader.load();
+
+        DocumentsController documentsController = fxmlLoader.getController();
+        documentsController.setFormClass(Quotation.class);
 
         borderPane.setCenter(pane);
     }
 
     public void addQuotation() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("salesdocument/form-sales-document.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("document/form-document.fxml"));
         VBox pane = fxmlLoader.load();
 
-        SalesDocumentController salesDocumentController = fxmlLoader.getController();
-        salesDocumentController.setSalesDocumentType(Quotation.class);
+        DocumentController documentController = fxmlLoader.getController();
+        documentController.setDocumentType(Quotation.class);
 
         borderPane.setCenter(pane);
     }
 
     public void listDeliveryNotes() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("salesdocument/list-sales-documents.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("document/documents.fxml"));
         VBox pane = fxmlLoader.load();
 
-        SalesDocumentsController salesDocumentsController = fxmlLoader.getController();
-        salesDocumentsController.setFormClass(DeliveryNote.class);
+        DocumentsController documentsController = fxmlLoader.getController();
+        documentsController.setFormClass(DeliveryNote.class);
 
         borderPane.setCenter(pane);
     }
 
     public void addDeliveryNote() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("salesdocument/form-sales-document.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("document/form-document.fxml"));
         VBox pane = fxmlLoader.load();
 
-        SalesDocumentController salesDocumentController = fxmlLoader.getController();
-        salesDocumentController.setSalesDocumentType(DeliveryNote.class);
+        DocumentController documentController = fxmlLoader.getController();
+        documentController.setDocumentType(DeliveryNote.class);
 
         borderPane.setCenter(pane);
     }
 
     public void addInvoice() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("salesdocument/form-sales-document.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("document/form-document.fxml"));
         VBox pane = fxmlLoader.load();
 
-        SalesDocumentController salesDocumentController = fxmlLoader.getController();
-        salesDocumentController.setSalesDocumentType(Invoice.class);
+        DocumentController documentController = fxmlLoader.getController();
+        documentController.setDocumentType(Invoice.class);
 
         borderPane.setCenter(pane);
     }
 
     public void listInvoices() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("salesdocument/list-sales-documents.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("document/documents.fxml"));
         VBox pane = fxmlLoader.load();
 
-        SalesDocumentsController salesDocumentsController = fxmlLoader.getController();
-        salesDocumentsController.setFormClass(Invoice.class);
+        DocumentsController documentsController = fxmlLoader.getController();
+        documentsController.setFormClass(Invoice.class);
 
         borderPane.setCenter(pane);
     }
 
     public void listCreditInvoices() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("salesdocument/list-sales-documents.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("document/documents.fxml"));
         VBox pane = fxmlLoader.load();
 
-        SalesDocumentsController salesDocumentsController = fxmlLoader.getController();
-        salesDocumentsController.setFormClass(CreditInvoice.class);
+        DocumentsController documentsController = fxmlLoader.getController();
+        documentsController.setFormClass(CreditInvoice.class);
 
         borderPane.setCenter(pane);
     }
 
     public void addCreditInvoice() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("salesdocument/form-sales-document.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("document/form-document.fxml"));
         VBox pane = fxmlLoader.load();
 
-        SalesDocumentController salesDocumentController = fxmlLoader.getController();
-        salesDocumentController.setSalesDocumentType(CreditInvoice.class);
+        DocumentController documentController = fxmlLoader.getController();
+        documentController.setDocumentType(CreditInvoice.class);
 
         borderPane.setCenter(pane);
     }

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<VBox xmlns:fx="http://javafx.com/fxml/1" spacing="8.0" xmlns="http://javafx.com/javafx/22"
+      fx:controller="com.example.salesmanagement.supplier.SupplierController">
+    <children>
+        <Label graphicTextGap="8.0" text="Fournisseur">
+            <font>
+                <Font name="System Bold" size="32.0"/>
+            </font>
+            <graphic>
+                <FontAwesomeIconView glyphName="USER"/>
+            </graphic>
+            <VBox.margin>
+                <Insets bottom="16.0"/>
+            </VBox.margin>
+        </Label>
+
+        <HBox>
+            <children>
+                <Label prefWidth="110.0" text="Nom" HBox.hgrow="ALWAYS"/>
+                <TextField fx:id="nameTextField" prefHeight="25.0" prefWidth="250.0" HBox.hgrow="ALWAYS"/>
+            </children>
+        </HBox>
+        <HBox>
+            <children>
+                <Label prefWidth="110.0" text="ICE" HBox.hgrow="ALWAYS"/>
+                <TextField fx:id="commonCompanyIdentifierTextField" prefHeight="25.0" prefWidth="250.0"
+                           HBox.hgrow="ALWAYS"/>
+            </children>
+        </HBox>
+        <HBox>
+            <children>
+                <Label prefWidth="110.0" text="IF" HBox.hgrow="ALWAYS"/>
+                <TextField fx:id="taxIdentificationNumberTextField" prefHeight="25.0" prefWidth="250.0"
+                           HBox.hgrow="ALWAYS"/>
+            </children>
+        </HBox>
+        <HBox>
+            <children>
+                <Label prefHeight="17.0" prefWidth="110.0" text="Telephone" HBox.hgrow="ALWAYS"/>
+                <TextField fx:id="phoneNumberTextField" prefHeight="25.0" prefWidth="250.0" HBox.hgrow="ALWAYS"/>
+            </children>
+        </HBox>
+        <HBox>
+            <children>
+                <Label prefWidth="110.0" text="Adresse" HBox.hgrow="ALWAYS"/>
+                <TextArea fx:id="addressTextArea" prefHeight="56.0" prefWidth="250.0" wrapText="true"
+                          HBox.hgrow="ALWAYS"/>
+            </children>
+        </HBox>
+        <Separator prefWidth="200.0"/>
+        <ButtonBar>
+            <buttons>
+                <Button fx:id="saveButton" defaultButton="true" mnemonicParsing="false" prefHeight="25.0"
+                        prefWidth="75.0" text="Enregistrer"/>
+                <Button fx:id="cancelButton" cancelButton="true" mnemonicParsing="false" prefHeight="25.0"
+                        prefWidth="75.0" text="Annuler"/>
+            </buttons>
+        </ButtonBar>
+    </children>
+    <padding>
+        <Insets bottom="8.0" left="8.0" right="8.0" top="8.0"/>
+    </padding>
+</VBox>

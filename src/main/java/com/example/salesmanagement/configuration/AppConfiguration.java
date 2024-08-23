@@ -1,6 +1,6 @@
 package com.example.salesmanagement.configuration;
 
-import com.example.salesmanagement.salesdocument.*;
+import com.example.salesmanagement.document.*;
 
 import java.util.Map;
 import java.util.Set;
@@ -14,7 +14,11 @@ public class AppConfiguration {
 
         for (ConfigKey key : ConfigKey.values()) {
             if (configOptions.stream().filter(configOption -> configOption.getKey() == key).findFirst().isEmpty()) {
-                if (key == ConfigKey.NEXT_QUOTATION_NUMBER) {
+                if (key == ConfigKey.NEXT_PURCHASE_ORDER_NUMBER) {
+                    ConfigOptionRepository.save(new ConfigOption(key, "1"));
+                } else if (key == ConfigKey.NEXT_PURCHASE_DELIVERY_NOTE_NUMBER) {
+                    ConfigOptionRepository.save(new ConfigOption(key, "1"));
+                } else if (key == ConfigKey.NEXT_QUOTATION_NUMBER) {
                     ConfigOptionRepository.save(new ConfigOption(key, "1"));
                 } else if (key == ConfigKey.NEXT_DELIVERY_NOTE_NUMBER) {
                     ConfigOptionRepository.save(new ConfigOption(key, "1"));
@@ -44,16 +48,16 @@ public class AppConfiguration {
         return instance;
     }
 
-    private static <T extends SalesDocument> void validateNextSalesDocumentReference(Long nextReference, Class<T> aClass) {
+    private static <T extends Document> void validateNextSalesDocumentReference(Long nextReference, Class<T> aClass) {
         if (nextReference <= 0) {
             throw new RuntimeException("The next sales document number must be strictly greater than 0.");
         }
 
-        if (SalesDocumentRepository.count(aClass) > 0) {
-            SalesDocumentRepository.findFirstByOrderByIdDesc(aClass).ifPresent(salesDocument -> {
-                if (nextReference <= salesDocument.getReference()) {
+        if (DocumentRepository.count(aClass) > 0) {
+            DocumentRepository.findFirstByOrderByIdDesc(aClass).ifPresent(document -> {
+                if (nextReference <= document.getReference()) {
                             throw new RuntimeException(
-                                    "The next sales document number must be greater than or equal to " + (salesDocument.getReference() + 1));
+                                    "The next sales document number must be greater than or equal to " + (document.getReference() + 1));
                         }
                     }
             );
@@ -70,11 +74,15 @@ public class AppConfiguration {
         ConfigOptionRepository.update(option);
     }
 
-    private static <T extends SalesDocument> void updateNextSalesDocumentNumber(Long nextInvoiceNumber, Class<T> tClass) {
+    private static <T extends Document> void updateNextSalesDocumentNumber(Long nextInvoiceNumber, Class<T> tClass) {
         validateNextSalesDocumentReference(nextInvoiceNumber, tClass);
         ConfigKey configKey = null;
 
-        if (tClass == Invoice.class) {
+        if (tClass == PurchaseOrder.class) {
+            configKey = ConfigKey.NEXT_PURCHASE_ORDER_NUMBER;
+        } else if (tClass == PurchaseDeliveryNote.class) {
+            configKey = ConfigKey.NEXT_PURCHASE_DELIVERY_NOTE_NUMBER;
+        } else if (tClass == Invoice.class) {
             configKey = ConfigKey.NEXT_INVOICE_NUMBER;
         } else if (tClass == Quotation.class) {
             configKey = ConfigKey.NEXT_QUOTATION_NUMBER;
@@ -94,16 +102,21 @@ public class AppConfiguration {
 
     public void setConfigurationValues(Map<ConfigKey, String> configOptions) {
         configOptions.forEach((key, value) -> {
-            if (key == ConfigKey.NEXT_QUOTATION_NUMBER) {
-                updateNextSalesDocumentNumber(Long.valueOf((configOptions.get(ConfigKey.NEXT_QUOTATION_NUMBER))), Quotation.class);
-            } else if (key == ConfigKey.NEXT_DELIVERY_NOTE_NUMBER) {
-                updateNextSalesDocumentNumber(Long.valueOf((configOptions.get(ConfigKey.NEXT_DELIVERY_NOTE_NUMBER))), DeliveryNote.class);
-            } else if (key == ConfigKey.NEXT_INVOICE_NUMBER) {
-                updateNextSalesDocumentNumber(Long.valueOf((configOptions.get(ConfigKey.NEXT_INVOICE_NUMBER))), Invoice.class);
-            } else if (key == ConfigKey.NEXT_CREDIT_INVOICE_NUMBER) {
-                updateNextSalesDocumentNumber(Long.valueOf((configOptions.get(ConfigKey.NEXT_CREDIT_INVOICE_NUMBER))), CreditInvoice.class);
-            } else {
-                updateOptionValue(key, String.valueOf(value));
+
+            switch (key) {
+                case NEXT_PURCHASE_ORDER_NUMBER ->
+                        updateNextSalesDocumentNumber(Long.valueOf((configOptions.get(key))), PurchaseOrder.class);
+                case NEXT_PURCHASE_DELIVERY_NOTE_NUMBER ->
+                        updateNextSalesDocumentNumber(Long.valueOf((configOptions.get(key))), PurchaseDeliveryNote.class);
+                case NEXT_QUOTATION_NUMBER ->
+                        updateNextSalesDocumentNumber(Long.valueOf((configOptions.get(key))), Quotation.class);
+                case NEXT_DELIVERY_NOTE_NUMBER ->
+                        updateNextSalesDocumentNumber(Long.valueOf((configOptions.get(key))), DeliveryNote.class);
+                case NEXT_INVOICE_NUMBER ->
+                        updateNextSalesDocumentNumber(Long.valueOf((configOptions.get(key))), Invoice.class);
+                case NEXT_CREDIT_INVOICE_NUMBER ->
+                        updateNextSalesDocumentNumber(Long.valueOf((configOptions.get(key))), CreditInvoice.class);
+                default -> updateOptionValue(key, String.valueOf(value));
             }
         });
     }
@@ -112,6 +125,5 @@ public class AppConfiguration {
         return ConfigOptionRepository.findAll()
                 .stream()
                 .collect(Collectors.toMap(ConfigOption::getKey, ConfigOption::getValue));
-
     }
 }

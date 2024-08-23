@@ -16,15 +16,19 @@
 
         <mapping class="com.example.salesmanagement.configuration.ConfigOption"/>
         <mapping class="com.example.salesmanagement.client.Client"/>
+        <mapping class="com.example.salesmanagement.supplier.Supplier"/>
         <mapping class="com.example.salesmanagement.product.Product"/>
         <mapping class="com.example.salesmanagement.category.Category"/>
         <mapping class="com.example.salesmanagement.taxrate.TaxRate"/>
-        <mapping class="com.example.salesmanagement.salesdocument.SalesDocument"/>
-        <mapping class="com.example.salesmanagement.salesdocument.SalesDocumentItem"/>
-        <mapping class="com.example.salesmanagement.salesdocument.Quotation"/>
-        <mapping class="com.example.salesmanagement.salesdocument.DeliveryNote"/>
-        <mapping class="com.example.salesmanagement.salesdocument.Invoice"/>
-        <mapping class="com.example.salesmanagement.salesdocument.CreditInvoice"/>
+        <mapping class="com.example.salesmanagement.document.SalesDocument"/>
+        <mapping class="com.example.salesmanagement.document.DocumentItem"/>
+        <mapping class="com.example.salesmanagement.document.Quotation"/>
+        <mapping class="com.example.salesmanagement.document.DeliveryNote"/>
+        <mapping class="com.example.salesmanagement.document.Invoice"/>
+        <mapping class="com.example.salesmanagement.document.CreditInvoice"/>
+        <mapping class="com.example.salesmanagement.document.PurchaseDocument"/>
+        <mapping class="com.example.salesmanagement.document.PurchaseOrder"/>
+        <mapping class="com.example.salesmanagement.document.PurchaseDeliveryNote"/>
         <mapping class="com.example.salesmanagement.payment.Payment"/>
         <mapping class="com.example.salesmanagement.payment.Check"/>
         <mapping class="com.example.salesmanagement.payment.Cash"/>

@@ -27,13 +27,17 @@ public class ConfigurationController implements Initializable {
     @FXML
     private TextArea addressTextArea;
     @FXML
-    private TextField invoiceNumberTextField;
+    private TextField purchaseOrderNumberTextField;
     @FXML
-    private TextField creditInvoiceNumberTextField;
+    private TextField purchaseDeliveryNoteNumberTextField;
     @FXML
     private TextField quotationNumberTextField;
     @FXML
     private TextField deliveryNoteNumberTextField;
+    @FXML
+    private TextField invoiceNumberTextField;
+    @FXML
+    private TextField creditInvoiceNumberTextField;
     @FXML
     private TextField commercialRegistrationNumberTextField;
     @FXML
@@ -57,10 +61,14 @@ public class ConfigurationController implements Initializable {
             fixedPhoneNumberTextField.setText(allConfigurations.get(ConfigKey.COMPANY_FIXED_PHONE_NUMBER));
             addressTextArea.setText(allConfigurations.get(ConfigKey.BUSINESS_ADDRESS));
             emailTextField.setText(allConfigurations.get(ConfigKey.COMPANY_EMAIL_ADDRESS));
-            invoiceNumberTextField.setText(allConfigurations.get(ConfigKey.NEXT_INVOICE_NUMBER));
-            creditInvoiceNumberTextField.setText(allConfigurations.get(ConfigKey.NEXT_CREDIT_INVOICE_NUMBER));
+
+            purchaseOrderNumberTextField.setText(allConfigurations.get(ConfigKey.NEXT_PURCHASE_ORDER_NUMBER));
+            purchaseDeliveryNoteNumberTextField.setText(allConfigurations.get(ConfigKey.NEXT_PURCHASE_DELIVERY_NOTE_NUMBER));
             quotationNumberTextField.setText(allConfigurations.get(ConfigKey.NEXT_QUOTATION_NUMBER));
             deliveryNoteNumberTextField.setText(allConfigurations.get(ConfigKey.NEXT_DELIVERY_NOTE_NUMBER));
+            invoiceNumberTextField.setText(allConfigurations.get(ConfigKey.NEXT_INVOICE_NUMBER));
+            creditInvoiceNumberTextField.setText(allConfigurations.get(ConfigKey.NEXT_CREDIT_INVOICE_NUMBER));
+
             printHeaderCheckBox.setSelected(Boolean.parseBoolean(allConfigurations.get(ConfigKey.PRINT_SALES_DOCUMENT_HEADING)));
             printDeliveryNoteUnitPriceCheckBox.setSelected(Boolean.parseBoolean(allConfigurations.get(ConfigKey.PRINT_DELIVERY_NOTE_UNIT_PRICE)));
         });
@@ -77,12 +85,17 @@ public class ConfigurationController implements Initializable {
             allConfigurations.put(ConfigKey.COMPANY_FIXED_PHONE_NUMBER, fixedPhoneNumberTextField.getText());
             allConfigurations.put(ConfigKey.BUSINESS_ADDRESS, addressTextArea.getText());
             allConfigurations.put(ConfigKey.COMPANY_EMAIL_ADDRESS, emailTextField.getText());
-            allConfigurations.put(ConfigKey.NEXT_INVOICE_NUMBER, invoiceNumberTextField.getText());
-            allConfigurations.put(ConfigKey.NEXT_CREDIT_INVOICE_NUMBER, creditInvoiceNumberTextField.getText());
+
+            allConfigurations.put(ConfigKey.NEXT_PURCHASE_ORDER_NUMBER, purchaseOrderNumberTextField.getText());
+            allConfigurations.put(ConfigKey.NEXT_PURCHASE_DELIVERY_NOTE_NUMBER, purchaseDeliveryNoteNumberTextField.getText());
             allConfigurations.put(ConfigKey.NEXT_QUOTATION_NUMBER, quotationNumberTextField.getText());
             allConfigurations.put(ConfigKey.NEXT_DELIVERY_NOTE_NUMBER, deliveryNoteNumberTextField.getText());
+            allConfigurations.put(ConfigKey.NEXT_INVOICE_NUMBER, invoiceNumberTextField.getText());
+            allConfigurations.put(ConfigKey.NEXT_CREDIT_INVOICE_NUMBER, creditInvoiceNumberTextField.getText());
+
             allConfigurations.put(ConfigKey.PRINT_SALES_DOCUMENT_HEADING, String.valueOf(printHeaderCheckBox.isSelected()));
             allConfigurations.put(ConfigKey.PRINT_DELIVERY_NOTE_UNIT_PRICE, String.valueOf(printDeliveryNoteUnitPriceCheckBox.isSelected()));
+
             configuration.setConfigurationValues(allConfigurations);
             displaySuccessAlert();
         });

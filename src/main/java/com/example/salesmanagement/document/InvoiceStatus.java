@@ -1,4 +1,4 @@
-package com.example.salesmanagement.salesdocument;
+package com.example.salesmanagement.document;
 
 /**
  * Enum representing the status of an invoice.

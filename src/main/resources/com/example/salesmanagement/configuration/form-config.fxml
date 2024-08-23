@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="616.0" prefWidth="1260.0" spacing="10.0" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.salesmanagement.configuration.ConfigurationController">
-    <Label layoutX="14.0" layoutY="14.0" text="Paramètres">
+   <Label graphicTextGap="8.0" layoutX="14.0" layoutY="14.0" text="Paramètres">
         <font>
            <Font name="System Bold" size="32.0"/>
         </font>
+      <graphic>
+         <FontAwesomeIconView glyphName="COGS"/>
+      </graphic>
         <VBox.margin>
             <Insets bottom="16.0" />
         </VBox.margin>
@@ -122,6 +126,26 @@
             <content>
                <VBox prefHeight="351.0" prefWidth="600.0" spacing="16.0">
                   <children>
+                     <HBox prefWidth="176.0">
+                        <children>
+                           <Label prefHeight="0.0" prefWidth="225.0" text="Numéro initiale de bon de commande">
+                              <HBox.margin>
+                                 <Insets right="4.0"/>
+                              </HBox.margin>
+                           </Label>
+                           <TextField fx:id="purchaseOrderNumberTextField" prefWidth="330.0"/>
+                        </children>
+                     </HBox>
+                     <HBox prefWidth="176.0">
+                        <children>
+                           <Label prefHeight="0.0" prefWidth="225.0" text="Numéro initiale de Bon de réception">
+                              <HBox.margin>
+                                 <Insets right="4.0"/>
+                              </HBox.margin>
+                           </Label>
+                           <TextField fx:id="purchaseDeliveryNoteNumberTextField" prefWidth="330.0"/>
+                        </children>
+                     </HBox>
                      <HBox prefWidth="176.0">
                         <children>
                            <Label prefHeight="0.0" prefWidth="225.0" text="Numéro initiale de devis">

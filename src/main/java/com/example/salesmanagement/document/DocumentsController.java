@@ -1,6 +1,6 @@
-package com.example.salesmanagement.salesdocument;
+package com.example.salesmanagement.document;
 
-import com.example.salesmanagement.report.SalesDocumentReportManager;
+import com.example.salesmanagement.report.DocumentReportManager;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import javafx.beans.property.SimpleStringProperty;
@@ -20,10 +20,13 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import javafx.util.Pair;
 import net.sf.jasperreports.engine.JRException;
 
 import java.io.IOException;
@@ -35,19 +38,24 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class SalesDocumentsController implements Initializable {
+public class DocumentsController implements Initializable {
     @FXML
     public Label formLabel;
 
-    Class<? extends SalesDocument> formClass;
-    FilteredList<SalesDocument> filteredList;
-    SortedList<SalesDocument> sortedList;
-    ObservableList<SalesDocument> observableList;
+    Class<? extends Document> formClass;
+    FilteredList<Document> filteredList;
+    SortedList<Document> sortedList;
+    ObservableList<Document> observableList;
 
     @FXML
-    private TableView<SalesDocument> salesDocumentsTableView;
+    private TableView<Document> documentsTableView;
+
     @FXML
     private Button deleteButton, updateButton;
+
+    @FXML
+    private ComboBox<Pair<Class<? extends Document>, String>> docsListComboBox;
+
     @FXML
     private TextField searchTextField;
 
@@ -55,6 +63,21 @@ public class SalesDocumentsController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         updateButton.setDisable(true);
         deleteButton.setDisable(true);
+
+        docsListComboBox.setCellFactory(x -> new DocumentComboCell());
+        docsListComboBox.setButtonCell(new DocumentComboCell());
+
+
+        docsListComboBox.getItems().addAll(
+                new Pair<>(PurchaseOrder.class, "Bons de commande"),
+                new Pair<>(PurchaseDeliveryNote.class, "Bons de réception"),
+                new Pair<>(Quotation.class, "Devis"),
+                new Pair<>(DeliveryNote.class, "Bons de livraison"),
+                new Pair<>(Invoice.class, "Factures"),
+                new Pair<>(CreditInvoice.class, "Factures avoir")
+        );
+
+        docsListComboBox.setOnAction(event -> load(docsListComboBox.getSelectionModel().getSelectedItem().getKey()));
 
         searchTextField.textProperty().addListener((observable, oldValue, newValue) -> {
             filteredList.setPredicate(salesDocument -> {
@@ -73,35 +96,57 @@ public class SalesDocumentsController implements Initializable {
                 } catch (Exception ignored) {
                 }
 
-                return salesDocument.getClient().getName().toLowerCase().contains(lowerCaseFilter);
+                if (salesDocument instanceof SalesDocument document) {
+                    return document.getClient().getName().toLowerCase().contains(lowerCaseFilter);
+                } else {
+                    return ((PurchaseDocument) salesDocument).getSupplier().getName().toLowerCase().contains(lowerCaseFilter);
+                }
 
             });
         });
     }
 
-    public void addSalesDocument(ActionEvent actionEvent) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("form-sales-document.fxml"));
+    private void load(Class<? extends Document> documentClass) {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("documents.fxml"));
+
+        VBox pane = null;
+        try {
+            pane = fxmlLoader.load();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        DocumentsController documentController = fxmlLoader.getController();
+        documentController.setFormClass(documentClass);
+
+        BorderPane borderPane = (BorderPane) documentsTableView.getScene().getRoot();
+        borderPane.setCenter(pane);
+    }
+
+    public void addDocument(ActionEvent actionEvent) throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("form-document.fxml"));
         VBox pane = fxmlLoader.load();
 
-        SalesDocumentController salesDocumentController = fxmlLoader.getController();
-        salesDocumentController.setSalesDocumentType(formClass);
+        DocumentController documentController = fxmlLoader.getController();
+        documentController.setDocumentType(formClass);
 
         Button button = (Button) actionEvent.getSource();
         BorderPane borderPane = (BorderPane) button.getScene().getRoot();
         borderPane.setCenter(pane);
     }
 
-    public void updateSalesDocument() throws IOException {
-        SalesDocument selectedSalesDocument = salesDocumentsTableView.getSelectionModel().getSelectedItem();
-        if (selectedSalesDocument != null) {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("form-sales-document.fxml"));
+    public void updateDocument() throws IOException {
+        Document selectedDocument = documentsTableView.getSelectionModel().getSelectedItem();
+
+        if (selectedDocument != null) {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("form-document.fxml"));
             Parent root = fxmlLoader.load();
 
-            SalesDocumentController salesDocumentController = fxmlLoader.getController();
+            DocumentController documentController = fxmlLoader.getController();
 
-            SalesDocument salesDocument = SalesDocumentRepository.findById(selectedSalesDocument.getId()).orElseThrow();
-            salesDocumentController.setSalesDocumentType(formClass);
-            salesDocumentController.initSalesDocumentUpdate(salesDocument);
+            Document salesDocument = DocumentRepository.findById(selectedDocument.getId()).orElseThrow();
+            documentController.setDocumentType(formClass);
+            documentController.initDocumentUpdateForm(salesDocument);
 
             Stage stage = new Stage();
             stage.initModality(Modality.APPLICATION_MODAL);
@@ -109,13 +154,14 @@ public class SalesDocumentsController implements Initializable {
             stage.setResizable(false);
             stage.showAndWait();
 
-            loadSalesDocumentsData(formClass);
+            loadDocumentsData(formClass);
         }
     }
 
-    public void deleteSalesDocument() {
-        SalesDocument selectedSalesDocument = salesDocumentsTableView.getSelectionModel().getSelectedItem();
-        if (selectedSalesDocument != null) {
+    public void deleteDocument() {
+        Document selectedDocument = documentsTableView.getSelectionModel().getSelectedItem();
+
+        if (selectedDocument != null) {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Confirmation de suppression");
             alert.setHeaderText("Confirmation de suppression");
@@ -124,8 +170,8 @@ public class SalesDocumentsController implements Initializable {
 
             if (result.isPresent() && result.get() == ButtonType.OK) {
 
-                if (SalesDocumentRepository.deleteById(selectedSalesDocument.getId())) {
-                    loadSalesDocumentsData(formClass);
+                if (DocumentRepository.deleteById(selectedDocument.getId())) {
+                    loadDocumentsData(formClass);
                     updateButton.setDisable(true);
                     deleteButton.setDisable(true);
                     displaySuccessAlert();
@@ -137,41 +183,63 @@ public class SalesDocumentsController implements Initializable {
         }
     }
 
-    public void setFormClass(Class<? extends SalesDocument> formClass) {
+    public void setFormClass(Class<? extends Document> formClass) {
         this.formClass = formClass;
 
-        initSalesDocumentsTableView(formClass);
-        loadSalesDocumentsData(formClass);
+        initDocumentsTableView(formClass);
+        loadDocumentsData(formClass);
 
-        if (formClass == Quotation.class) {
-            formLabel.setText("Devis");
-        }
+        docsListComboBox.setValue(docsListComboBox.getItems().stream().filter(o -> o.getKey() == formClass).findFirst().get());
 
-        if (formClass == DeliveryNote.class) {
-            formLabel.setText("Bons de livraison");
-        }
-
-        if (formClass == Invoice.class) {
-            formLabel.setText("Factures");
-        }
-
-        if (formClass == CreditInvoice.class) {
-            formLabel.setText("Factures avoir");
-        }
+//        if (formClass == PurchaseOrder.class) {
+//            formLabel.setText("Bons de commande");
+//        }
+//
+//        if (formClass == PurchaseDeliveryNote.class) {
+//            formLabel.setText("Bons de réception");
+//        }
+//
+//        if (formClass == Quotation.class) {
+//            formLabel.setText("Devis");
+//        }
+//
+//        if (formClass == DeliveryNote.class) {
+//            formLabel.setText("Bons de livraison");
+//        }
+//
+//        if (formClass == Invoice.class) {
+//            formLabel.setText("Factures");
+//        }
+//
+//        if (formClass == CreditInvoice.class) {
+//            formLabel.setText("Factures avoir");
+//        }
     }
 
-    private <T extends SalesDocument> void initSalesDocumentsTableView(Class<T> aClass) {
+    private <T extends Document> void initDocumentsTableView(Class<T> aClass) {
         TableColumn<T, String> idColumn = new TableColumn<>("ID");
         TableColumn<T, String> referenceColumn = new TableColumn<>("Référence");
-        TableColumn<T, String> clientColumn = new TableColumn<>("Client");
         TableColumn<T, String> issueDateColumn = new TableColumn<>("Date d'émission");
         TableColumn<T, String> totalIncludingTaxesColumn = new TableColumn<>("Total (TTC)");
         TableColumn<T, String> actionColumn = new TableColumn<>("Actions");
         TableColumn<T, String> statusColumn = new TableColumn<>("Status");
+        TableColumn<T, String> clientColumn = null;
         TableColumn<T, String> paidAmountColumn = null;
         TableColumn<T, String> remainingAmountTaxesColumn = null;
         TableColumn<T, String> dueDateColumn = null;
         TableColumn<T, String> validUntilColumn = null;
+
+        if (aClass == Quotation.class) {
+            validUntilColumn = new TableColumn<>("Valide jusqu'au");
+            validUntilColumn.setCellValueFactory(cellData -> new SimpleStringProperty(((Quotation) cellData.getValue()).getValidUntil() == null ? "N/A" : ((Quotation) cellData.getValue()).getValidUntil().toString()));
+            clientColumn = new TableColumn<>("Client");
+            clientColumn.setCellValueFactory(cellData -> new SimpleStringProperty(((Quotation) cellData.getValue()).getClient().getName()));
+        }
+
+        if (aClass == DeliveryNote.class) {
+            clientColumn = new TableColumn<>("Client");
+            clientColumn.setCellValueFactory(cellData -> new SimpleStringProperty(((DeliveryNote) cellData.getValue()).getClient().getName()));
+        }
 
         if (aClass == Invoice.class) {
             paidAmountColumn = new TableColumn<>("Montant payé");
@@ -181,24 +249,34 @@ public class SalesDocumentsController implements Initializable {
             remainingAmountTaxesColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getTotalIncludingTaxes().subtract(((Invoice) cellData.getValue()).getPaidAmount()).toPlainString()));
             paidAmountColumn.setCellValueFactory(new PropertyValueFactory<>("paidAmount"));
             dueDateColumn.setCellValueFactory(cellData -> new SimpleStringProperty(((Invoice) cellData.getValue()).getDueDate() == null ? "N/A" : ((Invoice) cellData.getValue()).getDueDate().toString()));
+            clientColumn = new TableColumn<>("Client");
+            clientColumn.setCellValueFactory(cellData -> new SimpleStringProperty(((Invoice) cellData.getValue()).getClient().getName()));
         }
+
         if (aClass == CreditInvoice.class) {
             paidAmountColumn = new TableColumn<>("Montant payé");
             remainingAmountTaxesColumn = new TableColumn<>("Montant restant");
 
             paidAmountColumn.setCellValueFactory(new PropertyValueFactory<>("paidAmount"));
             remainingAmountTaxesColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getTotalIncludingTaxes().subtract(((CreditInvoice) cellData.getValue()).getPaidAmount()).toPlainString()));
+            clientColumn = new TableColumn<>("Client");
+            clientColumn.setCellValueFactory(cellData -> new SimpleStringProperty(((CreditInvoice) cellData.getValue()).getClient().getName()));
         }
 
-        if (aClass == Quotation.class) {
-            validUntilColumn = new TableColumn<>("Valide jusqu'au");
-            validUntilColumn.setCellValueFactory(cellData -> new SimpleStringProperty(((Quotation) cellData.getValue()).getValidUntil() == null ? "N/A" : ((Quotation) cellData.getValue()).getValidUntil().toString()));
-
+        if (formClass == PurchaseOrder.class) {
+            clientColumn = new TableColumn<>("Fournisseur");
+            clientColumn.setCellValueFactory(cellData -> new SimpleStringProperty(((PurchaseOrder) cellData.getValue()).getSupplier().getName()));
         }
+
+        if (formClass == PurchaseDeliveryNote.class) {
+            clientColumn = new TableColumn<>("Fournisseur");
+            clientColumn.setCellValueFactory(cellData -> new SimpleStringProperty(((PurchaseDeliveryNote) cellData.getValue()).getSupplier().getName()));
+        }
+
 
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         issueDateColumn.setCellValueFactory(new PropertyValueFactory<>("issueDate"));
-        clientColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getClient().getName()));
+
         totalIncludingTaxesColumn.setCellValueFactory(new PropertyValueFactory<>("totalIncludingTaxes"));
         referenceColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getReference() == null ? "N/A" : cellData.getValue().getReference().toString()));
         statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
@@ -214,47 +292,47 @@ public class SalesDocumentsController implements Initializable {
         actionColumn.setResizable(false);
         actionColumn.setReorderable(false);
 
-        salesDocumentsTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        documentsTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-        salesDocumentsTableView.getColumns().addAll(
-                (TableColumn<SalesDocument, ?>) idColumn,
-                (TableColumn<SalesDocument, ?>) referenceColumn,
-                (TableColumn<SalesDocument, ?>) clientColumn,
-                (TableColumn<SalesDocument, ?>) issueDateColumn,
-                (TableColumn<SalesDocument, ?>) statusColumn
+        documentsTableView.getColumns().addAll(
+                (TableColumn<Document, ?>) idColumn,
+                (TableColumn<Document, ?>) referenceColumn,
+                (TableColumn<Document, ?>) clientColumn,
+                (TableColumn<Document, ?>) issueDateColumn,
+                (TableColumn<Document, ?>) statusColumn
         );
 
         if (aClass == Quotation.class) {
-            salesDocumentsTableView.getColumns().addAll(
-                    (TableColumn<SalesDocument, ?>) totalIncludingTaxesColumn,
-                    (TableColumn<SalesDocument, ?>) validUntilColumn
+            documentsTableView.getColumns().addAll(
+                    (TableColumn<Document, ?>) totalIncludingTaxesColumn,
+                    (TableColumn<Document, ?>) validUntilColumn
             );
         }
 
         if (aClass == DeliveryNote.class) {
-            salesDocumentsTableView.getColumns().addAll(
-                    (TableColumn<SalesDocument, ?>) totalIncludingTaxesColumn
+            documentsTableView.getColumns().addAll(
+                    (TableColumn<Document, ?>) totalIncludingTaxesColumn
             );
         }
         if (aClass == Invoice.class) {
-            salesDocumentsTableView.getColumns().addAll(
-                    (TableColumn<SalesDocument, ?>) dueDateColumn,
-                    (TableColumn<SalesDocument, ?>) totalIncludingTaxesColumn,
-                    (TableColumn<SalesDocument, ?>) paidAmountColumn,
-                    (TableColumn<SalesDocument, ?>) remainingAmountTaxesColumn
+            documentsTableView.getColumns().addAll(
+                    (TableColumn<Document, ?>) dueDateColumn,
+                    (TableColumn<Document, ?>) totalIncludingTaxesColumn,
+                    (TableColumn<Document, ?>) paidAmountColumn,
+                    (TableColumn<Document, ?>) remainingAmountTaxesColumn
             );
         }
 
         if (aClass == CreditInvoice.class) {
-            salesDocumentsTableView.getColumns().addAll(
-                    (TableColumn<SalesDocument, ?>) totalIncludingTaxesColumn,
-                    (TableColumn<SalesDocument, ?>) paidAmountColumn,
-                    (TableColumn<SalesDocument, ?>) remainingAmountTaxesColumn
+            documentsTableView.getColumns().addAll(
+                    (TableColumn<Document, ?>) totalIncludingTaxesColumn,
+                    (TableColumn<Document, ?>) paidAmountColumn,
+                    (TableColumn<Document, ?>) remainingAmountTaxesColumn
             );
         }
 
 
-        salesDocumentsTableView.getColumns().addAll((TableColumn<SalesDocument, ?>) actionColumn);
+        documentsTableView.getColumns().addAll((TableColumn<Document, ?>) actionColumn);
 
         Callback<TableColumn<T, String>, TableCell<T, String>> cellFactory =
                 (TableColumn<T, String> param) -> {
@@ -278,20 +356,20 @@ public class SalesDocumentsController implements Initializable {
                                 printButton.setOnMouseClicked((MouseEvent event) -> {
                                     try {
                                         @SuppressWarnings("unchecked")
-                                        TableRow<SalesDocument> tableRow = (TableRow<SalesDocument>) printButton.getParent().getParent().getParent();
-                                        SalesDocument selectedSalesDocument = tableRow.getItem();
+                                        TableRow<Document> tableRow = (TableRow<Document>) printButton.getParent().getParent().getParent();
+                                        Document selectedDocument = tableRow.getItem();
 
-                                        SalesDocument salesDocument = SalesDocumentRepository.findById(selectedSalesDocument.getId()).orElseThrow();
+                                        Document document = DocumentRepository.findById(selectedDocument.getId()).orElseThrow();
 
                                         try {
-                                            SalesDocumentReportManager salesDocumentReportManager = new SalesDocumentReportManager();
-                                            salesDocumentReportManager.displaySalesDocumentReport(salesDocument);
+                                            DocumentReportManager documentReportManager = new DocumentReportManager();
+                                            documentReportManager.displayDocumentReport(document);
                                         } catch (JRException e) {
                                             throw new RuntimeException(e);
                                         }
 
                                     } catch (Exception ex) {
-                                        Logger.getLogger(SalesDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+                                        Logger.getLogger(DocumentController.class.getName()).log(Level.SEVERE, null, ex);
                                     }
                                 });
 
@@ -308,8 +386,8 @@ public class SalesDocumentsController implements Initializable {
 
         actionColumn.setCellFactory(cellFactory);
 
-        salesDocumentsTableView.setOnMouseClicked(e -> {
-            if (salesDocumentsTableView.getSelectionModel().getSelectedItem() != null) {
+        documentsTableView.setOnMouseClicked(e -> {
+            if (documentsTableView.getSelectionModel().getSelectedItem() != null) {
                 updateButton.setDisable(false);
                 deleteButton.setDisable(false);
             } else {
@@ -319,17 +397,17 @@ public class SalesDocumentsController implements Initializable {
         });
     }
 
-    private <T extends SalesDocument> void loadSalesDocumentsData(Class<T> aClass) {
-        List<T> all = SalesDocumentRepository.findAll(aClass);
-        salesDocumentsTableView.setItems(FXCollections.observableArrayList());
-        all.forEach(salesDocument -> salesDocumentsTableView.getItems().add(salesDocument));
+    private <T extends Document> void loadDocumentsData(Class<T> aClass) {
+        List<T> all = DocumentRepository.findAll(aClass);
+        documentsTableView.setItems(FXCollections.observableArrayList());
+        all.forEach(document -> documentsTableView.getItems().add(document));
 
-        observableList = salesDocumentsTableView.getItems();
+        observableList = documentsTableView.getItems();
 
         filteredList = new FilteredList<>(observableList);
         sortedList = new SortedList<>(filteredList);
-        sortedList.comparatorProperty().bind(salesDocumentsTableView.comparatorProperty());
-        salesDocumentsTableView.setItems(sortedList);
+        sortedList.comparatorProperty().bind(documentsTableView.comparatorProperty());
+        documentsTableView.setItems(sortedList);
 
         updateButton.setDisable(true);
         deleteButton.setDisable(true);
@@ -351,4 +429,13 @@ public class SalesDocumentsController implements Initializable {
         alert.showAndWait();
     }
 
+    private static class DocumentComboCell extends ListCell<Pair<Class<? extends Document>, String>> {
+        @Override
+        protected void updateItem(Pair<Class<? extends Document>, String> pair, boolean bln) {
+            super.updateItem(pair, bln);
+            setText(pair != null ? pair.getValue() : null);
+            setFont(Font.font(null, FontWeight.BOLD, 14));
+
+        }
+    }
 }

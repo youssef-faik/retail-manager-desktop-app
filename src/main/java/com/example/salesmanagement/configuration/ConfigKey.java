@@ -62,6 +62,16 @@ public enum ConfigKey {
     PRINT_DELIVERY_NOTE_UNIT_PRICE,
 
     /**
+     * The next purchase order number to be used.
+     */
+    NEXT_PURCHASE_ORDER_NUMBER,
+
+    /**
+     * The next purchase delivery note number to be used.
+     */
+    NEXT_PURCHASE_DELIVERY_NOTE_NUMBER,
+
+    /**
      * The next quotation number to be used.
      */
     NEXT_QUOTATION_NUMBER,

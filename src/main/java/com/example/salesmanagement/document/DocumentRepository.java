@@ -1,4 +1,4 @@
-package com.example.salesmanagement.salesdocument;
+package com.example.salesmanagement.document;
 
 import com.example.salesmanagement.HibernateUtil;
 import com.example.salesmanagement.configuration.AppConfiguration;
@@ -15,48 +15,48 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public interface SalesDocumentRepository {
+public interface DocumentRepository {
     SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
 
-    static <T extends SalesDocument> List<T> findAll(Class<T> salesDocumentClass) {
-        List<T> salesDocuments;
+    static <T extends Document> List<T> findAll(Class<T> documentClass) {
+        List<T> documents;
 
         try (Session session = sessionFactory.openSession()) {
-            List<T> documents =
+            List<T> documentsList =
                     session
-                            .createQuery("select S from " + salesDocumentClass.getAnnotation(Entity.class).name() + " S", salesDocumentClass)
+                            .createQuery("select S from " + documentClass.getAnnotation(Entity.class).name() + " S", documentClass)
                             .list();
 
-            salesDocuments = new ArrayList<>(documents);
+            documents = new ArrayList<>(documentsList);
         }
 
-        return salesDocuments;
+        return documents;
     }
 
-    static Optional<SalesDocument> findById(Long id) {
+    static Optional<Document> findById(Long id) {
 
         try (Session session = sessionFactory.openSession()) {
-            SalesDocument salesDocument = session.find(SalesDocument.class, id);
-            session.refresh(salesDocument);
+            Document document = session.find(Document.class, id);
+            session.refresh(document);
 
-            return Optional.ofNullable(salesDocument);
+            return Optional.ofNullable(document);
         }
     }
 
-    static Optional<SalesDocument> add(SalesDocument salesDocument) {
+    static Optional<Document> add(Document document) {
         Session session = sessionFactory.openSession();
 
         try {
             session.beginTransaction();
 
-            salesDocument = session.merge(salesDocument);
+            document = session.merge(document);
 
             // Process the sales document within the same transaction
-            processSalesDocument(salesDocument, session);
+            processDocument(document, session);
 
             session.getTransaction().commit();
 
-            return Optional.ofNullable(salesDocument);
+            return Optional.ofNullable(document);
         } catch (Exception e) {
             e.printStackTrace();
 
@@ -71,19 +71,19 @@ public interface SalesDocumentRepository {
         }
     }
 
-    private static void processSalesDocument(SalesDocument salesDocument, Session session) {
+    private static void processDocument(Document document, Session session) {
         try {
             AppConfiguration configuration = AppConfiguration.getInstance();
-            ConfigKey nextSalesDocumentNumber = getNextSalesDocumentNumberKey(salesDocument);
+            ConfigKey nextDocumentNumber = getNextDocumentNumberKey(document);
 
-            if (nextSalesDocumentNumber != null && !isDraftStatus(salesDocument)) {
-                long lastSalesDocumentNumber = Long.parseLong(configuration.getConfigurationValue(nextSalesDocumentNumber).getValue());
-                salesDocument.setReference(lastSalesDocumentNumber);
+            if (nextDocumentNumber != null && !isDraftStatus(document)) {
+                long lastDocumentNumber = Long.parseLong(configuration.getConfigurationValue(nextDocumentNumber).getValue());
+                document.setReference(lastDocumentNumber);
 
-                session.persist(salesDocument);
+                session.persist(document);
 
-                lastSalesDocumentNumber++;
-                configuration.setConfigurationValues(Map.of(nextSalesDocumentNumber, String.valueOf(lastSalesDocumentNumber)));
+                lastDocumentNumber++;
+                configuration.setConfigurationValues(Map.of(nextDocumentNumber, String.valueOf(lastDocumentNumber)));
             }
 
         } catch (Exception e) {
@@ -92,61 +92,73 @@ public interface SalesDocumentRepository {
         }
     }
 
-    private static ConfigKey getNextSalesDocumentNumberKey(SalesDocument salesDocument) {
-        if (salesDocument instanceof Quotation) {
+    private static ConfigKey getNextDocumentNumberKey(Document document) {
+        if (document instanceof PurchaseOrder) {
+            return ConfigKey.NEXT_PURCHASE_ORDER_NUMBER;
+        } else if (document instanceof PurchaseDeliveryNote) {
+            return ConfigKey.NEXT_PURCHASE_DELIVERY_NOTE_NUMBER;
+        } else if (document instanceof Quotation) {
             return ConfigKey.NEXT_QUOTATION_NUMBER;
-        } else if (salesDocument instanceof DeliveryNote) {
+        } else if (document instanceof DeliveryNote) {
             return ConfigKey.NEXT_DELIVERY_NOTE_NUMBER;
-        } else if (salesDocument instanceof Invoice) {
+        } else if (document instanceof Invoice) {
             return ConfigKey.NEXT_INVOICE_NUMBER;
-        } else if (salesDocument instanceof CreditInvoice) {
+        } else if (document instanceof CreditInvoice) {
             return ConfigKey.NEXT_CREDIT_INVOICE_NUMBER;
         }
         return null;
     }
 
-    private static boolean isDraftStatus(SalesDocument salesDocument) {
-        if (salesDocument instanceof Quotation quotation) {
+    private static boolean isDraftStatus(Document document) {
+        if (document instanceof PurchaseOrder purchaseOrder) {
+            return purchaseOrder.getStatus() == PurchaseOrderStatus.DRAFT;
+        } else if (document instanceof PurchaseDeliveryNote purchaseDeliveryNote) {
+            return purchaseDeliveryNote.getStatus() == PurchaseDeliveryNoteStatus.DRAFT;
+        } else if (document instanceof Quotation quotation) {
             return quotation.getStatus() == QuotationStatus.DRAFT;
-        } else if (salesDocument instanceof DeliveryNote deliveryNote) {
+        } else if (document instanceof DeliveryNote deliveryNote) {
             return deliveryNote.getStatus() == DeliveryNoteStatus.DRAFT;
-        } else if (salesDocument instanceof Invoice invoice) {
+        } else if (document instanceof Invoice invoice) {
             return invoice.getStatus() == InvoiceStatus.DRAFT;
-        } else if (salesDocument instanceof CreditInvoice creditInvoice) {
+        } else if (document instanceof CreditInvoice creditInvoice) {
             return creditInvoice.getStatus() == CreditInvoiceStatus.DRAFT;
         }
         return false;
     }
 
-    static Optional<SalesDocument> update(SalesDocument updatedSalesDocument) {
+    static Optional<Document> update(Document updatedDocument) {
         Session session = sessionFactory.openSession();
 
         try {
-            SalesDocument originalSalesDocument = session.find(SalesDocument.class, updatedSalesDocument.getId());
+            Document originalDocument = session.find(Document.class, updatedDocument.getId());
 
-            if (originalSalesDocument == null) {
+            if (originalDocument == null) {
                 return Optional.empty();
             }
 
             session.beginTransaction();
 
-            updateCommonFields(originalSalesDocument, updatedSalesDocument);
-            updateItems(originalSalesDocument, updatedSalesDocument, session);
+            updateCommonFields(originalDocument, updatedDocument);
+            updateItems(originalDocument, updatedDocument, session);
 
-            if (originalSalesDocument instanceof Quotation) {
-                updateQuotation((Quotation) originalSalesDocument, (Quotation) updatedSalesDocument);
-            } else if (originalSalesDocument instanceof DeliveryNote) {
-                updateDeliveryNote((DeliveryNote) originalSalesDocument, (DeliveryNote) updatedSalesDocument);
-            } else if (originalSalesDocument instanceof Invoice) {
-                updateInvoice((Invoice) originalSalesDocument, (Invoice) updatedSalesDocument, session);
-            } else if (originalSalesDocument instanceof CreditInvoice) {
-                updateCreditInvoice((CreditInvoice) originalSalesDocument, (CreditInvoice) updatedSalesDocument, session);
+            if (originalDocument instanceof PurchaseOrder purchaseOrder) {
+                updatePurchaseOrder(purchaseOrder, (PurchaseOrder) updatedDocument);
+            } else if (originalDocument instanceof PurchaseDeliveryNote purchaseDeliveryNote) {
+                updatePurchaseDeliveryNote(purchaseDeliveryNote, (PurchaseDeliveryNote) updatedDocument);
+            } else if (originalDocument instanceof Quotation) {
+                updateQuotation((Quotation) originalDocument, (Quotation) updatedDocument);
+            } else if (originalDocument instanceof DeliveryNote) {
+                updateDeliveryNote((DeliveryNote) originalDocument, (DeliveryNote) updatedDocument);
+            } else if (originalDocument instanceof Invoice) {
+                updateInvoice((Invoice) originalDocument, (Invoice) updatedDocument, session);
+            } else if (originalDocument instanceof CreditInvoice) {
+                updateCreditInvoice((CreditInvoice) originalDocument, (CreditInvoice) updatedDocument, session);
             }
 
-            session.merge(originalSalesDocument);
+            session.merge(originalDocument);
             session.getTransaction().commit();
 
-            return Optional.of(originalSalesDocument);
+            return Optional.of(originalDocument);
         } catch (Exception e) {
             e.printStackTrace();
 
@@ -160,15 +172,14 @@ public interface SalesDocumentRepository {
         }
     }
 
-    private static void updateCommonFields(SalesDocument original, SalesDocument updated) {
+    private static void updateCommonFields(Document original, Document updated) {
         original.setIssueDate(updated.getIssueDate());
-        original.setClient(updated.getClient());
         original.setTotalExcludingTaxes(updated.getTotalExcludingTaxes());
         original.setTotalTaxes(updated.getTotalTaxes());
         original.setTotalIncludingTaxes(updated.getTotalIncludingTaxes());
     }
 
-    private static void updateItems(SalesDocument original, SalesDocument updated, Session session) {
+    private static void updateItems(Document original, Document updated, Session session) {
         updated.getItems().forEach(
                 updatedItem -> {
                     if (original.getItems().contains(updatedItem)) {
@@ -190,6 +201,7 @@ public interface SalesDocumentRepository {
     }
 
     private static void updateQuotation(Quotation original, Quotation updated) {
+        original.setClient(updated.getClient());
         QuotationStatus originalStatus = original.getStatus();
 
         original.setValidUntil(updated.getValidUntil());
@@ -200,7 +212,30 @@ public interface SalesDocumentRepository {
         }
     }
 
+    private static void updatePurchaseOrder(PurchaseOrder original, PurchaseOrder updated) {
+        original.setSupplier(updated.getSupplier());
+        PurchaseOrderStatus originalStatus = original.getStatus();
+
+        original.setStatus(updated.getStatus());
+
+        if (originalStatus == PurchaseOrderStatus.DRAFT && updated.getStatus() != PurchaseOrderStatus.DRAFT) {
+            assignNewReference(original, ConfigKey.NEXT_PURCHASE_ORDER_NUMBER);
+        }
+    }
+
+    private static void updatePurchaseDeliveryNote(PurchaseDeliveryNote original, PurchaseDeliveryNote updated) {
+        original.setSupplier(updated.getSupplier());
+        PurchaseDeliveryNoteStatus originalStatus = original.getStatus();
+
+        original.setStatus(updated.getStatus());
+
+        if (originalStatus == PurchaseDeliveryNoteStatus.DRAFT && updated.getStatus() != PurchaseDeliveryNoteStatus.DRAFT) {
+            assignNewReference(original, ConfigKey.NEXT_PURCHASE_DELIVERY_NOTE_NUMBER);
+        }
+    }
+
     private static void updateDeliveryNote(DeliveryNote original, DeliveryNote updated) {
+        original.setClient(updated.getClient());
         DeliveryNoteStatus originalStatus = original.getStatus();
 
         original.setStatus(updated.getStatus());
@@ -211,6 +246,7 @@ public interface SalesDocumentRepository {
     }
 
     private static void updateInvoice(Invoice original, Invoice updated, Session session) {
+        original.setClient(updated.getClient());
         InvoiceStatus originalStatus = original.getStatus();
 
         original.setStatus(updated.getStatus());
@@ -225,6 +261,7 @@ public interface SalesDocumentRepository {
     }
 
     private static void updateCreditInvoice(CreditInvoice original, CreditInvoice updated, Session session) {
+        original.setClient(updated.getClient());
         CreditInvoiceStatus originalStatus = original.getStatus();
 
         original.setStatus(updated.getStatus());
@@ -237,7 +274,7 @@ public interface SalesDocumentRepository {
         }
     }
 
-    private static <T extends SalesDocument> void updatePayments(T original, T updated, Session session) {
+    private static <T extends Document> void updatePayments(T original, T updated, Session session) {
         if (updated instanceof Invoice updatedDocument && original instanceof Invoice originalDocument) {
             updatedDocument.getPayments().forEach(
                     updatedPayment -> {
@@ -281,14 +318,14 @@ public interface SalesDocumentRepository {
         }
     }
 
-    private static void assignNewReference(SalesDocument salesDocument, ConfigKey configKey) {
+    private static void assignNewReference(Document document, ConfigKey configKey) {
         AppConfiguration configuration = AppConfiguration.getInstance();
-        long lastSalesDocumentNumber = Long.parseLong(configuration.getConfigurationValue(configKey).getValue());
+        long lastDocumentNumber = Long.parseLong(configuration.getConfigurationValue(configKey).getValue());
 
-        salesDocument.setReference(lastSalesDocumentNumber);
+        document.setReference(lastDocumentNumber);
 
-        lastSalesDocumentNumber++;
-        configuration.setConfigurationValues(Map.of(configKey, String.valueOf(lastSalesDocumentNumber)));
+        lastDocumentNumber++;
+        configuration.setConfigurationValues(Map.of(configKey, String.valueOf(lastDocumentNumber)));
     }
 
     static boolean deleteById(Long id) {
@@ -297,13 +334,13 @@ public interface SalesDocumentRepository {
         try {
             session.beginTransaction();
 
-            SalesDocument deletedSalesDocument = session.find(SalesDocument.class, id);
+            Document deletedDocument = session.find(Document.class, id);
 
-            if (deletedSalesDocument == null) {
+            if (deletedDocument == null) {
                 return false;
             }
 
-            session.remove(deletedSalesDocument);
+            session.remove(deletedDocument);
             session.getTransaction().commit();
 
             return true;
@@ -320,11 +357,11 @@ public interface SalesDocumentRepository {
         }
     }
 
-    static Long count(Class<? extends SalesDocument> salesDocumentClass) {
+    static Long count(Class<? extends Document> documentClass) {
         Long count;
 
         try (Session session = sessionFactory.openSession()) {
-            String query = "SELECT COUNT(*) count_salesDocument FROM " + salesDocumentClass.getAnnotation(Entity.class).name();
+            String query = "SELECT COUNT(*) count_document FROM " + documentClass.getAnnotation(Entity.class).name();
             Query<Long> nativeQuery = session.createQuery(query, long.class);
             count = nativeQuery.getSingleResult();
         }
@@ -332,11 +369,11 @@ public interface SalesDocumentRepository {
         return count;
     }
 
-    static Optional<SalesDocument> findFirstByOrderByIdDesc(Class<? extends SalesDocument> salesDocumentClass) {
+    static Optional<Document> findFirstByOrderByIdDesc(Class<? extends Document> documentClass) {
         try (Session session = sessionFactory.openSession()) {
-            String query = "SELECT I FROM SalesDocument I WHERE TYPE(I) = :type AND I.reference is not null ORDER BY I.reference DESC LIMIT 1";
-            Query<? extends SalesDocument> nativeQuery = session.createQuery(query, salesDocumentClass);
-            nativeQuery.setParameter("type", salesDocumentClass);
+            String query = "SELECT D FROM Document D WHERE TYPE(D) = :type AND D.reference is not null ORDER BY D.reference DESC LIMIT 1";
+            Query<? extends Document> nativeQuery = session.createQuery(query, documentClass);
+            nativeQuery.setParameter("type", documentClass);
 
             return Optional.of(nativeQuery.getSingleResult());
         } catch (NoResultException e) {

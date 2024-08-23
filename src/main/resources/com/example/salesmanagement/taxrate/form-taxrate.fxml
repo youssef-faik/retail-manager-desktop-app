@@ -1,20 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
-<?import javafx.scene.text.Text?>
 <VBox prefHeight="184.0" prefWidth="400.0" spacing="8.0" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.salesmanagement.taxrate.TaxRateController">
     <children>
-        <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Taux TVA">
+        <Label graphicTextGap="8.0" text="Taux TVA">
             <font>
                 <Font name="System Bold" size="32.0"/>
             </font>
+            <graphic>
+                <FontAwesomeIconView glyphName="PERCENT"/>
+            </graphic>
             <VBox.margin>
                 <Insets bottom="16.0" />
             </VBox.margin>
-        </Text>
+        </Label>
         <HBox prefHeight="100.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
             <children>
                 <Label prefWidth="110.0" text="Libellé *" HBox.hgrow="ALWAYS" />

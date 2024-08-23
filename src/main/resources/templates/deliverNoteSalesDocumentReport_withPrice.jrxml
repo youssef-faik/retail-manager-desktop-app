@@ -3,7 +3,7 @@
 <jasperReport xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               xmlns="http://jasperreports.sourceforge.net/jasperreports"
               xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
-              name="SalesDocument" pageWidth="595" pageHeight="842" columnWidth="565" leftMargin="15" rightMargin="15"
+              name="SalesDocument" columnWidth="565" leftMargin="15" rightMargin="15"
               topMargin="10" bottomMargin="10" isSummaryWithPageHeaderAndFooter="true"
               uuid="fa1c252c-ee0f-40b1-a847-e8c4f7ab6392">
     <property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
@@ -26,11 +26,11 @@
         </box>
     </style>
     <subDataset name="salesDocumentItemsDataSet" uuid="0129ef01-754f-4f46-8c8d-f94f467c7389">
-        <parameter name="document_type" class="java.lang.String"/>
+        <parameter name="document_type"/>
         <queryString>
             <![CDATA[]]>
         </queryString>
-        <field name="productDesignation" class="java.lang.String"/>
+        <field name="productDesignation"/>
         <field name="quantity" class="java.lang.Integer"/>
         <field name="unitPriceExcludingTaxes" class="java.math.BigDecimal"/>
         <field name="totalTaxes" class="java.math.BigDecimal"/>
@@ -41,27 +41,27 @@
         </variable>
     </subDataset>
     <parameter name="issueDate" class="java.time.LocalDate"/>
-    <parameter name="client_name" class="java.lang.String"/>
-    <parameter name="client_address" class="java.lang.String"/>
-    <parameter name="client_ice" class="java.lang.String"/>
+    <parameter name="client_name"/>
+    <parameter name="client_address"/>
+    <parameter name="client_ice"/>
     <parameter name="id" class="java.lang.Long"/>
     <parameter name="salesDocumentItemsDataSet" class="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource"/>
     <parameter name="totalHT" class="java.math.BigDecimal"/>
     <parameter name="totalTaxes" class="java.math.BigDecimal"/>
     <parameter name="totalTTC" class="java.math.BigDecimal"/>
-    <parameter name="amountInWords" class="java.lang.String"/>
-    <parameter name="companyName" class="java.lang.String"/>
+    <parameter name="amountInWords"/>
+    <parameter name="companyName"/>
     <parameter name="companyInfosDataSet" class="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource"/>
-    <parameter name="companyAddress" class="java.lang.String"/>
-    <parameter name="ice" class="java.lang.String"/>
-    <parameter name="if" class="java.lang.String"/>
-    <parameter name="rc" class="java.lang.String"/>
-    <parameter name="patent" class="java.lang.String"/>
-    <parameter name="phone_number" class="java.lang.String"/>
-    <parameter name="email" class="java.lang.String"/>
-    <parameter name="fixed_phone_number" class="java.lang.String"/>
+    <parameter name="companyAddress"/>
+    <parameter name="ice"/>
+    <parameter name="if"/>
+    <parameter name="rc"/>
+    <parameter name="patent"/>
+    <parameter name="phone_number"/>
+    <parameter name="email"/>
+    <parameter name="fixed_phone_number"/>
     <parameter name="print_sales_document_heading" class="java.lang.Boolean"/>
-    <parameter name="document_type" class="java.lang.String"/>
+    <parameter name="document_type"/>
     <queryString>
         <![CDATA[]]>
     </queryString>

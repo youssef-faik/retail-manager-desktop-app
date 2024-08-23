@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import de.jensd.fx.glyphs.fontawesome.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.BorderPane?>
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:id="borderPane" prefHeight="480.0" prefWidth="640.0"
@@ -7,12 +8,33 @@
     <top>
         <MenuBar prefHeight="25.0" prefWidth="600.0" BorderPane.alignment="CENTER">
             <menus>
-                <Menu mnemonicParsing="false" text="Clients">
+                <Menu mnemonicParsing="false" text="Contact">
                     <items>
+                        <MenuItem fx:id="addSupplierMenuItem" mnemonicParsing="false" onAction="#addSupplier"
+                                  text="Nouveau fournisseur">
+                            <graphic>
+                                <FontAwesomeIconView glyphName="PLUS"/>
+                            </graphic>
+                        </MenuItem>
+                        <MenuItem fx:id="listSuppliersMenuItem" mnemonicParsing="false" onAction="#listSuppliers"
+                                  text="Liste des fournisseurs">
+                            <graphic>
+                                <FontAwesomeIconView glyphName="USERS"/>
+                            </graphic>
+                        </MenuItem>
+                        <SeparatorMenuItem/>
                         <MenuItem fx:id="addClientMenuItem" mnemonicParsing="false" onAction="#addClient"
-                                  text="Nouveau client"/>
+                                  text="Nouveau client">
+                            <graphic>
+                                <FontAwesomeIconView glyphName="PLUS"/>
+                            </graphic>
+                        </MenuItem>
                         <MenuItem fx:id="listClientsMenuItem" mnemonicParsing="false" onAction="#listClients"
-                                  text="Liste des clients"/>
+                                  text="Liste des clients">
+                            <graphic>
+                                <FontAwesomeIconView glyphName="USERS"/>
+                            </graphic>
+                        </MenuItem>
                     </items>
                 </Menu>
             </menus>
@@ -20,70 +42,149 @@
                 <Menu mnemonicParsing="false" text="Produits">
                     <items>
                         <MenuItem fx:id="addProductMenuItem" mnemonicParsing="false" onAction="#addProduct"
-                                  text="Nouveau produit"/>
+                                  text="Nouveau produit">
+                            <graphic>
+                                <FontAwesomeIconView glyphName="PLUS"/>
+                            </graphic>
+                        </MenuItem>
                         <MenuItem fx:id="listProductsMenuItem" mnemonicParsing="false" onAction="#listProducts"
-                                  text="Liste des produits"/>
+                                  text="Liste des produits">
+                            <graphic>
+                                <FontAwesomeIconView glyphName="CUBES"/>
+                            </graphic>
+                        </MenuItem>
                         <SeparatorMenuItem/>
                         <MenuItem fx:id="addCategoryMenuItem" mnemonicParsing="false" onAction="#addCategory"
-                                  text="Nouvelle catégorie"/>
+                                  text="Nouvelle catégorie">
+                            <graphic>
+                                <FontAwesomeIconView glyphName="PLUS"/>
+                            </graphic>
+                        </MenuItem>
                         <MenuItem fx:id="listCategoriesMenuItem" mnemonicParsing="false" onAction="#listCategories"
-                                  text="Liste des catégories"/>
-
+                                  text="Liste des catégories">
+                            <graphic>
+                                <FontAwesomeIconView glyphName="TAGS"/>
+                            </graphic>
+                        </MenuItem>
                         <SeparatorMenuItem/>
                         <MenuItem fx:id="addTaxRateMenuItem" mnemonicParsing="false" onAction="#addTaxRate"
-                                  text="Nouveau taux TVA"/>
+                                  text="Nouveau taux TVA">
+                            <graphic>
+                                <FontAwesomeIconView glyphName="PLUS"/>
+                            </graphic>
+                        </MenuItem>
                         <MenuItem fx:id="listTaxeRatesMenuItem" mnemonicParsing="false" onAction="#listTaxRates"
-                                  text="Liste des taux TVA"/>
+                                  text="Liste des taux TVA">
+                            <graphic>
+                                <FontAwesomeIconView glyphName="PERCENT"/>
+                            </graphic>
+                        </MenuItem>
 
                     </items>
                 </Menu>
             </menus>
             <menus>
-                <Menu mnemonicParsing="false" text="Devis">
+                <Menu mnemonicParsing="false" text="Achats">
+                    <items>
+                        <MenuItem fx:id="addPurchaseOrderMenuItem" mnemonicParsing="false" onAction="#addPurchaseOrder"
+                                  text="Nouvelle commande fournisseur">
+                            <graphic>
+                                <FontAwesomeIconView glyphName="PLUS"/>
+                            </graphic>
+                        </MenuItem>
+                        <MenuItem fx:id="listPurchaseOrdersMenuItem" mnemonicParsing="false"
+                                  onAction="#listPurchaseOrders"
+                                  text="Liste des commandes fournisseur">
+                            <graphic>
+                                <FontAwesomeIconView glyphName="COPY"/>
+                            </graphic>
+                        </MenuItem>
+                        <SeparatorMenuItem/>
+                        <MenuItem fx:id="addPurchaseDeliveryNoteMenuItem" mnemonicParsing="false"
+                                  onAction="#addPurchaseDeliveryNote"
+                                  text="Nouveau bon de reception">
+                            <graphic>
+                                <FontAwesomeIconView glyphName="PLUS"/>
+                            </graphic>
+                        </MenuItem>
+                        <MenuItem fx:id="listPurchaseDeliveryNotesMenuItem" mnemonicParsing="false"
+                                  onAction="#listPurchaseDeliveryNotes"
+                                  text="Liste des bons de reception">
+                            <graphic>
+                                <FontAwesomeIconView glyphName="COPY"/>
+                            </graphic>
+                        </MenuItem>
+                    </items>
+                </Menu>
+            </menus>
+            <menus>
+                <Menu mnemonicParsing="false" text="Ventes">
                     <items>
                         <MenuItem fx:id="addQuotationMenuItem" mnemonicParsing="false" onAction="#addQuotation"
-                                  text="Nouveau devis"/>
+                                  text="Nouveau devis">
+                            <graphic>
+                                <FontAwesomeIconView glyphName="PLUS"/>
+                            </graphic>
+                        </MenuItem>
                         <MenuItem fx:id="listQuotationsMenuItem" mnemonicParsing="false" onAction="#listQuotations"
-                                  text="Liste des devis"/>
-                    </items>
-                </Menu>
-            </menus>
-            <menus>
-                <Menu mnemonicParsing="false" text="Bon de livraison">
-                    <items>
+                                  text="Liste des devis">
+                            <graphic>
+                                <FontAwesomeIconView glyphName="COPY"/>
+                            </graphic>
+                        </MenuItem>
+                        <SeparatorMenuItem/>
                         <MenuItem fx:id="addDeliveryNoteMenuItem" mnemonicParsing="false" onAction="#addDeliveryNote"
-                                  text="Nouveau bon de livraison"/>
+                                  text="Nouveau bon de livraison">
+                            <graphic>
+                                <FontAwesomeIconView glyphName="PLUS"/>
+                            </graphic>
+                        </MenuItem>
                         <MenuItem fx:id="listDeliveryNotesMenuItem" mnemonicParsing="false"
                                   onAction="#listDeliveryNotes"
-                                  text="Liste des bons de livraison"/>
-                    </items>
-                </Menu>
-            </menus>
-            <menus>
-                <Menu mnemonicParsing="false" text="Factures">
-                    <items>
+                                  text="Liste des bons de livraison">
+                            <graphic>
+                                <FontAwesomeIconView glyphName="COPY"/>
+                            </graphic>
+                        </MenuItem>
+                        <SeparatorMenuItem/>
                         <MenuItem fx:id="addInvoiceMenuItem" mnemonicParsing="false" onAction="#addInvoice"
-                                  text="Nouvelle facture"/>
+                                  text="Nouvelle facture">
+                            <graphic>
+                                <FontAwesomeIconView glyphName="PLUS"/>
+                            </graphic>
+                        </MenuItem>
                         <MenuItem fx:id="listInvoicesMenuItem" mnemonicParsing="false" onAction="#listInvoices"
-                                  text="Liste des factures"/>
-                    </items>
-                </Menu>
-            </menus>
-            <menus>
-                <Menu mnemonicParsing="false" text="Factures avoir">
-                    <items>
+                                  text="Liste des factures">
+                            <graphic>
+                                <FontAwesomeIconView glyphName="COPY"/>
+                            </graphic>
+                        </MenuItem>
+                        <SeparatorMenuItem/>
                         <MenuItem fx:id="addCreditInvoiceMenuItem" mnemonicParsing="false" onAction="#addCreditInvoice"
-                                  text="Nouvelle facture d'avoir"/>
+                                  text="Nouvelle facture d'avoir">
+                            <graphic>
+                                <FontAwesomeIconView glyphName="PLUS"/>
+                            </graphic>
+                        </MenuItem>
                         <MenuItem fx:id="listCreditInvoicesMenuItem" mnemonicParsing="false"
                                   onAction="#listCreditInvoices"
-                                  text="Liste des factures d'avoir"/>
+                                  text="Liste des factures d'avoir">
+                            <graphic>
+                                <FontAwesomeIconView glyphName="COPY"/>
+                            </graphic>
+                        </MenuItem>
                     </items>
                 </Menu>
             </menus>
             <menus>
                 <Menu mnemonicParsing="false" text="Paramètres">
                     <items>
-                        <MenuItem mnemonicParsing="false" text="Infos et Numérotation" onAction="#editConfig"/>
+                        <MenuItem mnemonicParsing="false" text="Infos, Numérotation et impression"
+                                  onAction="#editConfig">
+                            <graphic>
+                                <FontAwesomeIconView glyphName="COGS"/>
+                            </graphic>
+                        </MenuItem>
                     </items>
                 </Menu>
             </menus>

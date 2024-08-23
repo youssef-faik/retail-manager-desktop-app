@@ -1,4 +1,4 @@
-package com.example.salesmanagement.salesdocument;
+package com.example.salesmanagement.document;
 
 import com.example.salesmanagement.client.Client;
 import jakarta.persistence.*;
