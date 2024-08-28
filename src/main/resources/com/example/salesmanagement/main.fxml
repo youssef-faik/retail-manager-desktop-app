@@ -36,6 +36,9 @@
                             </graphic>
                         </MenuItem>
                     </items>
+                    <graphic>
+                        <FontAwesomeIconView glyphName="USERS"/>
+                    </graphic>
                 </Menu>
             </menus>
             <menus>
@@ -81,6 +84,24 @@
                         </MenuItem>
 
                     </items>
+                    <graphic>
+                        <FontAwesomeIconView glyphName="CUBES"/>
+                    </graphic>
+                </Menu>
+            </menus>
+            <menus>
+                <Menu mnemonicParsing="false" text="Stock">
+                    <items>
+                        <MenuItem mnemonicParsing="false" text="Mouvement des stock"
+                                  onAction="#listStockMouvements">
+                            <graphic>
+                                <FontAwesomeIconView glyphName="EXCHANGE"/>
+                            </graphic>
+                        </MenuItem>
+                    </items>
+                    <graphic>
+                        <FontAwesomeIconView glyphName="EXCHANGE"/>
+                    </graphic>
                 </Menu>
             </menus>
             <menus>
@@ -115,6 +136,9 @@
                             </graphic>
                         </MenuItem>
                     </items>
+                    <graphic>
+                        <FontAwesomeIconView glyphName="SHOPPING_CART"/>
+                    </graphic>
                 </Menu>
             </menus>
             <menus>
@@ -174,10 +198,16 @@
                             </graphic>
                         </MenuItem>
                     </items>
+                    <graphic>
+                        <FontAwesomeIconView glyphName="SHOPPING_CART"/>
+                    </graphic>
                 </Menu>
             </menus>
             <menus>
                 <Menu mnemonicParsing="false" text="Paramètres">
+                    <graphic>
+                        <FontAwesomeIconView glyphName="COGS"/>
+                    </graphic>
                     <items>
                         <MenuItem mnemonicParsing="false" text="Infos, Numérotation et impression"
                                   onAction="#editConfig">

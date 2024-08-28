@@ -211,5 +211,10 @@ public class MainController {
         VBox pane = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("configuration/form-config.fxml")));
         borderPane.setCenter(pane);
     }
+
+    public void listStockMouvements() throws IOException {
+        VBox pane = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("stockmouvement/stock_mouvements.fxml")));
+        borderPane.setCenter(pane);
+    }
 }
 

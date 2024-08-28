@@ -8,6 +8,7 @@ module com.example.salesmanagement {
     requires jakarta.persistence;
     requires org.hibernate.orm.core;
     requires java.naming;
+    requires java.desktop;
 
 
     opens com.example.salesmanagement to javafx.fxml;
@@ -30,5 +31,7 @@ module com.example.salesmanagement {
     exports com.example.salesmanagement.payment;
     opens com.example.salesmanagement.configuration to javafx.fxml, org.hibernate.orm.core;
     exports com.example.salesmanagement.configuration;
+    opens com.example.salesmanagement.stockmouvement to javafx.fxml, org.hibernate.orm.core;
+    exports com.example.salesmanagement.stockmouvement;
 
 }

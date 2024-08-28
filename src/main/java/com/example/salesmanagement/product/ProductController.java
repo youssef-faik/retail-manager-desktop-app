@@ -2,18 +2,26 @@ package com.example.salesmanagement.product;
 
 import com.example.salesmanagement.category.Category;
 import com.example.salesmanagement.category.CategoryRepository;
+import com.example.salesmanagement.document.CreditInvoice;
+import com.example.salesmanagement.document.DeliveryNote;
+import com.example.salesmanagement.document.Invoice;
+import com.example.salesmanagement.document.PurchaseDeliveryNote;
+import com.example.salesmanagement.stockmouvement.*;
 import com.example.salesmanagement.taxrate.TaxRate;
 import com.example.salesmanagement.taxrate.TaxRateRepository;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
 import java.math.BigDecimal;
 import java.net.URL;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -22,7 +30,12 @@ import java.util.function.Function;
 public class ProductController implements Initializable {
     private final Pair<String, Category> EMPTY_CATEGORY = new Pair<>(null, null);
     private final Pair<String, TaxRate> EMPTY_TAX_RATE = new Pair<>(null, null);
-
+    @FXML
+    public Tab stockMouvementsTab;
+    @FXML
+    public TableView<StockMouvement> stockMouvementsTable;
+    public VBox parentVBox;
+    TabPane tabPane;
     private Long id;
     private ListProductsController listProductsController;
     @FXML
@@ -43,6 +56,9 @@ public class ProductController implements Initializable {
             Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
             stage.close();
         });
+
+        tabPane = stockMouvementsTab.getTabPane();
+        tabPane.getTabs().remove(stockMouvementsTab);
 
         initCategoryComboBox();
         initTaxRatesComboBox();
@@ -107,6 +123,10 @@ public class ProductController implements Initializable {
         this.descriptionTextArea.setText(product.getDescription());
         this.purchasePriceExcludingTaxTextField.setText(String.valueOf(product.getPurchasePriceExcludingTax()));
         this.sellingPriceExcludingTaxTextField.setText(String.valueOf(product.getSellingPriceExcludingTax()));
+
+        tabPane.getTabs().add(stockMouvementsTab);
+        initStockMovementsTableView(product);
+        parentVBox.setPrefWidth(550);
 
         if (product.getCategory() != null) {
             categoryComboBox.getItems()
@@ -188,6 +208,74 @@ public class ProductController implements Initializable {
     public void setListProductsController(ListProductsController listProductsController) {
         this.listProductsController = listProductsController;
     }
+
+
+    private void initStockMovementsTableView(Product product) {
+        TableColumn<StockMouvement, String> movementTypeColumn = new TableColumn<>("Type movement");
+        TableColumn<StockMouvement, String> quantityColumn = new TableColumn<>("Quantité");
+        TableColumn<StockMouvement, String> dateTimeColumn = new TableColumn<>("Date");
+        TableColumn<StockMouvement, String> mouvementSourceColumn = new TableColumn<>("Source movement");
+
+        movementTypeColumn.setMinWidth(100);
+        movementTypeColumn.setMaxWidth(100);
+        movementTypeColumn.setResizable(false);
+        movementTypeColumn.setReorderable(false);
+
+        quantityColumn.setMinWidth(65);
+        quantityColumn.setMaxWidth(65);
+        quantityColumn.setResizable(false);
+        quantityColumn.setReorderable(false);
+
+        dateTimeColumn.setMinWidth(140);
+        dateTimeColumn.setMaxWidth(140);
+        dateTimeColumn.setResizable(false);
+        dateTimeColumn.setReorderable(false);
+
+        mouvementSourceColumn.setReorderable(false);
+
+        stockMouvementsTable.getColumns().addAll(
+                movementTypeColumn,
+                quantityColumn,
+                dateTimeColumn,
+                mouvementSourceColumn
+        );
+
+        movementTypeColumn.setCellValueFactory(cellData -> new SimpleStringProperty(switch (cellData.getValue().getMovementType()) {
+            case STOCK_ENTRY -> "Entrée de stock";
+            case OUT_OF_STOCK -> "Sortie de stock";
+        }));
+
+        quantityColumn.setCellValueFactory(cellData -> new SimpleStringProperty(Integer.toString(cellData.getValue().getQuantity())));
+        dateTimeColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getDateTime().format(DateTimeFormatter.ofPattern("yyyy MMM dd - HH:mm:ss"))));
+        mouvementSourceColumn.setCellValueFactory(cellData -> {
+            MouvementSource mouvementSource = cellData.getValue().getMovementSource();
+
+            String initialValue = "";
+            if (mouvementSource instanceof DocumentBasedMouvementSource documentBasedMouvementSource
+                    && documentBasedMouvementSource.getSource() != null) {
+                if (documentBasedMouvementSource.getSource() instanceof PurchaseDeliveryNote purchaseDeliveryNote) {
+                    initialValue = "Bon de réception ref n° : " + purchaseDeliveryNote.getReference();
+                } else if (documentBasedMouvementSource.getSource() instanceof DeliveryNote deliveryNote) {
+                    initialValue = "Bon de livraison ref n° : " + deliveryNote.getReference();
+                } else if (documentBasedMouvementSource.getSource() instanceof Invoice invoice) {
+                    initialValue = "Facture ref n° : " + invoice.getReference();
+                } else if (documentBasedMouvementSource.getSource() instanceof CreditInvoice creditInvoice) {
+                    initialValue = "Facture d'avoir ref n° : " + creditInvoice.getReference();
+                }
+            }
+
+            if (mouvementSource instanceof StockCorrectionBasedMouvementSource stockCorrectionBasedMovementSource
+                    && stockCorrectionBasedMovementSource.getSource() != null) {
+                initialValue = "Correction de stock ref n° : " + stockCorrectionBasedMovementSource.getSource().getId();
+            }
+
+            return new SimpleStringProperty(initialValue);
+        });
+
+        stockMouvementsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        stockMouvementsTable.getItems().addAll(StockMovementRepository.findAllByProduct(product));
+    }
+
 
     private static class CategoryComboCell extends ListCell<Pair<String, Category>> {
         @Override

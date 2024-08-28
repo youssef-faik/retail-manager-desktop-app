@@ -91,6 +91,7 @@ public class ListProductsController implements Initializable {
         TableColumn<Product, Integer> idColumn = new TableColumn<>("ID");
         TableColumn<Product, String> nameColumn = new TableColumn<>("Nom");
         TableColumn<Product, String> descriptionColumn = new TableColumn<>("Description");
+        TableColumn<Product, String> quantityColumn = new TableColumn<>("Quantité");
         TableColumn<Product, BigDecimal> purchasePriceExcludingTaxColumn = new TableColumn<>("Prix d'achat (HT)");
         TableColumn<Product, BigDecimal> sellingPriceExcludingTaxColumn = new TableColumn<>("Prix de vente (HT)");
         TableColumn<Product, String> taxRateColumn = new TableColumn<>("Taux TVA");
@@ -101,6 +102,7 @@ public class ListProductsController implements Initializable {
                 nameColumn,
                 descriptionColumn,
                 categoryColumn,
+                quantityColumn,
                 purchasePriceExcludingTaxColumn,
                 sellingPriceExcludingTaxColumn,
                 taxRateColumn
@@ -119,6 +121,7 @@ public class ListProductsController implements Initializable {
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         idColumn.setVisible(false);
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        quantityColumn.setCellValueFactory(new PropertyValueFactory<>("quantity"));
         descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
         sellingPriceExcludingTaxColumn.setCellValueFactory(new PropertyValueFactory<>("sellingPriceExcludingTax"));
         purchasePriceExcludingTaxColumn.setCellValueFactory(new PropertyValueFactory<>("purchasePriceExcludingTax"));

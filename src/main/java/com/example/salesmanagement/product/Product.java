@@ -1,11 +1,15 @@
 package com.example.salesmanagement.product;
 
 import com.example.salesmanagement.category.Category;
+import com.example.salesmanagement.stockmouvement.MouvementType;
+import com.example.salesmanagement.stockmouvement.StockMouvement;
 import com.example.salesmanagement.taxrate.TaxRate;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Table(
@@ -28,7 +32,18 @@ public class Product implements Serializable {
     @ManyToOne
     private Category category;
 
+    @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "product")
+    private List<StockMouvement> stockMouvements = new ArrayList<>();
+
     public Product() {
+    }
+
+    public List<StockMouvement> getStockMovements() {
+        return stockMouvements;
+    }
+
+    public void setStockMovements(List<StockMouvement> stockMouvements) {
+        this.stockMouvements = stockMouvements;
     }
 
     public Long getId() {
@@ -85,6 +100,22 @@ public class Product implements Serializable {
 
     public void setCategory(Category category) {
         this.category = category;
+    }
+
+    public int getQuantity() {
+        int quantity = 0;
+
+        for (StockMouvement stockMouvement : stockMouvements) {
+            if (!stockMouvement.isCanceled()) {
+                if (Objects.requireNonNull(stockMouvement.getMovementType()) == MouvementType.STOCK_ENTRY) {
+                    quantity += stockMouvement.getQuantity();
+                } else if (stockMouvement.getMovementType() == MouvementType.OUT_OF_STOCK) {
+                    quantity -= stockMouvement.getQuantity();
+                }
+            }
+        }
+
+        return quantity;
     }
 
     @Override

@@ -33,5 +33,11 @@
         <mapping class="com.example.salesmanagement.payment.Check"/>
         <mapping class="com.example.salesmanagement.payment.Cash"/>
         <mapping class="com.example.salesmanagement.payment.BankTransfer"/>
+        <mapping class="com.example.salesmanagement.stockmouvement.MouvementSource"/>
+        <mapping class="com.example.salesmanagement.stockmouvement.StockCorrection"/>
+        <mapping class="com.example.salesmanagement.stockmouvement.StockMouvement"/>
+        <mapping class="com.example.salesmanagement.stockmouvement.StockCorrectionItem"/>
+        <mapping class="com.example.salesmanagement.stockmouvement.StockCorrectionBasedMouvementSource"/>
+        <mapping class="com.example.salesmanagement.stockmouvement.DocumentBasedMouvementSource"/>
     </session-factory>
 </hibernate-configuration>
