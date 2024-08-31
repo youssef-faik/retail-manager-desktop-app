@@ -1,8 +1,8 @@
 package com.example.salesmanagement.product;
 
 import com.example.salesmanagement.category.Category;
-import com.example.salesmanagement.stockmouvement.MouvementType;
-import com.example.salesmanagement.stockmouvement.StockMouvement;
+import com.example.salesmanagement.stockmouvement.MovementType;
+import com.example.salesmanagement.stockmouvement.StockMovement;
 import com.example.salesmanagement.taxrate.TaxRate;
 import jakarta.persistence.*;
 
@@ -33,17 +33,17 @@ public class Product implements Serializable {
     private Category category;
 
     @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "product")
-    private List<StockMouvement> stockMouvements = new ArrayList<>();
+    private List<StockMovement> stockMovements = new ArrayList<>();
 
     public Product() {
     }
 
-    public List<StockMouvement> getStockMovements() {
-        return stockMouvements;
+    public List<StockMovement> getStockMovements() {
+        return stockMovements;
     }
 
-    public void setStockMovements(List<StockMouvement> stockMouvements) {
-        this.stockMouvements = stockMouvements;
+    public void setStockMovements(List<StockMovement> stockMovements) {
+        this.stockMovements = stockMovements;
     }
 
     public Long getId() {
@@ -105,12 +105,12 @@ public class Product implements Serializable {
     public int getQuantity() {
         int quantity = 0;
 
-        for (StockMouvement stockMouvement : stockMouvements) {
-            if (!stockMouvement.isCanceled()) {
-                if (Objects.requireNonNull(stockMouvement.getMovementType()) == MouvementType.STOCK_ENTRY) {
-                    quantity += stockMouvement.getQuantity();
-                } else if (stockMouvement.getMovementType() == MouvementType.OUT_OF_STOCK) {
-                    quantity -= stockMouvement.getQuantity();
+        for (StockMovement stockMovement : stockMovements) {
+            if (!stockMovement.isCanceled()) {
+                if (Objects.requireNonNull(stockMovement.getMovementType()) == MovementType.STOCK_ENTRY) {
+                    quantity += stockMovement.getQuantity();
+                } else if (stockMovement.getMovementType() == MovementType.OUT_OF_STOCK) {
+                    quantity -= stockMovement.getQuantity();
                 }
             }
         }

@@ -4,9 +4,21 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.BorderPane?>
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:id="borderPane" prefHeight="480.0" prefWidth="640.0"
-            xmlns="http://javafx.com/javafx/17.0.6" fx:controller="com.example.salesmanagement.MainController">
+            xmlns="http://javafx.com/javafx/22" fx:controller="com.example.salesmanagement.MainController">
     <top>
         <MenuBar prefHeight="25.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+            <Menu mnemonicParsing="false">
+                <graphic>
+                    <FontAwesomeIconView glyphName="BARS"/>
+                </graphic>
+                <items>
+                    <MenuItem mnemonicParsing="false" onAction="#signout" text="Se déconnecter">
+                        <graphic>
+                            <FontAwesomeIconView glyphName="SIGN_OUT"/>
+                        </graphic>
+                    </MenuItem>
+                </items>
+            </Menu>
             <menus>
                 <Menu mnemonicParsing="false" text="Contact">
                     <items>
@@ -92,8 +104,7 @@
             <menus>
                 <Menu mnemonicParsing="false" text="Stock">
                     <items>
-                        <MenuItem mnemonicParsing="false" text="Mouvement des stock"
-                                  onAction="#listStockMouvements">
+                        <MenuItem mnemonicParsing="false" onAction="#listStockMouvements" text="Mouvement des stock">
                             <graphic>
                                 <FontAwesomeIconView glyphName="EXCHANGE"/>
                             </graphic>
@@ -114,23 +125,20 @@
                             </graphic>
                         </MenuItem>
                         <MenuItem fx:id="listPurchaseOrdersMenuItem" mnemonicParsing="false"
-                                  onAction="#listPurchaseOrders"
-                                  text="Liste des commandes fournisseur">
+                                  onAction="#listPurchaseOrders" text="Liste des commandes fournisseur">
                             <graphic>
                                 <FontAwesomeIconView glyphName="COPY"/>
                             </graphic>
                         </MenuItem>
                         <SeparatorMenuItem/>
                         <MenuItem fx:id="addPurchaseDeliveryNoteMenuItem" mnemonicParsing="false"
-                                  onAction="#addPurchaseDeliveryNote"
-                                  text="Nouveau bon de reception">
+                                  onAction="#addPurchaseDeliveryNote" text="Nouveau bon de reception">
                             <graphic>
                                 <FontAwesomeIconView glyphName="PLUS"/>
                             </graphic>
                         </MenuItem>
                         <MenuItem fx:id="listPurchaseDeliveryNotesMenuItem" mnemonicParsing="false"
-                                  onAction="#listPurchaseDeliveryNotes"
-                                  text="Liste des bons de reception">
+                                  onAction="#listPurchaseDeliveryNotes" text="Liste des bons de reception">
                             <graphic>
                                 <FontAwesomeIconView glyphName="COPY"/>
                             </graphic>
@@ -164,8 +172,7 @@
                             </graphic>
                         </MenuItem>
                         <MenuItem fx:id="listDeliveryNotesMenuItem" mnemonicParsing="false"
-                                  onAction="#listDeliveryNotes"
-                                  text="Liste des bons de livraison">
+                                  onAction="#listDeliveryNotes" text="Liste des bons de livraison">
                             <graphic>
                                 <FontAwesomeIconView glyphName="COPY"/>
                             </graphic>
@@ -191,8 +198,7 @@
                             </graphic>
                         </MenuItem>
                         <MenuItem fx:id="listCreditInvoicesMenuItem" mnemonicParsing="false"
-                                  onAction="#listCreditInvoices"
-                                  text="Liste des factures d'avoir">
+                                  onAction="#listCreditInvoices" text="Liste des factures d'avoir">
                             <graphic>
                                 <FontAwesomeIconView glyphName="COPY"/>
                             </graphic>
@@ -209,10 +215,35 @@
                         <FontAwesomeIconView glyphName="COGS"/>
                     </graphic>
                     <items>
-                        <MenuItem mnemonicParsing="false" text="Infos, Numérotation et impression"
-                                  onAction="#editConfig">
+                        <MenuItem mnemonicParsing="false" onAction="#editConfig"
+                                  text="Infos, Numérotation et impression">
                             <graphic>
                                 <FontAwesomeIconView glyphName="COGS"/>
+                            </graphic>
+                        </MenuItem>
+                        <MenuItem mnemonicParsing="false" onAction="#changePassword" text="Changer mot de passe">
+                            <graphic>
+                                <FontAwesomeIconView glyphName="KEY"/>
+                            </graphic>
+                        </MenuItem>
+                    </items>
+                </Menu>
+            </menus>
+
+            <menus>
+                <Menu mnemonicParsing="false" text="Utilisateur">
+                    <graphic>
+                        <FontAwesomeIconView glyphName="USERS"/>
+                    </graphic>
+                    <items>
+                        <MenuItem mnemonicParsing="false" onAction="#addUser" text="Ajouter utilisateur">
+                            <graphic>
+                                <FontAwesomeIconView glyphName="USER_PLUS"/>
+                            </graphic>
+                        </MenuItem>
+                        <MenuItem mnemonicParsing="false" onAction="#listUsers" text="Liste utilisateurs">
+                            <graphic>
+                                <FontAwesomeIconView glyphName="USERS"/>
                             </graphic>
                         </MenuItem>
                     </items>

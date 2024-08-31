@@ -6,9 +6,9 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 <VBox xmlns:fx="http://javafx.com/fxml/1" spacing="8.0" xmlns="http://javafx.com/javafx/22"
-      fx:controller="com.example.salesmanagement.client.ClientController">
+      fx:controller="com.example.salesmanagement.user.UserController">
     <children>
-        <Label graphicTextGap="8.0" text="Client">
+        <Label graphicTextGap="8.0" text="Utilisateur">
             <font>
                 <Font name="System Bold" size="32.0"/>
             </font>
@@ -22,21 +22,19 @@
         <HBox>
             <children>
                 <Label prefWidth="110.0" text="Nom" HBox.hgrow="ALWAYS"/>
-                <TextField fx:id="nameTextField" prefHeight="25.0" prefWidth="250.0" HBox.hgrow="ALWAYS"/>
+                <TextField fx:id="lastnameTextField" prefHeight="25.0" prefWidth="250.0" HBox.hgrow="ALWAYS"/>
             </children>
         </HBox>
         <HBox>
             <children>
-                <Label prefWidth="110.0" text="ICE" HBox.hgrow="ALWAYS"/>
-                <TextField fx:id="commonCompanyIdentifierTextField" prefHeight="25.0" prefWidth="250.0"
-                           HBox.hgrow="ALWAYS"/>
+                <Label prefWidth="110.0" text="Prénom" HBox.hgrow="ALWAYS"/>
+                <TextField fx:id="firstnameTextField" prefHeight="25.0" prefWidth="250.0" HBox.hgrow="ALWAYS"/>
             </children>
         </HBox>
         <HBox>
             <children>
-                <Label prefWidth="110.0" text="IF" HBox.hgrow="ALWAYS"/>
-                <TextField fx:id="taxIdentificationNumberTextField" prefHeight="25.0" prefWidth="250.0"
-                           HBox.hgrow="ALWAYS"/>
+                <Label prefWidth="110.0" text="identifiant" HBox.hgrow="ALWAYS"/>
+                <TextField fx:id="usernameTextField" prefHeight="25.0" prefWidth="250.0" HBox.hgrow="ALWAYS"/>
             </children>
         </HBox>
         <HBox>

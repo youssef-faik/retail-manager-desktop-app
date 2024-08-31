@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<VBox xmlns:fx="http://javafx.com/fxml/1" spacing="8.0" xmlns="http://javafx.com/javafx/17.0.6"
+      fx:controller="com.example.salesmanagement.LoginController">
+    <children>
+        <VBox alignment="CENTER" spacing="8.0" VBox.vgrow="ALWAYS">
+            <children>
+                <FontAwesomeIconView glyphName="USER" size="52.0"/>
+                <Label graphicTextGap="8.0" text="Authentification">
+                    <font>
+                        <Font name="System Bold" size="14.0"/>
+                    </font>
+                </Label>
+            </children>
+            <VBox.margin>
+                <Insets/>
+            </VBox.margin>
+            <padding>
+                <Insets bottom="16.0" left="16.0" right="16.0" top="16.0"/>
+            </padding>
+        </VBox>
+        <HBox>
+            <children>
+                <Label prefWidth="200.0" text="Identifiant" HBox.hgrow="ALWAYS">
+                    <HBox.margin>
+                        <Insets/>
+                    </HBox.margin>
+                </Label>
+                <TextField fx:id="usernameTextField" prefWidth="250.0"/>
+            </children>
+        </HBox>
+        <HBox>
+            <children>
+                <Label prefWidth="200.0" text="Mot de passe" HBox.hgrow="ALWAYS">
+                    <HBox.margin>
+                        <Insets/>
+                    </HBox.margin>
+                </Label>
+                <Pane>
+                    <children>
+                        <PasswordField fx:id="passwordField" prefWidth="250.0"/>
+                        <TextField fx:id="passwordTextField" prefWidth="250.0" visible="false"/>
+                    </children>
+                </Pane>
+            </children>
+        </HBox>
+        <HBox fx:id="newPasswordHBox">
+            <children>
+                <Label prefHeight="17.0" prefWidth="200.0" text="Nouveau mot de passe" HBox.hgrow="ALWAYS"/>
+                <Pane HBox.hgrow="ALWAYS">
+                    <children>
+                        <PasswordField fx:id="newPasswordField" prefWidth="250.0"/>
+                        <TextField fx:id="newPasswordTextField" maxWidth="-Infinity" prefHeight="25.0" prefWidth="250.0"
+                                   visible="false"/>
+                    </children>
+                </Pane>
+            </children>
+        </HBox>
+        <HBox fx:id="confirmNewPasswordHBox">
+            <children>
+                <Label prefHeight="17.0" prefWidth="200.0" text="Confirmer le nouveau mot de passe" wrapText="true"
+                       HBox.hgrow="ALWAYS"/>
+                <Pane HBox.hgrow="ALWAYS">
+                    <children>
+                        <PasswordField fx:id="confirmNewPasswordField" prefWidth="250.0"/>
+                        <TextField fx:id="confirmNewPasswordTextField" maxWidth="-Infinity" prefHeight="25.0"
+                                   prefWidth="250.0" visible="false"/>
+                    </children>
+                </Pane>
+            </children>
+        </HBox>
+        <HBox fx:id="showPasswordHBox">
+            <children>
+                <Label alignment="TOP_RIGHT" prefHeight="17.0" prefWidth="200.0"/>
+                <CheckBox fx:id="showPasswordCheckBox" mnemonicParsing="false" text="Afficher mot de passe"
+                          HBox.hgrow="ALWAYS"/>
+            </children>
+        </HBox>
+        <Separator prefWidth="200.0"/>
+        <HBox/>
+        <ButtonBar>
+            <buttons>
+                <Button fx:id="loginButton" defaultButton="true" mnemonicParsing="false" prefHeight="25.0"
+                        text="S'authentifier"/>
+                <Button fx:id="cancelButton" cancelButton="true" mnemonicParsing="false" prefHeight="25.0"
+                        prefWidth="75.0" text="Annuler"/>
+            </buttons>
+        </ButtonBar>
+    </children>
+    <padding>
+        <Insets bottom="8.0" left="8.0" right="8.0" top="8.0"/>
+    </padding>
+</VBox>

@@ -11,13 +11,14 @@ module com.example.salesmanagement {
     requires java.desktop;
 
 
-    opens com.example.salesmanagement to javafx.fxml;
     exports com.example.salesmanagement;
     opens com.example.salesmanagement.client to javafx.fxml, org.hibernate.orm.core;
     exports com.example.salesmanagement.client;
     opens com.example.salesmanagement.supplier to javafx.fxml, org.hibernate.orm.core;
     exports com.example.salesmanagement.supplier;
     opens com.example.salesmanagement.product to javafx.fxml, org.hibernate.orm.core;
+    exports com.example.salesmanagement.user;
+    opens com.example.salesmanagement.user to javafx.fxml, org.hibernate.orm.core;
     exports com.example.salesmanagement.product;
     opens com.example.salesmanagement.category to javafx.fxml, org.hibernate.orm.core;
     exports com.example.salesmanagement.category;
@@ -33,5 +34,6 @@ module com.example.salesmanagement {
     exports com.example.salesmanagement.configuration;
     opens com.example.salesmanagement.stockmouvement to javafx.fxml, org.hibernate.orm.core;
     exports com.example.salesmanagement.stockmouvement;
+    opens com.example.salesmanagement to javafx.fxml, org.hibernate.orm.core;
 
 }

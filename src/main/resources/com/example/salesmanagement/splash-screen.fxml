@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.shape.Rectangle?>
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" disable="true" prefHeight="400.0" prefWidth="600.0"
+            xmlns="http://javafx.com/javafx/17.0.6">
+    <children>
+        <Rectangle height="400.0" smooth="false" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="600.0"/>
+        <ImageView fitHeight="389.0" fitWidth="423.0" layoutX="105.0" layoutY="6.0" pickOnBounds="true"
+                   preserveRatio="true">
+            <image>
+                <Image url="@../../../white-IBSYS-SARL-AU-Logo.png"/>
+            </image>
+        </ImageView>
+    </children>
+</AnchorPane>

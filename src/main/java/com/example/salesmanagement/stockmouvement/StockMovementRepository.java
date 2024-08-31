@@ -15,52 +15,52 @@ import java.util.Optional;
 public interface StockMovementRepository {
     SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
 
-    static List<StockMouvement> findAll() {
-        List<StockMouvement> stockMouvements = new ArrayList();
+    static List<StockMovement> findAll() {
+        List<StockMovement> stockMovements = new ArrayList();
 
         Session session = sessionFactory.openSession();
 
         try (session) {
-            stockMouvements.addAll(session.createQuery("select S from StockMovement S where S.isCanceled = false order by S.dateTime desc", StockMouvement.class).list());
+            stockMovements.addAll(session.createQuery("select S from StockMovement S where S.isCanceled = false order by S.dateTime desc", StockMovement.class).list());
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return stockMouvements;
+        return stockMovements;
     }
 
-    static List<StockMouvement> findAllByDocument(Document document) {
-        List<StockMouvement> stockMouvements = new ArrayList<>();
+    static List<StockMovement> findAllByDocument(Document document) {
+        List<StockMovement> stockMovements = new ArrayList<>();
 
         Session session = sessionFactory.openSession();
 
         try (session) {
             String queryString = "select S from StockMovement S join MovementSource M on S.movementSource = M join DocumentBasedMovementSource D on M.id = D.id where D.source = :document order by S.dateTime desc";
-            Query<StockMouvement> query = session.createQuery(queryString, StockMouvement.class);
+            Query<StockMovement> query = session.createQuery(queryString, StockMovement.class);
             query.setParameter("document", document);
-            stockMouvements.addAll(query.list());
+            stockMovements.addAll(query.list());
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return stockMouvements;
+        return stockMovements;
     }
 
-    static Optional<StockMouvement> findById(Long id) {
+    static Optional<StockMovement> findById(Long id) {
         try (Session session = sessionFactory.openSession()) {
-            StockMouvement stockMouvement = session.find(StockMouvement.class, id);
-            session.refresh(stockMouvement);
+            StockMovement stockMovement = session.find(StockMovement.class, id);
+            session.refresh(stockMovement);
 
-            return Optional.ofNullable(stockMouvement);
+            return Optional.ofNullable(stockMovement);
         }
     }
 
-    static boolean save(StockMouvement stockMouvement) {
+    static boolean save(StockMovement stockMovement) {
         Session session = sessionFactory.openSession();
 
         try {
             session.beginTransaction();
-            session.persist(stockMouvement);
+            session.persist(stockMovement);
             session.getTransaction().commit();
 
             return true;
@@ -78,29 +78,29 @@ public interface StockMovementRepository {
         }
     }
 
-    static Optional<StockMouvement> update(StockMouvement stockMouvement) {
+    static Optional<StockMovement> update(StockMovement stockMovement) {
         Session session = sessionFactory.openSession();
 
         try {
             session.beginTransaction();
 
-            StockMouvement originalStockMouvement = session.find(StockMouvement.class, stockMouvement.getId());
+            StockMovement originalStockMovement = session.find(StockMovement.class, stockMovement.getId());
 
-            if (originalStockMouvement == null) {
+            if (originalStockMovement == null) {
                 return Optional.empty();
             }
 
-            originalStockMouvement.setMovementType(stockMouvement.getMovementType());
-            originalStockMouvement.setCanceled(stockMouvement.isCanceled());
-            originalStockMouvement.setDateTime(stockMouvement.getDateTime());
-            originalStockMouvement.setQuantity(stockMouvement.getQuantity());
-            originalStockMouvement.setProduct(stockMouvement.getProduct());
-            originalStockMouvement.setMovementSource(stockMouvement.getMovementSource());
+            originalStockMovement.setMovementType(stockMovement.getMovementType());
+            originalStockMovement.setCanceled(stockMovement.isCanceled());
+            originalStockMovement.setDateTime(stockMovement.getDateTime());
+            originalStockMovement.setQuantity(stockMovement.getQuantity());
+            originalStockMovement.setProduct(stockMovement.getProduct());
+            originalStockMovement.setMovementSource(stockMovement.getMovementSource());
 
-            session.merge(originalStockMouvement);
+            session.merge(originalStockMovement);
             session.getTransaction().commit();
 
-            return Optional.of(originalStockMouvement);
+            return Optional.of(originalStockMovement);
         } catch (Exception e) {
             e.printStackTrace();
 
@@ -121,12 +121,12 @@ public interface StockMovementRepository {
         try {
             session.beginTransaction();
 
-            StockMouvement deletedStockMouvement = session.getReference(StockMouvement.class, id);
-            if (deletedStockMouvement == null) {
+            StockMovement deletedStockMovement = session.getReference(StockMovement.class, id);
+            if (deletedStockMovement == null) {
                 return false;
             }
 
-            session.remove(deletedStockMouvement);
+            session.remove(deletedStockMovement);
             session.getTransaction().commit();
 
             return true;
@@ -145,20 +145,20 @@ public interface StockMovementRepository {
     }
 
 
-    static List<StockMouvement> findAllByProduct(Product product) {
-        List<StockMouvement> stockMouvements = new ArrayList<>();
+    static List<StockMovement> findAllByProduct(Product product) {
+        List<StockMovement> stockMovements = new ArrayList<>();
 
         Session session = sessionFactory.openSession();
 
         try (session) {
             String queryString = "select S from StockMovement S where S.product = :product order by S.dateTime desc";
-            Query<StockMouvement> query = session.createQuery(queryString, StockMouvement.class);
+            Query<StockMovement> query = session.createQuery(queryString, StockMovement.class);
             query.setParameter("product", product);
-            stockMouvements.addAll(query.list());
+            stockMovements.addAll(query.list());
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return stockMouvements;
+        return stockMovements;
     }
 }

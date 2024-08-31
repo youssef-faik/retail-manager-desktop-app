@@ -12,13 +12,13 @@ import java.util.ResourceBundle;
 public class StockCorrectionController implements Initializable {
 
     public TextField productNameTextField, currentQuantityTextField, quantityUpdatedByTextField;
-    public ComboBox<MouvementType> correctionTypeComboBox;
+    public ComboBox<MovementType> correctionTypeComboBox;
     public Button saveButton, cancelButton;
-    private StockMouvement stockMouvement;
+    private StockMovement stockMovement;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        correctionTypeComboBox.getItems().addAll(MouvementType.values());
+        correctionTypeComboBox.getItems().addAll(MovementType.values());
         correctionTypeComboBox.setCellFactory(x -> new MovementTypeComboCell());
         correctionTypeComboBox.setButtonCell(new MovementTypeComboCell());
 
@@ -31,7 +31,7 @@ public class StockCorrectionController implements Initializable {
     }
 
     private void update() {
-        Optional<StockMouvement> optionalStockMovement = StockMovementRepository.update(stockMouvement);
+        Optional<StockMovement> optionalStockMovement = StockMovementRepository.update(stockMovement);
 
         if (optionalStockMovement.isPresent()) {
             displaySuccessAlert();
@@ -40,36 +40,36 @@ public class StockCorrectionController implements Initializable {
         }
     }
 
-    public void setStockMovement(StockMouvement stockMouvement) {
-        this.stockMouvement = new StockMouvement(
-                stockMouvement.getId(),
-                stockMouvement.getProduct(),
-                stockMouvement.getQuantity(),
-                stockMouvement.isCanceled(),
-                stockMouvement.getDateTime(),
-                stockMouvement.getMovementType(),
-                stockMouvement.getMovementSource()
+    public void setStockMovement(StockMovement stockMovement) {
+        this.stockMovement = new StockMovement(
+                stockMovement.getId(),
+                stockMovement.getProduct(),
+                stockMovement.getQuantity(),
+                stockMovement.isCanceled(),
+                stockMovement.getDateTime(),
+                stockMovement.getMovementType(),
+                stockMovement.getMovementSource()
         );
 
-        int actualQuantity = stockMouvement.getProduct().getQuantity();
+        int actualQuantity = stockMovement.getProduct().getQuantity();
 
-        productNameTextField.setText(this.stockMouvement.getProduct().getName());
+        productNameTextField.setText(this.stockMovement.getProduct().getName());
         currentQuantityTextField.setText(Integer.toString(actualQuantity));
-        quantityUpdatedByTextField.setText(Integer.toString(this.stockMouvement.getQuantity()));
-        correctionTypeComboBox.setValue(this.stockMouvement.getMovementType());
+        quantityUpdatedByTextField.setText(Integer.toString(this.stockMovement.getQuantity()));
+        correctionTypeComboBox.setValue(this.stockMovement.getMovementType());
 
         quantityUpdatedByTextField.textProperty().addListener((observable, oldValue, newValue) ->
                 {
                     int quantityUpdatedBy = Integer.parseInt(newValue);
 
-                    this.stockMouvement.setQuantity(quantityUpdatedBy);
+                    this.stockMovement.setQuantity(quantityUpdatedBy);
                 }
         );
 
         correctionTypeComboBox.setOnAction(event -> {
-            MouvementType mouvementType = correctionTypeComboBox.getSelectionModel().getSelectedItem();
+            MovementType movementType = correctionTypeComboBox.getSelectionModel().getSelectedItem();
 
-            this.stockMouvement.setMovementType(mouvementType);
+            this.stockMovement.setMovementType(movementType);
         });
     }
 
@@ -89,9 +89,9 @@ public class StockCorrectionController implements Initializable {
         alert.showAndWait();
     }
 
-    private static class MovementTypeComboCell extends ListCell<MouvementType> {
+    private static class MovementTypeComboCell extends ListCell<MovementType> {
         @Override
-        protected void updateItem(MouvementType item, boolean bln) {
+        protected void updateItem(MovementType item, boolean bln) {
             super.updateItem(item, bln);
             setText(item == null ? null : switch (item) {
                 case STOCK_ENTRY -> "Entrée de stock";

@@ -3,7 +3,7 @@ package com.example.salesmanagement.document;
 import com.example.salesmanagement.HibernateUtil;
 import com.example.salesmanagement.configuration.AppConfiguration;
 import com.example.salesmanagement.configuration.ConfigKey;
-import com.example.salesmanagement.stockmouvement.StockMouvement;
+import com.example.salesmanagement.stockmouvement.StockMovement;
 import com.example.salesmanagement.stockmouvement.StockMovementRepository;
 import jakarta.persistence.Entity;
 import jakarta.persistence.NoResultException;
@@ -250,24 +250,24 @@ public interface DocumentRepository {
 
         original.setStatus(updated.getStatus());
 
-        List<StockMouvement> stockMouvements;
+        List<StockMovement> stockMovements;
 
         if (originalStatus == PurchaseDeliveryNoteStatus.DRAFT && updated.getStatus() != PurchaseDeliveryNoteStatus.DRAFT) {
             assignNewReference(original, ConfigKey.NEXT_PURCHASE_DELIVERY_NOTE_NUMBER);
-            stockMouvements = saveStockMouvements(original, session);
+            stockMovements = saveStockMouvements(original, session);
         } else {
-            stockMouvements = StockMovementRepository.findAllByDocument(original);
+            stockMovements = StockMovementRepository.findAllByDocument(original);
         }
 
         AtomicReference<LocalDateTime> stockEntryMouvementDateTime = new AtomicReference<>(LocalDateTime.now());
 
-        if (!stockMouvements.isEmpty()) {
-            stockMouvements.stream().findFirst().ifPresent(mouvement -> stockEntryMouvementDateTime.set(mouvement.getDateTime()));
+        if (!stockMovements.isEmpty()) {
+            stockMovements.stream().findFirst().ifPresent(mouvement -> stockEntryMouvementDateTime.set(mouvement.getDateTime()));
         }
 
         if (updated.getStatus() != PurchaseDeliveryNoteStatus.DRAFT) {
             original.getItems().forEach(item ->
-                    stockMouvements
+                    stockMovements
                             .stream()
                             .filter(stockMouvement -> stockMouvement.getProduct().equals(item.getProduct()))
                             .findFirst()
@@ -278,18 +278,18 @@ public interface DocumentRepository {
                                     },
                                     () -> {
                                         //create new stock mouvement
-                                        StockMouvement stockEntryMouvement = StockMouvement.createStockEntryMouvement(item.getProduct(), item.getQuantity(), original);
+                                        StockMovement stockEntryMouvement = StockMovement.createStockEntryMouvement(item.getProduct(), item.getQuantity(), original);
                                         stockEntryMouvement.setDateTime(stockEntryMouvementDateTime.get());
                                         session.persist(stockEntryMouvement);
 
-                                        stockMouvements.add(stockEntryMouvement);
+                                        stockMovements.add(stockEntryMouvement);
                                     }
                             ));
 
 
-            List<StockMouvement> stockMouvementsToRemove = new ArrayList<>();
+            List<StockMovement> stockMouvementsToRemove = new ArrayList<>();
 
-            stockMouvements.forEach(stockMouvement -> {
+            stockMovements.forEach(stockMouvement -> {
                 boolean noneMatch = original.getItems()
                         .stream()
                         .noneMatch(item -> stockMouvement.getProduct().equals(item.getProduct()));
@@ -302,14 +302,14 @@ public interface DocumentRepository {
 
             stockMouvementsToRemove.stream().map(session::merge).forEach(session::remove);
 
-            stockMouvements.removeAll(stockMouvementsToRemove);
+            stockMovements.removeAll(stockMouvementsToRemove);
         }
 
 
         // X -> CANCELLED
         if ((originalStatus != PurchaseDeliveryNoteStatus.CANCELLED && originalStatus != PurchaseDeliveryNoteStatus.DRAFT)
                 && updated.getStatus() == PurchaseDeliveryNoteStatus.CANCELLED) {
-            stockMouvements.forEach(stockMouvement -> {
+            stockMovements.forEach(stockMouvement -> {
                 stockMouvement.setCanceled(true);
                 session.merge(stockMouvement);
             });
@@ -318,7 +318,7 @@ public interface DocumentRepository {
         // CANCELLED -> X
         if (originalStatus == PurchaseDeliveryNoteStatus.CANCELLED
                 && (updated.getStatus() != PurchaseDeliveryNoteStatus.DRAFT && updated.getStatus() != PurchaseDeliveryNoteStatus.CANCELLED)) {
-            stockMouvements.forEach(stockMouvement -> {
+            stockMovements.forEach(stockMouvement -> {
                 stockMouvement.setCanceled(false);
                 session.merge(stockMouvement);
             });
@@ -331,24 +331,24 @@ public interface DocumentRepository {
 
         original.setStatus(updated.getStatus());
 
-        List<StockMouvement> stockMouvements;
+        List<StockMovement> stockMovements;
 
         if (originalStatus == DeliveryNoteStatus.DRAFT && updated.getStatus() != DeliveryNoteStatus.DRAFT) {
             assignNewReference(original, ConfigKey.NEXT_DELIVERY_NOTE_NUMBER);
-            stockMouvements = saveStockMouvements(original, session);
+            stockMovements = saveStockMouvements(original, session);
         } else {
-            stockMouvements = StockMovementRepository.findAllByDocument(original);
+            stockMovements = StockMovementRepository.findAllByDocument(original);
         }
 
         AtomicReference<LocalDateTime> stockEntryMouvementDateTime = new AtomicReference<>(LocalDateTime.now());
 
-        if (!stockMouvements.isEmpty()) {
-            stockMouvements.stream().findFirst().ifPresent(mouvement -> stockEntryMouvementDateTime.set(mouvement.getDateTime()));
+        if (!stockMovements.isEmpty()) {
+            stockMovements.stream().findFirst().ifPresent(mouvement -> stockEntryMouvementDateTime.set(mouvement.getDateTime()));
         }
 
         if (updated.getStatus() != DeliveryNoteStatus.DRAFT) {
             original.getItems().forEach(item ->
-                    stockMouvements
+                    stockMovements
                             .stream()
                             .filter(stockMouvement -> stockMouvement.getProduct().equals(item.getProduct()))
                             .findFirst()
@@ -359,18 +359,18 @@ public interface DocumentRepository {
                                     },
                                     () -> {
                                         //create new stock mouvement
-                                        StockMouvement stockEntryMouvement = StockMouvement.createStockEntryMouvement(item.getProduct(), item.getQuantity(), original);
+                                        StockMovement stockEntryMouvement = StockMovement.createStockEntryMouvement(item.getProduct(), item.getQuantity(), original);
                                         stockEntryMouvement.setDateTime(stockEntryMouvementDateTime.get());
                                         session.persist(stockEntryMouvement);
 
-                                        stockMouvements.add(stockEntryMouvement);
+                                        stockMovements.add(stockEntryMouvement);
                                     }
                             ));
 
 
-            List<StockMouvement> stockMouvementsToRemove = new ArrayList<>();
+            List<StockMovement> stockMouvementsToRemove = new ArrayList<>();
 
-            stockMouvements.forEach(stockMouvement -> {
+            stockMovements.forEach(stockMouvement -> {
                 boolean noneMatch = original.getItems()
                         .stream()
                         .noneMatch(item -> stockMouvement.getProduct().equals(item.getProduct()));
@@ -383,12 +383,12 @@ public interface DocumentRepository {
 
             stockMouvementsToRemove.stream().map(session::merge).forEach(session::remove);
 
-            stockMouvements.removeAll(stockMouvementsToRemove);
+            stockMovements.removeAll(stockMouvementsToRemove);
         }
 
         if ((originalStatus != DeliveryNoteStatus.CANCELLED && originalStatus != DeliveryNoteStatus.DRAFT)
                 && updated.getStatus() == DeliveryNoteStatus.CANCELLED) {
-            stockMouvements.forEach(stockMouvement -> {
+            stockMovements.forEach(stockMouvement -> {
                 stockMouvement.setCanceled(true);
                 session.merge(stockMouvement);
             });
@@ -396,7 +396,7 @@ public interface DocumentRepository {
 
         if (originalStatus == DeliveryNoteStatus.CANCELLED
                 && (updated.getStatus() != DeliveryNoteStatus.DRAFT && updated.getStatus() != DeliveryNoteStatus.CANCELLED)) {
-            stockMouvements.forEach(stockMouvement -> {
+            stockMovements.forEach(stockMouvement -> {
                 stockMouvement.setCanceled(false);
                 session.merge(stockMouvement);
             });
@@ -413,24 +413,24 @@ public interface DocumentRepository {
 
         updatePayments(original, updated, session);
 
-        List<StockMouvement> stockMouvements;
+        List<StockMovement> stockMovements;
 
         if (originalStatus == InvoiceStatus.DRAFT && updated.getStatus() != InvoiceStatus.DRAFT) {
             assignNewReference(original, ConfigKey.NEXT_INVOICE_NUMBER);
-            stockMouvements = saveStockMouvements(original, session);
+            stockMovements = saveStockMouvements(original, session);
         } else {
-            stockMouvements = StockMovementRepository.findAllByDocument(original);
+            stockMovements = StockMovementRepository.findAllByDocument(original);
         }
 
         AtomicReference<LocalDateTime> stockEntryMouvementDateTime = new AtomicReference<>(LocalDateTime.now());
 
-        if (!stockMouvements.isEmpty()) {
-            stockMouvements.stream().findFirst().ifPresent(mouvement -> stockEntryMouvementDateTime.set(mouvement.getDateTime()));
+        if (!stockMovements.isEmpty()) {
+            stockMovements.stream().findFirst().ifPresent(mouvement -> stockEntryMouvementDateTime.set(mouvement.getDateTime()));
         }
 
         if (updated.getStatus() != InvoiceStatus.DRAFT) {
             original.getItems().forEach(item ->
-                    stockMouvements
+                    stockMovements
                             .stream()
                             .filter(stockMouvement -> stockMouvement.getProduct().equals(item.getProduct()))
                             .findFirst()
@@ -441,18 +441,18 @@ public interface DocumentRepository {
                                     },
                                     () -> {
                                         //create new stock mouvement
-                                        StockMouvement stockEntryMouvement = StockMouvement.createStockEntryMouvement(item.getProduct(), item.getQuantity(), original);
+                                        StockMovement stockEntryMouvement = StockMovement.createStockEntryMouvement(item.getProduct(), item.getQuantity(), original);
                                         stockEntryMouvement.setDateTime(stockEntryMouvementDateTime.get());
                                         session.persist(stockEntryMouvement);
 
-                                        stockMouvements.add(stockEntryMouvement);
+                                        stockMovements.add(stockEntryMouvement);
                                     }
                             ));
 
 
-            List<StockMouvement> stockMouvementsToRemove = new ArrayList<>();
+            List<StockMovement> stockMouvementsToRemove = new ArrayList<>();
 
-            stockMouvements.forEach(stockMouvement -> {
+            stockMovements.forEach(stockMouvement -> {
                 boolean noneMatch = original.getItems()
                         .stream()
                         .noneMatch(item -> stockMouvement.getProduct().equals(item.getProduct()));
@@ -465,13 +465,13 @@ public interface DocumentRepository {
 
             stockMouvementsToRemove.stream().map(session::merge).forEach(session::remove);
 
-            stockMouvements.removeAll(stockMouvementsToRemove);
+            stockMovements.removeAll(stockMouvementsToRemove);
         }
 
 
         if ((originalStatus != InvoiceStatus.CANCELLED && originalStatus != InvoiceStatus.DRAFT)
                 && updated.getStatus() == InvoiceStatus.CANCELLED) {
-            stockMouvements.forEach(stockMouvement -> {
+            stockMovements.forEach(stockMouvement -> {
                 stockMouvement.setCanceled(true);
                 session.merge(stockMouvement);
             });
@@ -479,7 +479,7 @@ public interface DocumentRepository {
 
         if (originalStatus == InvoiceStatus.CANCELLED
                 && (updated.getStatus() != InvoiceStatus.DRAFT && updated.getStatus() != InvoiceStatus.CANCELLED)) {
-            stockMouvements.forEach(stockMouvement -> {
+            stockMovements.forEach(stockMouvement -> {
                 stockMouvement.setCanceled(false);
                 session.merge(stockMouvement);
             });
@@ -494,24 +494,24 @@ public interface DocumentRepository {
         original.setPaidAmount(updated.getPaidAmount());
 
         updatePayments(original, updated, session);
-        List<StockMouvement> stockMouvements;
+        List<StockMovement> stockMovements;
 
         if (originalStatus == CreditInvoiceStatus.DRAFT && updated.getStatus() != CreditInvoiceStatus.DRAFT) {
             assignNewReference(original, ConfigKey.NEXT_CREDIT_INVOICE_NUMBER);
-            stockMouvements = saveStockMouvements(original, session);
+            stockMovements = saveStockMouvements(original, session);
         } else {
-            stockMouvements = StockMovementRepository.findAllByDocument(original);
+            stockMovements = StockMovementRepository.findAllByDocument(original);
         }
 
         AtomicReference<LocalDateTime> stockEntryMouvementDateTime = new AtomicReference<>(LocalDateTime.now());
 
-        if (!stockMouvements.isEmpty()) {
-            stockMouvements.stream().findFirst().ifPresent(mouvement -> stockEntryMouvementDateTime.set(mouvement.getDateTime()));
+        if (!stockMovements.isEmpty()) {
+            stockMovements.stream().findFirst().ifPresent(mouvement -> stockEntryMouvementDateTime.set(mouvement.getDateTime()));
         }
 
         if (updated.getStatus() != CreditInvoiceStatus.DRAFT) {
             original.getItems().forEach(item ->
-                    stockMouvements
+                    stockMovements
                             .stream()
                             .filter(stockMouvement -> stockMouvement.getProduct().equals(item.getProduct()))
                             .findFirst()
@@ -522,17 +522,17 @@ public interface DocumentRepository {
                                     },
                                     () -> {
                                         //create new stock mouvement
-                                        StockMouvement stockEntryMouvement = StockMouvement.createStockEntryMouvement(item.getProduct(), item.getQuantity(), original);
+                                        StockMovement stockEntryMouvement = StockMovement.createStockEntryMouvement(item.getProduct(), item.getQuantity(), original);
                                         stockEntryMouvement.setDateTime(stockEntryMouvementDateTime.get());
                                         session.persist(stockEntryMouvement);
 
-                                        stockMouvements.add(stockEntryMouvement);
+                                        stockMovements.add(stockEntryMouvement);
                                     }
                             ));
 
-            List<StockMouvement> stockMouvementsToRemove = new ArrayList<>();
+            List<StockMovement> stockMouvementsToRemove = new ArrayList<>();
 
-            stockMouvements.forEach(stockMouvement -> {
+            stockMovements.forEach(stockMouvement -> {
                 boolean noneMatch = original.getItems()
                         .stream()
                         .noneMatch(item -> stockMouvement.getProduct().equals(item.getProduct()));
@@ -545,12 +545,12 @@ public interface DocumentRepository {
 
             stockMouvementsToRemove.stream().map(session::merge).forEach(session::remove);
 
-            stockMouvements.removeAll(stockMouvementsToRemove);
+            stockMovements.removeAll(stockMouvementsToRemove);
         }
 
         if ((originalStatus != CreditInvoiceStatus.CANCELLED && originalStatus != CreditInvoiceStatus.DRAFT)
                 && updated.getStatus() == CreditInvoiceStatus.CANCELLED) {
-            stockMouvements.forEach(stockMouvement -> {
+            stockMovements.forEach(stockMouvement -> {
                 stockMouvement.setCanceled(true);
                 session.merge(stockMouvement);
             });
@@ -558,7 +558,7 @@ public interface DocumentRepository {
 
         if (originalStatus == CreditInvoiceStatus.CANCELLED
                 && (updated.getStatus() != CreditInvoiceStatus.DRAFT && updated.getStatus() != CreditInvoiceStatus.CANCELLED)) {
-            stockMouvements.forEach(stockMouvement -> {
+            stockMovements.forEach(stockMouvement -> {
                 stockMouvement.setCanceled(false);
                 session.merge(stockMouvement);
             });
@@ -672,30 +672,30 @@ public interface DocumentRepository {
         }
     }
 
-    private static List<StockMouvement> saveStockMouvements(Document document, Session session) {
-        List<StockMouvement> stockMouvements = new ArrayList<>();
+    private static List<StockMovement> saveStockMouvements(Document document, Session session) {
+        List<StockMovement> stockMovements = new ArrayList<>();
 
         if (document instanceof PurchaseDeliveryNote || document instanceof CreditInvoice) {
             document.getItems()
                     .forEach(item -> {
-                        stockMouvements.add(StockMouvement.createStockEntryMouvement(item.getProduct(), item.getQuantity(), document));
+                        stockMovements.add(StockMovement.createStockEntryMouvement(item.getProduct(), item.getQuantity(), document));
                     });
         }
 
         if (document instanceof DeliveryNote || document instanceof Invoice) {
             document.getItems()
                     .forEach(item -> {
-                        stockMouvements.add(StockMouvement.createOutOfStockMouvement(item.getProduct(), item.getQuantity(), document));
+                        stockMovements.add(StockMovement.createOutOfStockMouvement(item.getProduct(), item.getQuantity(), document));
                     });
         }
 
         try {
-            stockMouvements.forEach(session::persist);
+            stockMovements.forEach(session::persist);
         } catch (Exception e) {
             // If any exception occurs, it will propagate back to the caller, which will trigger a rollback
             throw e;
         }
 
-        return stockMouvements;
+        return stockMovements;
     }
 }

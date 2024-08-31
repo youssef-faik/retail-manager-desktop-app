@@ -1,6 +1,6 @@
 package com.example.salesmanagement.stockmouvement;
 
-public enum MouvementType {
+public enum MovementType {
     OUT_OF_STOCK,
     STOCK_ENTRY
 }

@@ -33,7 +33,7 @@ public class ProductController implements Initializable {
     @FXML
     public Tab stockMouvementsTab;
     @FXML
-    public TableView<StockMouvement> stockMouvementsTable;
+    public TableView<StockMovement> stockMouvementsTable;
     public VBox parentVBox;
     TabPane tabPane;
     private Long id;
@@ -215,6 +215,10 @@ public class ProductController implements Initializable {
         TableColumn<StockMouvement, String> quantityColumn = new TableColumn<>("Quantité");
         TableColumn<StockMouvement, String> dateTimeColumn = new TableColumn<>("Date");
         TableColumn<StockMouvement, String> mouvementSourceColumn = new TableColumn<>("Source movement");
+        TableColumn<StockMovement, String> movementTypeColumn = new TableColumn<>("Type movement");
+        TableColumn<StockMovement, String> quantityColumn = new TableColumn<>("Quantité");
+        TableColumn<StockMovement, String> dateTimeColumn = new TableColumn<>("Date");
+        TableColumn<StockMovement, String> mouvementSourceColumn = new TableColumn<>("Source movement");
 
         movementTypeColumn.setMinWidth(100);
         movementTypeColumn.setMaxWidth(100);
@@ -248,10 +252,10 @@ public class ProductController implements Initializable {
         quantityColumn.setCellValueFactory(cellData -> new SimpleStringProperty(Integer.toString(cellData.getValue().getQuantity())));
         dateTimeColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getDateTime().format(DateTimeFormatter.ofPattern("yyyy MMM dd - HH:mm:ss"))));
         mouvementSourceColumn.setCellValueFactory(cellData -> {
-            MouvementSource mouvementSource = cellData.getValue().getMovementSource();
+            MovementSource movementSource = cellData.getValue().getMovementSource();
 
             String initialValue = "";
-            if (mouvementSource instanceof DocumentBasedMouvementSource documentBasedMouvementSource
+            if (movementSource instanceof DocumentBasedMovementSource documentBasedMouvementSource
                     && documentBasedMouvementSource.getSource() != null) {
                 if (documentBasedMouvementSource.getSource() instanceof PurchaseDeliveryNote purchaseDeliveryNote) {
                     initialValue = "Bon de réception ref n° : " + purchaseDeliveryNote.getReference();
@@ -264,7 +268,7 @@ public class ProductController implements Initializable {
                 }
             }
 
-            if (mouvementSource instanceof StockCorrectionBasedMouvementSource stockCorrectionBasedMovementSource
+            if (movementSource instanceof StockCorrectionBasedMovementSource stockCorrectionBasedMovementSource
                     && stockCorrectionBasedMovementSource.getSource() != null) {
                 initialValue = "Correction de stock ref n° : " + stockCorrectionBasedMovementSource.getSource().getId();
             }

@@ -4,12 +4,12 @@ import jakarta.persistence.*;
 
 import java.io.Serializable;
 
-@Entity(name = "MouvementSource")
-@Table(name = "mouvement_source")
+@Entity(name = "MovementSource")
+@Table(name = "movement_source")
 @DiscriminatorColumn()
-@DiscriminatorValue("MOUVEMENT_SOURCE")
+@DiscriminatorValue("MOVEMENT_SOURCE")
 @Inheritance(strategy = InheritanceType.JOINED)
-public abstract class MouvementSource implements Serializable {
+public abstract class MovementSource implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

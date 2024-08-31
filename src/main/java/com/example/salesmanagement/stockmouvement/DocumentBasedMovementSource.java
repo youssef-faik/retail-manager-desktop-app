@@ -3,21 +3,21 @@ package com.example.salesmanagement.stockmouvement;
 import com.example.salesmanagement.document.Document;
 import jakarta.persistence.*;
 
-@Entity(name = "DocumentBasedMouvementSource")
+@Entity(name = "DocumentBasedMovementSource")
 @Table(name = "document_based_mouvement_source")
 @DiscriminatorValue("DOCUMENT")
 @PrimaryKeyJoinColumn(
         name = "id",
         referencedColumnName = "id",
-        foreignKey = @ForeignKey(name = "document_based_mouvement_source_fk"))
-public class DocumentBasedMouvementSource extends MouvementSource {
+        foreignKey = @ForeignKey(name = "document_based_movement_source_fk"))
+public class DocumentBasedMovementSource extends MovementSource {
     @ManyToOne
     private Document source;
 
-    public DocumentBasedMouvementSource() {
+    public DocumentBasedMovementSource() {
     }
 
-    public DocumentBasedMouvementSource(Document document) {
+    public DocumentBasedMovementSource(Document document) {
         this.source = document;
     }
 

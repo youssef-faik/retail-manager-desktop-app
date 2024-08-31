@@ -64,20 +64,20 @@ public interface StockCorrectionRepository {
 
 
     private static void saveStockMouvements(StockCorrection stockCorrection, Session session) {
-        List<StockMouvement> stockMouvements = new ArrayList<>();
+        List<StockMovement> stockMovements = new ArrayList<>();
 
         stockCorrection.getItems()
                 .forEach(item -> {
                     switch (item.getCorrectionType()) {
                         case POSITIVE ->
-                                stockMouvements.add(StockMouvement.createStockEntryMouvement(item.getProduct(), item.getQuantity(), stockCorrection));
+                                stockMovements.add(StockMovement.createStockEntryMouvement(item.getProduct(), item.getQuantity(), stockCorrection));
                         case NEGATIVE ->
-                                stockMouvements.add(StockMouvement.createOutOfStockMouvement(item.getProduct(), item.getQuantity(), stockCorrection));
+                                stockMovements.add(StockMovement.createOutOfStockMouvement(item.getProduct(), item.getQuantity(), stockCorrection));
                     }
                 });
 
         try {
-            stockMouvements.forEach(session::persist);
+            stockMovements.forEach(session::persist);
         } catch (Exception e) {
             // If any exception occurs, it will propagate back to the caller, which will trigger a rollback
             throw e;

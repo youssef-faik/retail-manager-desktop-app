@@ -1,13 +1,16 @@
 package com.example.salesmanagement;
 
 import com.example.salesmanagement.document.*;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -215,6 +218,47 @@ public class MainController {
     public void listStockMouvements() throws IOException {
         VBox pane = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("stockmouvement/stock_mouvements.fxml")));
         borderPane.setCenter(pane);
+    }
+
+    public void addUser() throws IOException {
+        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("user/form-user.fxml")));
+        Stage stage = new Stage();
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.setScene(new Scene(root));
+        stage.setResizable(false);
+        stage.showAndWait();
+    }
+
+    public void listUsers() throws IOException {
+        VBox pane = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("user/list-users.fxml")));
+        borderPane.setCenter(pane);
+    }
+
+    public void changePassword() throws IOException {
+        VBox pane = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("configuration/form-change-password.fxml")));
+        borderPane.setCenter(pane);
+    }
+
+    public void signout(ActionEvent actionEvent) {
+        Stage stage = (Stage) borderPane.getScene().getWindow();
+
+        try {
+            VBox pane = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("form-login.fxml")));
+            Scene scene = new Scene(pane);
+            stage.setScene(scene);
+            stage.sizeToScene();
+
+            final Rectangle2D bounds = Screen.getPrimary().getBounds();
+
+            stage.setX(bounds.getMinX() + bounds.getWidth() / 2 - scene.getWidth() / 2);
+            stage.setY(bounds.getMinY() + bounds.getHeight() / 2 - scene.getHeight() / 2);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            // Display error dialog or handle gracefully
+        }
+
+        AuthenticationService.setCurrentAuthenticatedUser(null);
+        stage.show();
     }
 }
 

@@ -30,6 +30,10 @@ public class ListStockMouvementsController implements Initializable {
     FilteredList<StockMouvement> filteredList;
     SortedList<StockMouvement> sortedList;
     ObservableList<StockMouvement> observableList;
+    public TableView<StockMovement> stockMovementTableView;
+    FilteredList<StockMovement> filteredList;
+    SortedList<StockMovement> sortedList;
+    ObservableList<StockMovement> observableList;
     @FXML
     private Button deleteButton, updateButton;
     @FXML
@@ -77,12 +81,13 @@ public class ListStockMouvementsController implements Initializable {
     public void updateStockMouvement() throws IOException {
         StockMouvement selectedStockMouvement = stockMouvementTableView.getSelectionModel().getSelectedItem();
         if (selectedStockMouvement != null) {
+        StockMovement selectedStockMovement = stockMovementTableView.getSelectionModel().getSelectedItem();
 
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("form-stock-correction.fxml"));
             Parent root = fxmlLoader.load();
 
             StockCorrectionController stockCorrectionController = fxmlLoader.getController();
-            stockCorrectionController.setStockMovement(selectedStockMouvement);
+            stockCorrectionController.setStockMovement(selectedStockMovement);
 
             Stage stage = new Stage();
             stage.initModality(Modality.APPLICATION_MODAL);
@@ -96,6 +101,8 @@ public class ListStockMouvementsController implements Initializable {
     public void deleteStockMouvement() {
         StockMouvement selectedStockMouvement = stockMouvementTableView.getSelectionModel().getSelectedItem();
         if (selectedStockMouvement != null) {
+        StockMovement selectedStockMovement = stockMovementTableView.getSelectionModel().getSelectedItem();
+        if (selectedStockMovement != null) {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Confirmation de suppression");
             alert.setHeaderText("Confirmation de suppression");
@@ -105,6 +112,8 @@ public class ListStockMouvementsController implements Initializable {
             if (result.isPresent() && result.get() == ButtonType.OK) {
                 if (StockMovementRepository.deleteById(selectedStockMouvement.getId())) {
                     stockMouvementTableView.getItems().remove(selectedStockMouvement);
+                if (StockMovementRepository.deleteById(selectedStockMovement.getId())) {
+                    stockMovementTableView.getItems().remove(selectedStockMovement);
                     displaySuccessAlert();
 
                     updateButton.setDisable(true);
@@ -123,9 +132,15 @@ public class ListStockMouvementsController implements Initializable {
         TableColumn<StockMouvement, String> quantityColumn = new TableColumn<>("Quantité");
         TableColumn<StockMouvement, String> dateTimeColumn = new TableColumn<>("Date");
         TableColumn<StockMouvement, String> movementSourceColumn = new TableColumn<>("Source movement");
+        TableColumn<StockMovement, Integer> idColumn = new TableColumn<>("ID");
+        TableColumn<StockMovement, String> movementTypeColumn = new TableColumn<>("Type movement");
+        TableColumn<StockMovement, String> productColumn = new TableColumn<>("Produit");
+        TableColumn<StockMovement, String> quantityColumn = new TableColumn<>("Quantité");
+        TableColumn<StockMovement, String> dateTimeColumn = new TableColumn<>("Date");
+        TableColumn<StockMovement, String> movementSourceColumn = new TableColumn<>("Source movement");
 
 
-        stockMouvementTableView.getColumns().addAll(
+        stockMovementTableView.getColumns().addAll(
                 idColumn,
                 productColumn,
                 movementTypeColumn,
@@ -137,6 +152,9 @@ public class ListStockMouvementsController implements Initializable {
         stockMouvementTableView.setOnMouseClicked(e -> {
             if (stockMouvementTableView.getSelectionModel().getSelectedItem() != null
                     && stockMouvementTableView.getSelectionModel().getSelectedItem().getMovementSource() instanceof StockCorrectionBasedMouvementSource
+        stockMovementTableView.setOnMouseClicked(e -> {
+            if (stockMovementTableView.getSelectionModel().getSelectedItem() != null
+                    && stockMovementTableView.getSelectionModel().getSelectedItem().getMovementSource() instanceof StockCorrectionBasedMovementSource
             ) {
                 updateButton.setDisable(false);
                 deleteButton.setDisable(false);
@@ -158,10 +176,10 @@ public class ListStockMouvementsController implements Initializable {
         quantityColumn.setCellValueFactory(cellData -> new SimpleStringProperty(Integer.toString(cellData.getValue().getQuantity())));
         dateTimeColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getDateTime().format(DateTimeFormatter.ofPattern("yyyy MMM dd - HH:mm:ss"))));
         movementSourceColumn.setCellValueFactory(cellData -> {
-            MouvementSource mouvementSource = cellData.getValue().getMovementSource();
+            MovementSource movementSource = cellData.getValue().getMovementSource();
 
             String initialValue = "";
-            if (mouvementSource instanceof DocumentBasedMouvementSource documentBasedMouvementSource
+            if (movementSource instanceof DocumentBasedMovementSource documentBasedMouvementSource
                     && documentBasedMouvementSource.getSource() != null) {
                 if (documentBasedMouvementSource.getSource() instanceof PurchaseDeliveryNote purchaseDeliveryNote) {
                     initialValue = "Bon de réception ref n° : " + purchaseDeliveryNote.getReference();
@@ -174,7 +192,7 @@ public class ListStockMouvementsController implements Initializable {
                 }
             }
 
-            if (mouvementSource instanceof StockCorrectionBasedMouvementSource stockCorrectionBasedMovementSource
+            if (movementSource instanceof StockCorrectionBasedMovementSource stockCorrectionBasedMovementSource
                     && stockCorrectionBasedMovementSource.getSource() != null) {
                 initialValue = "Correction de stock ref n° : " + stockCorrectionBasedMovementSource.getSource().getId();
             }
@@ -182,21 +200,23 @@ public class ListStockMouvementsController implements Initializable {
             return new SimpleStringProperty(initialValue);
         });
 
-        stockMouvementTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        stockMovementTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
     }
 
     public void refreshStockMovementsTable() {
-        stockMouvementTableView.getItems().addAll(StockMovementRepository.findAll());
+        stockMovementTableView.getItems().addAll(StockMovementRepository.findAll());
 
-        observableList = stockMouvementTableView.getItems();
+        observableList = stockMovementTableView.getItems();
 
         filteredList = new FilteredList<>(observableList);
         sortedList = new SortedList<>(filteredList);
         sortedList.comparatorProperty().bind(stockMouvementTableView.comparatorProperty());
         stockMouvementTableView.setItems(sortedList);
+        sortedList.comparatorProperty().bind(stockMovementTableView.comparatorProperty());
+        stockMovementTableView.setItems(sortedList);
 
 
-        stockMouvementTableView.refresh();
+        stockMovementTableView.refresh();
         updateButton.setDisable(true);
         deleteButton.setDisable(true);
     }

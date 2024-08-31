@@ -20,6 +20,7 @@
         <mapping class="com.example.salesmanagement.product.Product"/>
         <mapping class="com.example.salesmanagement.category.Category"/>
         <mapping class="com.example.salesmanagement.taxrate.TaxRate"/>
+        <mapping class="com.example.salesmanagement.user.User"/>
         <mapping class="com.example.salesmanagement.document.SalesDocument"/>
         <mapping class="com.example.salesmanagement.document.DocumentItem"/>
         <mapping class="com.example.salesmanagement.document.Quotation"/>
@@ -33,11 +34,11 @@
         <mapping class="com.example.salesmanagement.payment.Check"/>
         <mapping class="com.example.salesmanagement.payment.Cash"/>
         <mapping class="com.example.salesmanagement.payment.BankTransfer"/>
-        <mapping class="com.example.salesmanagement.stockmouvement.MouvementSource"/>
+        <mapping class="com.example.salesmanagement.stockmouvement.MovementSource"/>
         <mapping class="com.example.salesmanagement.stockmouvement.StockCorrection"/>
-        <mapping class="com.example.salesmanagement.stockmouvement.StockMouvement"/>
+        <mapping class="com.example.salesmanagement.stockmouvement.StockMovement"/>
         <mapping class="com.example.salesmanagement.stockmouvement.StockCorrectionItem"/>
-        <mapping class="com.example.salesmanagement.stockmouvement.StockCorrectionBasedMouvementSource"/>
-        <mapping class="com.example.salesmanagement.stockmouvement.DocumentBasedMouvementSource"/>
+        <mapping class="com.example.salesmanagement.stockmouvement.StockCorrectionBasedMovementSource"/>
+        <mapping class="com.example.salesmanagement.stockmouvement.DocumentBasedMovementSource"/>
     </session-factory>
 </hibernate-configuration>

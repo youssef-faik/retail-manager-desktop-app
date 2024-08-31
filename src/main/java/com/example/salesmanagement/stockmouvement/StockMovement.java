@@ -6,16 +6,16 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
-@Entity(name = "StockMouvement")
-@Table(name = "stock_mouvement")
-public class StockMouvement {
+@Entity(name = "StockMovement")
+@Table(name = "stock_movement")
+public class StockMovement {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "movement_type", nullable = false)
-    private MouvementType mouvementType;
+    private MovementType movementType;
 
     @ManyToOne
     private Product product;
@@ -25,7 +25,7 @@ public class StockMouvement {
     private LocalDateTime dateTime;
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private MouvementSource mouvementSource;
+    private MovementSource movementSource;
 
     @Column(name = "quantity")
     private int quantity;
@@ -33,58 +33,58 @@ public class StockMouvement {
     @Column(name = "is_canceled")
     private boolean isCanceled = Boolean.FALSE;
 
-    public StockMouvement(MouvementType mouvementType, Product product, int quantity, MouvementSource mouvementSource) {
-        this.mouvementType = mouvementType;
+    public StockMovement(MovementType movementType, Product product, int quantity, MovementSource movementSource) {
+        this.movementType = movementType;
         this.product = product;
         this.quantity = quantity;
-        this.mouvementSource = mouvementSource;
+        this.movementSource = movementSource;
         this.dateTime = LocalDateTime.now();
 
     }
 
-    public StockMouvement(Long id, Product product, int quantity, boolean isCanceled, LocalDateTime dateTime, MouvementType mouvementType, MouvementSource mouvementSource) {
+    public StockMovement(Long id, Product product, int quantity, boolean isCanceled, LocalDateTime dateTime, MovementType movementType, MovementSource movementSource) {
         this.id = id;
         this.product = product;
         this.quantity = quantity;
         this.dateTime = dateTime;
-        this.mouvementType = mouvementType;
-        this.mouvementSource = mouvementSource;
+        this.movementType = movementType;
+        this.movementSource = movementSource;
         this.isCanceled = isCanceled;
     }
 
-    public StockMouvement() {
+    public StockMovement() {
         this.dateTime = LocalDateTime.now();
     }
 
-    public static StockMouvement createStockEntryMouvement(Product product, int quantity, Document document) {
-        return new StockMouvement(MouvementType.STOCK_ENTRY,
+    public static StockMovement createStockEntryMouvement(Product product, int quantity, Document document) {
+        return new StockMovement(MovementType.STOCK_ENTRY,
                 product,
                 quantity,
-                new DocumentBasedMouvementSource(document)
+                new DocumentBasedMovementSource(document)
         );
     }
 
-    public static StockMouvement createStockEntryMouvement(Product product, int quantity, StockCorrection stockCorrection) {
-        return new StockMouvement(MouvementType.STOCK_ENTRY,
+    public static StockMovement createStockEntryMouvement(Product product, int quantity, StockCorrection stockCorrection) {
+        return new StockMovement(MovementType.STOCK_ENTRY,
                 product,
                 quantity,
-                new StockCorrectionBasedMouvementSource(stockCorrection)
+                new StockCorrectionBasedMovementSource(stockCorrection)
         );
     }
 
-    public static StockMouvement createOutOfStockMouvement(Product product, int quantity, Document document) {
-        return new StockMouvement(MouvementType.OUT_OF_STOCK,
+    public static StockMovement createOutOfStockMouvement(Product product, int quantity, Document document) {
+        return new StockMovement(MovementType.OUT_OF_STOCK,
                 product,
                 quantity,
-                new DocumentBasedMouvementSource(document)
+                new DocumentBasedMovementSource(document)
         );
     }
 
-    public static StockMouvement createOutOfStockMouvement(Product product, int quantity, StockCorrection stockCorrection) {
-        return new StockMouvement(MouvementType.OUT_OF_STOCK,
+    public static StockMovement createOutOfStockMouvement(Product product, int quantity, StockCorrection stockCorrection) {
+        return new StockMovement(MovementType.OUT_OF_STOCK,
                 product,
                 quantity,
-                new StockCorrectionBasedMouvementSource(stockCorrection)
+                new StockCorrectionBasedMovementSource(stockCorrection)
         );
     }
 
@@ -96,12 +96,12 @@ public class StockMouvement {
         this.id = id;
     }
 
-    public MouvementType getMovementType() {
-        return mouvementType;
+    public MovementType getMovementType() {
+        return movementType;
     }
 
-    public void setMovementType(MouvementType mouvementType) {
-        this.mouvementType = mouvementType;
+    public void setMovementType(MovementType movementType) {
+        this.movementType = movementType;
     }
 
     public int getQuantity() {
@@ -128,12 +128,12 @@ public class StockMouvement {
         this.dateTime = dateTime;
     }
 
-    public MouvementSource getMovementSource() {
-        return mouvementSource;
+    public MovementSource getMovementSource() {
+        return movementSource;
     }
 
-    public void setMovementSource(MouvementSource mouvementSource) {
-        this.mouvementSource = mouvementSource;
+    public void setMovementSource(MovementSource movementSource) {
+        this.movementSource = movementSource;
     }
 
     public boolean isCanceled() {

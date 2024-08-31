@@ -9,15 +9,15 @@ import jakarta.persistence.*;
         name = "id",
         referencedColumnName = "id",
         foreignKey = @ForeignKey(name = "stock_correction_based_mouvement_source_fk"))
-public class StockCorrectionBasedMouvementSource extends MouvementSource {
+public class StockCorrectionBasedMovementSource extends MovementSource {
     @ManyToOne
     private StockCorrection source;
 
-    public StockCorrectionBasedMouvementSource(StockCorrection source) {
+    public StockCorrectionBasedMovementSource(StockCorrection source) {
         this.source = source;
     }
 
-    public StockCorrectionBasedMouvementSource() {
+    public StockCorrectionBasedMovementSource() {
     }
 
     public StockCorrection getSource() {
