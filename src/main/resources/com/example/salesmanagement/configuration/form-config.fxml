@@ -5,7 +5,8 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="616.0" prefWidth="1260.0" spacing="10.0" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.salesmanagement.configuration.ConfigurationController">
+<VBox xmlns:fx="http://javafx.com/fxml/1" spacing="10.0" xmlns="http://javafx.com/javafx/22"
+      fx:controller="com.example.salesmanagement.configuration.ConfigurationController">
    <Label graphicTextGap="8.0" layoutX="14.0" layoutY="14.0" text="Paramètres">
         <font>
            <Font name="System Bold" size="32.0"/>
@@ -14,10 +15,10 @@
          <FontAwesomeIconView glyphName="COGS"/>
       </graphic>
         <VBox.margin>
-            <Insets bottom="16.0" />
+           <Insets bottom="16.0"/>
         </VBox.margin>
     </Label>
-   <TabPane prefHeight="320.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
+   <TabPane tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
       <tabs>
          <Tab closable="false" text="Informations sur l'entreprise">
             <content>
@@ -25,7 +26,8 @@
                   <children>
                      <HBox layoutX="10.0" layoutY="54.0" prefWidth="176.0">
                         <children>
-                           <Label prefHeight="17.0" prefWidth="225.0" text="Nom de l'entreprise" wrapText="true">
+                           <Label prefHeight="17.0" prefWidth="225.0" text="Nom de l'entreprise"
+                                  wrapText="true">
                               <HBox.margin>
                                  <Insets right="4.0"/>
                               </HBox.margin>
@@ -35,8 +37,8 @@
                      </HBox>
                      <HBox prefWidth="176.0">
                         <children>
-                           <Label prefHeight="17.0" prefWidth="225.0" text="Identifiant commun de l'entreprise (ICE) *"
-                                  wrapText="true">
+                           <Label prefHeight="17.0" prefWidth="225.0"
+                                  text="Identifiant commun de l'entreprise (ICE) *" wrapText="true">
                               <HBox.margin>
                                  <Insets right="4.0"/>
                               </HBox.margin>
@@ -111,8 +113,8 @@
                                  <Insets right="4.0"/>
                               </HBox.margin>
                            </Label>
-                           <TextArea fx:id="addressTextArea" minHeight="-Infinity" prefHeight="76.0" prefWidth="330.0"
-                                     wrapText="true"/>
+                           <TextArea fx:id="addressTextArea" minHeight="-Infinity" prefHeight="76.0"
+                                     prefWidth="330.0" wrapText="true"/>
                         </children>
                      </HBox>
                   </children>
@@ -138,7 +140,8 @@
                      </HBox>
                      <HBox prefWidth="176.0">
                         <children>
-                           <Label prefHeight="0.0" prefWidth="225.0" text="Numéro initiale de Bon de réception">
+                           <Label prefHeight="0.0" prefWidth="225.0"
+                                  text="Numéro initiale de Bon de réception">
                               <HBox.margin>
                                  <Insets right="4.0"/>
                               </HBox.margin>
@@ -158,7 +161,8 @@
                      </HBox>
                      <HBox prefWidth="176.0">
                         <children>
-                           <Label prefHeight="0.0" prefWidth="225.0" text="Numéro initiale de bon de livraison">
+                           <Label prefHeight="0.0" prefWidth="225.0"
+                                  text="Numéro initiale de bon de livraison">
                               <HBox.margin>
                                  <Insets right="4.0"/>
                               </HBox.margin>
@@ -232,16 +236,18 @@
          </Tab>
       </tabs>
    </TabPane>
-   <ButtonBar prefWidth="1208.0">
-      <VBox.margin>
-         <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
-      </VBox.margin>
-      <buttons>
-         <Button fx:id="saveButton" defaultButton="true" mnemonicParsing="false" prefHeight="25.0" prefWidth="129.0" text="Valider" />
-      </buttons>
-   </ButtonBar>
+   <HBox alignment="BOTTOM_RIGHT" VBox.vgrow="ALWAYS">
+      <children>
+         <Button fx:id="saveButton" defaultButton="true" mnemonicParsing="false" prefHeight="25.0" prefWidth="129.0"
+                 text="Valider">
+            <graphic>
+               <FontAwesomeIconView fill="WHITE" glyphName="CHECK"/>
+            </graphic>
+         </Button>
+      </children>
+   </HBox>
 
     <padding>
-        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+       <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
     </padding>
 </VBox>

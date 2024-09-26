@@ -6,7 +6,8 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="616.0" prefWidth="1260.0" spacing="10.0" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.salesmanagement.product.ListProductsController">
+<VBox xmlns:fx="http://javafx.com/fxml/1" spacing="10.0" xmlns="http://javafx.com/javafx/22"
+      fx:controller="com.example.salesmanagement.product.ListProductsController">
     <Label graphicTextGap="8.0" layoutX="14.0" layoutY="14.0" text="Produits">
         <font>
             <Font name="System Bold" size="32.0"/>
@@ -18,27 +19,30 @@
             <Insets bottom="16.0"/>
         </VBox.margin>
     </Label>
-   <HBox alignment="TOP_RIGHT" spacing="8.0">
-      <children>
-           <Button fx:id="newButton" mnemonicParsing="false" onAction="#addProduct" prefHeight="0.0" prefWidth="90.0" text="Nouveau">
-            <graphic>
-               <FontAwesomeIconView glyphName="PLUS" />
-           </graphic>
-         </Button>
-           <Button fx:id="updateButton" mnemonicParsing="false" onAction="#updateProduct" prefHeight="0.0" prefWidth="90.0" text="Modifier">
-            <graphic>
-               <FontAwesomeIconView glyphName="EDIT" />
-           </graphic>
-         </Button>
-           <Button fx:id="deleteButton" mnemonicParsing="false" onAction="#deleteProduct" prefHeight="0.0" prefWidth="90.0" text="Supprimer">
-            <graphic>
-               <FontAwesomeIconView glyphName="TRASH" />
-           </graphic>
-         </Button>
-      </children>
-   </HBox>
-    <TableView fx:id="productsTableView" prefHeight="520.0" prefWidth="1260.0" />
-   <padding>
-      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-   </padding>
+    <HBox alignment="TOP_RIGHT" spacing="8.0">
+        <children>
+            <Button fx:id="newButton" mnemonicParsing="false" onAction="#addProduct" prefHeight="0.0" prefWidth="90.0"
+                    text="Nouveau">
+                <graphic>
+                    <FontAwesomeIconView glyphName="PLUS"/>
+                </graphic>
+            </Button>
+            <Button fx:id="updateButton" mnemonicParsing="false" onAction="#updateProduct" prefHeight="0.0"
+                    prefWidth="90.0" text="Modifier">
+                <graphic>
+                    <FontAwesomeIconView glyphName="EDIT"/>
+                </graphic>
+            </Button>
+            <Button fx:id="deleteButton" mnemonicParsing="false" onAction="#deleteProduct" prefHeight="0.0"
+                    prefWidth="90.0" text="Supprimer">
+                <graphic>
+                    <FontAwesomeIconView glyphName="TRASH"/>
+                </graphic>
+            </Button>
+        </children>
+    </HBox>
+    <TableView fx:id="productsTableView" VBox.vgrow="ALWAYS"/>
+    <padding>
+        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+    </padding>
 </VBox>

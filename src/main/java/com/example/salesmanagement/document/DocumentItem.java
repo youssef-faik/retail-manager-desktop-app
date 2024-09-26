@@ -18,6 +18,8 @@ public class DocumentItem {
     private BigDecimal totalExcludingTaxes;
     private BigDecimal totalIncludingTaxes;
     private BigDecimal totalTaxes;
+    @ManyToOne
+    private Document document;
 
     @JoinColumn(
             name = "product_id",
@@ -101,5 +103,13 @@ public class DocumentItem {
     @Override
     public int hashCode() {
         return Objects.hashCode(getId());
+    }
+
+    public Document getDocument() {
+        return document;
+    }
+
+    public void setDocument(Document document) {
+        this.document = document;
     }
 }

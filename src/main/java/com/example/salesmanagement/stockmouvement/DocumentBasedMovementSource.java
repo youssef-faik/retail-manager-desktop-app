@@ -11,7 +11,7 @@ import jakarta.persistence.*;
         referencedColumnName = "id",
         foreignKey = @ForeignKey(name = "document_based_movement_source_fk"))
 public class DocumentBasedMovementSource extends MovementSource {
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     private Document source;
 
     public DocumentBasedMovementSource() {

@@ -15,6 +15,13 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.effect.BlurType;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -26,16 +33,12 @@ import java.util.ResourceBundle;
 
 public class ListStockMouvementsController implements Initializable {
     @FXML
-    public TableView<StockMouvement> stockMouvementTableView;
-    FilteredList<StockMouvement> filteredList;
-    SortedList<StockMouvement> sortedList;
-    ObservableList<StockMouvement> observableList;
     public TableView<StockMovement> stockMovementTableView;
     FilteredList<StockMovement> filteredList;
     SortedList<StockMovement> sortedList;
     ObservableList<StockMovement> observableList;
     @FXML
-    private Button deleteButton, updateButton;
+    private Button deleteButton, updateButton, newButton;
     @FXML
     private TextField searchTextField;
 
@@ -43,6 +46,22 @@ public class ListStockMouvementsController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         updateButton.setDisable(true);
         deleteButton.setDisable(true);
+
+        DropShadow dropShadow = new DropShadow(
+                BlurType.ONE_PASS_BOX,
+                Color.color(0.6392, 0.6392, 0.6392, 1.0),
+                10.0,
+                0,
+                0,
+                0
+        );
+
+        updateButton.setEffect(dropShadow);
+        deleteButton.setEffect(dropShadow);
+        newButton.setEffect(dropShadow);
+        newButton.setTextFill(Color.color(1, 1, 1));
+        newButton.setBackground(new Background(new BackgroundFill(Color.BLACK, new CornerRadii(3.0), null)));
+        ((Text) newButton.getGraphic()).setFill(Color.WHITE);
 
         initStockMovementsTableView();
         refreshStockMovementsTable();
@@ -79,9 +98,8 @@ public class ListStockMouvementsController implements Initializable {
     }
 
     public void updateStockMouvement() throws IOException {
-        StockMouvement selectedStockMouvement = stockMouvementTableView.getSelectionModel().getSelectedItem();
-        if (selectedStockMouvement != null) {
         StockMovement selectedStockMovement = stockMovementTableView.getSelectionModel().getSelectedItem();
+        if (selectedStockMovement != null) {
 
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("form-stock-correction.fxml"));
             Parent root = fxmlLoader.load();
@@ -99,8 +117,6 @@ public class ListStockMouvementsController implements Initializable {
     }
 
     public void deleteStockMouvement() {
-        StockMouvement selectedStockMouvement = stockMouvementTableView.getSelectionModel().getSelectedItem();
-        if (selectedStockMouvement != null) {
         StockMovement selectedStockMovement = stockMovementTableView.getSelectionModel().getSelectedItem();
         if (selectedStockMovement != null) {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -110,8 +126,6 @@ public class ListStockMouvementsController implements Initializable {
             Optional<ButtonType> result = alert.showAndWait();
 
             if (result.isPresent() && result.get() == ButtonType.OK) {
-                if (StockMovementRepository.deleteById(selectedStockMouvement.getId())) {
-                    stockMouvementTableView.getItems().remove(selectedStockMouvement);
                 if (StockMovementRepository.deleteById(selectedStockMovement.getId())) {
                     stockMovementTableView.getItems().remove(selectedStockMovement);
                     displaySuccessAlert();
@@ -126,12 +140,6 @@ public class ListStockMouvementsController implements Initializable {
     }
 
     private void initStockMovementsTableView() {
-        TableColumn<StockMouvement, Integer> idColumn = new TableColumn<>("ID");
-        TableColumn<StockMouvement, String> movementTypeColumn = new TableColumn<>("Type movement");
-        TableColumn<StockMouvement, String> productColumn = new TableColumn<>("Produit");
-        TableColumn<StockMouvement, String> quantityColumn = new TableColumn<>("Quantité");
-        TableColumn<StockMouvement, String> dateTimeColumn = new TableColumn<>("Date");
-        TableColumn<StockMouvement, String> movementSourceColumn = new TableColumn<>("Source movement");
         TableColumn<StockMovement, Integer> idColumn = new TableColumn<>("ID");
         TableColumn<StockMovement, String> movementTypeColumn = new TableColumn<>("Type movement");
         TableColumn<StockMovement, String> productColumn = new TableColumn<>("Produit");
@@ -149,9 +157,6 @@ public class ListStockMouvementsController implements Initializable {
                 movementSourceColumn
         );
 
-        stockMouvementTableView.setOnMouseClicked(e -> {
-            if (stockMouvementTableView.getSelectionModel().getSelectedItem() != null
-                    && stockMouvementTableView.getSelectionModel().getSelectedItem().getMovementSource() instanceof StockCorrectionBasedMouvementSource
         stockMovementTableView.setOnMouseClicked(e -> {
             if (stockMovementTableView.getSelectionModel().getSelectedItem() != null
                     && stockMovementTableView.getSelectionModel().getSelectedItem().getMovementSource() instanceof StockCorrectionBasedMovementSource
@@ -210,8 +215,6 @@ public class ListStockMouvementsController implements Initializable {
 
         filteredList = new FilteredList<>(observableList);
         sortedList = new SortedList<>(filteredList);
-        sortedList.comparatorProperty().bind(stockMouvementTableView.comparatorProperty());
-        stockMouvementTableView.setItems(sortedList);
         sortedList.comparatorProperty().bind(stockMovementTableView.comparatorProperty());
         stockMovementTableView.setItems(sortedList);
 

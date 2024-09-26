@@ -1,24 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import de.jensd.fx.glyphs.fontawesome.*?>
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:id="borderPane" prefHeight="480.0" prefWidth="640.0"
             xmlns="http://javafx.com/javafx/22" fx:controller="com.example.salesmanagement.MainController">
     <top>
         <MenuBar prefHeight="25.0" prefWidth="600.0" BorderPane.alignment="CENTER">
-            <Menu mnemonicParsing="false">
-                <graphic>
-                    <FontAwesomeIconView glyphName="BARS"/>
-                </graphic>
-                <items>
-                    <MenuItem mnemonicParsing="false" onAction="#signout" text="Se déconnecter">
-                        <graphic>
-                            <FontAwesomeIconView glyphName="SIGN_OUT"/>
-                        </graphic>
-                    </MenuItem>
-                </items>
-            </Menu>
             <menus>
                 <Menu mnemonicParsing="false" text="Contact">
                     <items>
@@ -209,26 +202,6 @@
                     </graphic>
                 </Menu>
             </menus>
-            <menus>
-                <Menu mnemonicParsing="false" text="Paramètres">
-                    <graphic>
-                        <FontAwesomeIconView glyphName="COGS"/>
-                    </graphic>
-                    <items>
-                        <MenuItem mnemonicParsing="false" onAction="#editConfig"
-                                  text="Infos, Numérotation et impression">
-                            <graphic>
-                                <FontAwesomeIconView glyphName="COGS"/>
-                            </graphic>
-                        </MenuItem>
-                        <MenuItem mnemonicParsing="false" onAction="#changePassword" text="Changer mot de passe">
-                            <graphic>
-                                <FontAwesomeIconView glyphName="KEY"/>
-                            </graphic>
-                        </MenuItem>
-                    </items>
-                </Menu>
-            </menus>
 
             <menus>
                 <Menu mnemonicParsing="false" text="Utilisateur">
@@ -249,6 +222,225 @@
                     </items>
                 </Menu>
             </menus>
+
+            <menus>
+                <Menu mnemonicParsing="false" text="Paramètres">
+                    <graphic>
+                        <FontAwesomeIconView glyphName="COGS"/>
+                    </graphic>
+                    <items>
+                        <MenuItem mnemonicParsing="false" onAction="#editConfig"
+                                  text="Infos, Numérotation et impression">
+                            <graphic>
+                                <FontAwesomeIconView glyphName="COGS"/>
+                            </graphic>
+                        </MenuItem>
+                        <MenuItem mnemonicParsing="false" onAction="#changePassword" text="Changer mot de passe">
+                            <graphic>
+                                <FontAwesomeIconView glyphName="KEY"/>
+                            </graphic>
+                        </MenuItem>
+                    </items>
+                </Menu>
+            </menus>
         </MenuBar>
     </top>
+    <left>
+        <VBox fx:id="sidenavVBox" prefHeight="455.0" prefWidth="185.0" spacing="8.0"
+              style="-fx-background-color: BLACK;" BorderPane.alignment="CENTER">
+            <children>
+                <HBox fx:id="logoHBox" alignment="CENTER" prefHeight="33.0" prefWidth="170.0" VBox.vgrow="ALWAYS">
+                    <children>
+                        <ImageView fx:id="logoImageView" fitHeight="42.0" fitWidth="150.0" pickOnBounds="true"
+                                   preserveRatio="true" HBox.hgrow="ALWAYS">
+                            <image>
+                                <Image url="@../../../IBSYS%20LOGO.png"/>
+                            </image>
+                        </ImageView>
+                    </children>
+                    <VBox.margin>
+                        <Insets bottom="16.0"/>
+                    </VBox.margin>
+                </HBox>
+                <VBox prefWidth="55.0" VBox.vgrow="ALWAYS">
+                    <children>
+                        <Text fx:id="homeLabel" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="ACCUEIL">
+                            <font>
+                                <Font name="System Bold" size="12.0"/>
+                            </font>
+                            <VBox.margin>
+                                <Insets bottom="4.0" right="4.0"/>
+                            </VBox.margin>
+                        </Text>
+                        <Button fx:id="dashboardNavBarButton" alignment="BASELINE_LEFT" graphicTextGap="8.0"
+                                mnemonicParsing="false" onAction="#displayDashboard" prefHeight="25.0" prefWidth="192.0"
+                                style="-fx-background-color: BLACK;" text="Tableau de bord" textFill="#c3c3c3">
+                            <font>
+                                <Font name="System Bold" size="12.0"/>
+                            </font>
+                            <graphic>
+                                <FontAwesomeIconView fill="#c3c3c3" glyphName="TH_LARGE"/>
+                            </graphic>
+                            <cursor>
+                                <Cursor fx:constant="HAND"/>
+                            </cursor>
+                        </Button>
+                        <Text fx:id="managementLabel" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0"
+                              text="GESTION">
+                            <font>
+                                <Font name="System Bold" size="12.0"/>
+                            </font>
+                            <VBox.margin>
+                                <Insets bottom="4.0" right="4.0" top="16.0"/>
+                            </VBox.margin>
+                        </Text>
+                        <Button fx:id="clientsNavBarButton" alignment="BASELINE_LEFT" graphicTextGap="8.0"
+                                mnemonicParsing="false" onAction="#listClients" prefHeight="30.0" prefWidth="192.0"
+                                style="-fx-background-color: BLACK;" text="Clients" textFill="#c3c3c3">
+                            <font>
+                                <Font name="System Bold" size="12.0"/>
+                            </font>
+                            <graphic>
+                                <FontAwesomeIconView fill="#c3c3c3" glyphName="USERS"/>
+                            </graphic>
+                            <cursor>
+                                <Cursor fx:constant="HAND"/>
+                            </cursor>
+                        </Button>
+                        <Button fx:id="suppliersNavBarButton" alignment="BASELINE_LEFT" graphicTextGap="8.0"
+                                mnemonicParsing="false" onAction="#listSuppliers" prefHeight="30.0" prefWidth="192.0"
+                                style="-fx-background-color: BLACK;" text="Fournisseur" textFill="#c3c3c3">
+                            <font>
+                                <Font name="System Bold" size="12.0"/>
+                            </font>
+                            <graphic>
+                                <FontAwesomeIconView fill="#c3c3c3" glyphName="USERS"/>
+                            </graphic>
+                            <cursor>
+                                <Cursor fx:constant="HAND"/>
+                            </cursor>
+                        </Button>
+                        <Button fx:id="productsNavBarButton" alignment="BASELINE_LEFT" graphicTextGap="8.0"
+                                mnemonicParsing="false" onAction="#listProducts" prefHeight="30.0" prefWidth="192.0"
+                                style="-fx-background-color: BLACK;" text="Produits" textFill="#c3c3c3">
+                            <font>
+                                <Font name="System Bold" size="12.0"/>
+                            </font>
+                            <graphic>
+                                <FontAwesomeIconView fill="#c3c3c3" glyphName="CUBES"/>
+                            </graphic>
+                            <cursor>
+                                <Cursor fx:constant="HAND"/>
+                            </cursor>
+                        </Button>
+                        <Button fx:id="stockNavBarButton" alignment="BASELINE_LEFT" graphicTextGap="8.0"
+                                mnemonicParsing="false" onAction="#listStockMouvements" prefHeight="30.0"
+                                prefWidth="192.0" style="-fx-background-color: BLACK;" text="Mouvements Stock"
+                                textFill="#c3c3c3">
+                            <font>
+                                <Font name="System Bold" size="12.0"/>
+                            </font>
+                            <graphic>
+                                <FontAwesomeIconView fill="#c3c3c3" glyphName="EXCHANGE"/>
+                            </graphic>
+                            <cursor>
+                                <Cursor fx:constant="HAND"/>
+                            </cursor>
+                        </Button>
+                        <Button fx:id="PurchaseDeliveryNoteNavBarButton" alignment="BASELINE_LEFT" graphicTextGap="8.0"
+                                mnemonicParsing="false" onAction="#listPurchaseDeliveryNotes" prefHeight="30.0"
+                                prefWidth="192.0" style="-fx-background-color: BLACK;" text="Commandes fournisseurs"
+                                textFill="#c3c3c3">
+                            <font>
+                                <Font name="System Bold" size="12.0"/>
+                            </font>
+                            <graphic>
+                                <FontAwesomeIconView fill="#c3c3c3" glyphName="SHOPPING_CART"/>
+                            </graphic>
+                            <cursor>
+                                <Cursor fx:constant="HAND"/>
+                            </cursor>
+                        </Button>
+                        <Button fx:id="invoiceNavBarButton" alignment="BASELINE_LEFT" graphicTextGap="8.0"
+                                mnemonicParsing="false" onAction="#listInvoices" prefHeight="25.0" prefWidth="192.0"
+                                style="-fx-background-color: BLACK;" text="Factures" textFill="#c3c3c3">
+                            <font>
+                                <Font name="System Bold" size="12.0"/>
+                            </font>
+                            <graphic>
+                                <FontAwesomeIconView fill="#c3c3c3" glyphName="SHOPPING_CART"/>
+                            </graphic>
+                            <cursor>
+                                <Cursor fx:constant="HAND"/>
+                            </cursor>
+                        </Button>
+                        <Button fx:id="usersNavBarButton" alignment="BASELINE_LEFT" graphicTextGap="8.0"
+                                mnemonicParsing="false" onAction="#listUsers" prefHeight="30.0" prefWidth="192.0"
+                                style="-fx-background-color: BLACK;" text="Utilisateurs" textFill="#c3c3c3">
+                            <font>
+                                <Font name="System Bold" size="12.0"/>
+                            </font>
+                            <graphic>
+                                <FontAwesomeIconView fill="#c3c3c3" glyphName="USERS"/>
+                            </graphic>
+                            <cursor>
+                                <Cursor fx:constant="HAND"/>
+                            </cursor>
+                        </Button>
+                        <Text fx:id="configLabel" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0"
+                              text="CONFIGURATION">
+                            <font>
+                                <Font name="System Bold" size="12.0"/>
+                            </font>
+                            <VBox.margin>
+                                <Insets bottom="4.0" right="4.0" top="16.0"/>
+                            </VBox.margin>
+                        </Text>
+                        <Button fx:id="settingsNavBarButton" alignment="BASELINE_LEFT" graphicTextGap="8.0"
+                                mnemonicParsing="false" onAction="#editConfig" prefHeight="25.0" prefWidth="192.0"
+                                style="-fx-background-color: BLACK;" text="Paramètres" textFill="#c3c3c3">
+                            <font>
+                                <Font name="System Bold" size="12.0"/>
+                            </font>
+                            <graphic>
+                                <FontAwesomeIconView fill="#c3c3c3" glyphName="COGS"/>
+                            </graphic>
+                            <cursor>
+                                <Cursor fx:constant="HAND"/>
+                            </cursor>
+                        </Button>
+                    </children>
+                    <VBox.margin>
+                        <Insets/>
+                    </VBox.margin>
+                    <padding>
+                        <Insets left="8.0"/>
+                    </padding>
+                </VBox>
+                <VBox alignment="BOTTOM_LEFT" prefHeight="200.0" prefWidth="100.0" VBox.vgrow="ALWAYS">
+                    <children>
+                        <Button fx:id="signoutNavBarButton" alignment="BASELINE_LEFT" graphicTextGap="8.0"
+                                mnemonicParsing="false" onAction="#signout" prefHeight="30.0" prefWidth="200.0"
+                                style="-fx-background-color: BLACK;" text="Se déconnecter" textFill="#c3c3c3">
+                            <font>
+                                <Font name="System Bold" size="12.0"/>
+                            </font>
+                            <graphic>
+                                <FontAwesomeIconView fill="#c3c3c3" glyphName="SIGN_OUT"/>
+                            </graphic>
+                            <cursor>
+                                <Cursor fx:constant="HAND"/>
+                            </cursor>
+                        </Button>
+                    </children>
+                    <padding>
+                        <Insets bottom="8.0" left="8.0" right="8.0" top="8.0"/>
+                    </padding>
+                </VBox>
+            </children>
+            <padding>
+                <Insets top="16.0"/>
+            </padding>
+        </VBox>
+    </left>
 </BorderPane>

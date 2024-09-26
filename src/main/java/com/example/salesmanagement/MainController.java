@@ -4,21 +4,42 @@ import com.example.salesmanagement.document.*;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.Objects;
+import java.util.ResourceBundle;
 
-public class MainController {
+public class MainController implements Initializable {
+    @FXML
+    public HBox logoHBox;
+    @FXML
+    public Button dashboardNavBarButton, clientsNavBarButton, suppliersNavBarButton, productsNavBarButton, stockNavBarButton, PurchaseDeliveryNoteNavBarButton, invoiceNavBarButton, usersNavBarButton, settingsNavBarButton, signoutNavBarButton;
+    public Text homeLabel, managementLabel, configLabel;
     @FXML
     private BorderPane borderPane;
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        initButtonHoverEffect();
+    }
+
+    public void displayDashboard() throws IOException {
+        VBox pane = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("dashboard.fxml")));
+        borderPane.setCenter(pane);
+    }
 
     public void addSupplier() throws IOException {
         Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("supplier/form-supplier.fxml")));
@@ -246,12 +267,15 @@ public class MainController {
             VBox pane = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("form-login.fxml")));
             Scene scene = new Scene(pane);
             stage.setScene(scene);
+            stage.setResizable(false);
+            stage.setMaximized(false);
             stage.sizeToScene();
+
 
             final Rectangle2D bounds = Screen.getPrimary().getBounds();
 
             stage.setX(bounds.getMinX() + bounds.getWidth() / 2 - scene.getWidth() / 2);
-            stage.setY(bounds.getMinY() + bounds.getHeight() / 2 - scene.getHeight() / 2);
+            stage.setY(bounds.getMinY() + bounds.getHeight() / 2 - scene.getHeight() / 2 - 60);
         } catch (IOException ex) {
             ex.printStackTrace();
             // Display error dialog or handle gracefully
@@ -259,6 +283,15 @@ public class MainController {
 
         AuthenticationService.setCurrentAuthenticatedUser(null);
         stage.show();
+    }
+
+    private void initButtonHoverEffect() {
+        Button[] buttons = {dashboardNavBarButton, clientsNavBarButton, suppliersNavBarButton, productsNavBarButton, stockNavBarButton, PurchaseDeliveryNoteNavBarButton, invoiceNavBarButton, usersNavBarButton, settingsNavBarButton, signoutNavBarButton};
+
+        for (Button button : buttons) {
+            button.setOnMouseEntered(event -> button.setStyle("-fx-background-color: rgba(255, 255, 255, 0.4)"));
+            button.setOnMouseExited(event -> button.setStyle("-fx-background-color: rgba(0, 0, 0, 0)"));
+        }
     }
 }
 

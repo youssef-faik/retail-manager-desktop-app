@@ -11,8 +11,14 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.effect.BlurType;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
 import javafx.util.Callback;
 
 import java.net.URL;
@@ -23,7 +29,7 @@ import java.util.logging.Logger;
 
 
 public class StockCorrectionsController implements Initializable {
-    public Button addProductButton, saveStockCorrectionButton;
+    public Button addProductButton, saveButton;
     public TableView<StockCorrectionFormEntry> stockCorrectionItemEntryTableView;
     private StockCorrection stockCorrection;
     private ObservableList<Product> products;
@@ -31,6 +37,19 @@ public class StockCorrectionsController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        DropShadow dropShadow = new DropShadow(
+                BlurType.ONE_PASS_BOX,
+                Color.color(0.6392, 0.6392, 0.6392, 1.0),
+                10.0,
+                0,
+                0,
+                0
+        );
+
+        saveButton.setEffect(dropShadow);
+        saveButton.setTextFill(Color.color(1, 1, 1));
+        saveButton.setBackground(new Background(new BackgroundFill(Color.BLACK, new CornerRadii(3.0), null)));
+
         products = ProductRepository.findAll();
         stockCorrection = new StockCorrection();
 
@@ -41,7 +60,7 @@ public class StockCorrectionsController implements Initializable {
             stockCorrectionItemEntryTableView.getItems().add(entry);
         });
 
-        saveStockCorrectionButton.setOnAction(e -> addStockCorrection());
+        saveButton.setOnAction(e -> addStockCorrection());
     }
 
     private void addStockCorrection() {

@@ -10,8 +10,14 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.effect.BlurType;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -29,10 +35,26 @@ public class ListUsersController implements Initializable {
     private TableView<User> usersTableView;
 
     @FXML
-    private Button deleteButton, updateButton;
+    private Button deleteButton, updateButton, newButton;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        DropShadow dropShadow = new DropShadow(
+                BlurType.ONE_PASS_BOX,
+                Color.color(0.6392, 0.6392, 0.6392, 1.0),
+                10.0,
+                0,
+                0,
+                0
+        );
+
+        updateButton.setEffect(dropShadow);
+        deleteButton.setEffect(dropShadow);
+        newButton.setEffect(dropShadow);
+        newButton.setTextFill(Color.color(1, 1, 1));
+        newButton.setBackground(new Background(new BackgroundFill(Color.BLACK, new CornerRadii(3.0), null)));
+        ((Text) newButton.getGraphic()).setFill(Color.WHITE);
+
         updateButton.setDisable(true);
         deleteButton.setDisable(true);
 

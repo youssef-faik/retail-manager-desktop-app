@@ -15,7 +15,13 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.effect.BlurType;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
@@ -51,6 +57,20 @@ public class ProductController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        DropShadow dropShadow = new DropShadow(
+                BlurType.ONE_PASS_BOX,
+                Color.color(0.6392, 0.6392, 0.6392, 1.0),
+                10.0,
+                0,
+                0,
+                0
+        );
+
+        cancelButton.setEffect(dropShadow);
+        saveButton.setEffect(dropShadow);
+        saveButton.setTextFill(Color.color(1, 1, 1));
+        saveButton.setBackground(new Background(new BackgroundFill(Color.BLACK, new CornerRadii(3.0), null)));
+
         saveButton.setOnAction(e -> saveProduct());
         cancelButton.setOnAction(e -> {
             Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
@@ -211,10 +231,6 @@ public class ProductController implements Initializable {
 
 
     private void initStockMovementsTableView(Product product) {
-        TableColumn<StockMouvement, String> movementTypeColumn = new TableColumn<>("Type movement");
-        TableColumn<StockMouvement, String> quantityColumn = new TableColumn<>("Quantité");
-        TableColumn<StockMouvement, String> dateTimeColumn = new TableColumn<>("Date");
-        TableColumn<StockMouvement, String> mouvementSourceColumn = new TableColumn<>("Source movement");
         TableColumn<StockMovement, String> movementTypeColumn = new TableColumn<>("Type movement");
         TableColumn<StockMovement, String> quantityColumn = new TableColumn<>("Quantité");
         TableColumn<StockMovement, String> dateTimeColumn = new TableColumn<>("Date");

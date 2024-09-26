@@ -3,6 +3,12 @@ package com.example.salesmanagement.configuration;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.effect.BlurType;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.paint.Color;
 
 import java.net.URL;
 import java.util.Map;
@@ -47,6 +53,19 @@ public class ConfigurationController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        DropShadow dropShadow = new DropShadow(
+                BlurType.ONE_PASS_BOX,
+                Color.color(0.6392, 0.6392, 0.6392, 1.0),
+                10.0,
+                0,
+                0,
+                0
+        );
+
+        saveButton.setEffect(dropShadow);
+        saveButton.setTextFill(Color.color(1, 1, 1));
+        saveButton.setBackground(new Background(new BackgroundFill(Color.BLACK, new CornerRadii(3.0), null)));
+
         AppConfiguration configuration = AppConfiguration.getInstance();
 
         Thread thread = new Thread(() -> {

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
+<?import de.jensd.fx.glyphs.fontawesome.*?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
@@ -102,8 +102,16 @@
         <ButtonBar prefHeight="40.0" prefWidth="200.0">
             <buttons>
                 <Button fx:id="saveButton" defaultButton="true" mnemonicParsing="false" prefHeight="25.0"
-                        prefWidth="75.0" text="Enregistrer"/>
-                <Button fx:id="cancelButton" cancelButton="true" mnemonicParsing="false" text="Annuler"/>
+                        prefWidth="90.0" text="Enregistrer">
+                    <graphic>
+                        <FontAwesomeIconView fill="WHITE" glyphName="CHECK"/>
+                    </graphic>
+                </Button>
+                <Button fx:id="cancelButton" cancelButton="true" mnemonicParsing="false" text="Annuler">
+                    <graphic>
+                        <FontAwesomeIconView glyphName="TIMES"/>
+                    </graphic>
+                </Button>
             </buttons>
         </ButtonBar>
     </children>

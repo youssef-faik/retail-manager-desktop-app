@@ -3,12 +3,9 @@
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
-<VBox xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-      minWidth="-Infinity"
-      prefHeight="616.0" prefWidth="1260.0" spacing="10.0" xmlns="http://javafx.com/javafx/22"
+<VBox xmlns:fx="http://javafx.com/fxml/1" spacing="10.0" xmlns="http://javafx.com/javafx/22"
       fx:controller="com.example.salesmanagement.client.ListClientsController">
     <Label graphicTextGap="8.0" layoutX="14.0" layoutY="14.0" text="Clients">
         <font>
@@ -46,7 +43,7 @@
             <Insets/>
         </VBox.margin>
     </HBox>
-    <TableView fx:id="clientsTableView" prefHeight="523.0" prefWidth="1260.0"/>
+    <TableView fx:id="clientsTableView" VBox.vgrow="ALWAYS"/>
     <padding>
         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
     </padding>

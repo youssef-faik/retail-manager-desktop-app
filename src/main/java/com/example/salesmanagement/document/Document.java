@@ -99,19 +99,23 @@ public abstract class Document implements Serializable {
     }
 
     public void setItems(List<DocumentItem> documentItems) {
+        documentItems.forEach(documentItem -> documentItem.setDocument(this));
         this.documentItems = documentItems;
     }
 
     public void clearItems() {
+        this.documentItems.forEach(documentItem -> documentItem.setDocument(null));
         this.documentItems.clear();
     }
 
     public void addItem(DocumentItem item) {
         this.documentItems.add(item);
+        item.setDocument(this);
     }
 
     public void removeItem(DocumentItem item) {
         this.documentItems.remove(item);
+        item.setDocument(null);
     }
 
     public void updateItem(DocumentItem updatedDocumentItem) {
@@ -126,6 +130,7 @@ public abstract class Document implements Serializable {
             originalDocumentItem.setTotalExcludingTaxes(updatedDocumentItem.getTotalExcludingTaxes());
             originalDocumentItem.setTotalIncludingTaxes(updatedDocumentItem.getTotalIncludingTaxes());
             originalDocumentItem.setTotalTaxes(updatedDocumentItem.getTotalTaxes());
+            originalDocumentItem.setDocument(updatedDocumentItem.getDocument());
         }
     }
 

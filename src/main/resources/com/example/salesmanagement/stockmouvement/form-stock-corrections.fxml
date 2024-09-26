@@ -55,10 +55,10 @@
 
     <HBox alignment="BOTTOM_RIGHT" prefWidth="940.0" spacing="16.0">
         <children>
-            <Button fx:id="saveStockCorrectionButton" minWidth="0.0" mnemonicParsing="false" prefHeight="25.0"
-                    prefWidth="99.0" text="Enregistrer" HBox.hgrow="ALWAYS">
+            <Button fx:id="saveButton" minWidth="0.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="99.0"
+                    text="Enregistrer" HBox.hgrow="ALWAYS">
                 <graphic>
-                    <FontAwesomeIconView glyphName="CHECK"/>
+                    <FontAwesomeIconView fill="WHITE" glyphName="CHECK"/>
                 </graphic>
             </Button>
         </children>

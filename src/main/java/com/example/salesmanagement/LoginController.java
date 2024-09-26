@@ -7,12 +7,17 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Rectangle2D;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.HBox;
+import javafx.scene.effect.BlurType;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
@@ -24,8 +29,6 @@ import java.util.ResourceBundle;
 public class LoginController implements Initializable {
     VBox parentNode;
     @FXML
-    private Button cancelButton;
-    @FXML
     private Button loginButton;
     @FXML
     private PasswordField passwordField, confirmNewPasswordField, newPasswordField;
@@ -36,13 +39,27 @@ public class LoginController implements Initializable {
     @FXML
     private TextField usernameTextField;
     @FXML
-    private HBox newPasswordHBox, confirmNewPasswordHBox, showPasswordHBox;
+    private VBox newPasswordVBox, confirmNewPasswordVBox, showPasswordVBox;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        parentNode = (VBox) newPasswordHBox.getParent();
-        parentNode.getChildren().remove(newPasswordHBox);
-        parentNode.getChildren().remove(confirmNewPasswordHBox);
+        DropShadow dropShadow = new DropShadow(
+                BlurType.ONE_PASS_BOX,
+                Color.color(0.6392, 0.6392, 0.6392, 1.0),
+                10.0,
+                0,
+                0,
+                0
+        );
+
+        loginButton.setEffect(dropShadow);
+        loginButton.setTextFill(Color.color(1, 1, 1));
+        loginButton.setBackground(new Background(new BackgroundFill(Color.BLACK, new CornerRadii(3.0), null)));
+        ((Text) loginButton.getGraphic()).setFill(Color.WHITE);
+
+        parentNode = (VBox) newPasswordVBox.getParent();
+        parentNode.getChildren().remove(newPasswordVBox);
+        parentNode.getChildren().remove(confirmNewPasswordVBox);
 
         showPasswordCheckBox.setOnAction(event -> {
             passwordField.setVisible(!showPasswordCheckBox.isSelected());
@@ -80,13 +97,6 @@ public class LoginController implements Initializable {
         });
 
         loginButton.setOnAction(e -> login());
-        cancelButton.setOnAction(e -> {
-            HibernateUtil.shutdown();
-
-            Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
-            stage.close();
-        });
-
     }
 
     private void login() {
@@ -118,11 +128,11 @@ public class LoginController implements Initializable {
         passwordTextField.setDisable(true);
         usernameTextField.setDisable(true);
 
-        int index = parentNode.getChildren().indexOf(showPasswordHBox);
-        parentNode.getChildren().add(index, newPasswordHBox);
-        parentNode.getChildren().add(index + 1, confirmNewPasswordHBox);
+        parentNode.getScene().getWindow().setHeight(602);
 
-        parentNode.getScene().getWindow().setHeight(400);
+        int index = parentNode.getChildren().indexOf(showPasswordVBox);
+        parentNode.getChildren().add(index, newPasswordVBox);
+        parentNode.getChildren().add(index + 1, confirmNewPasswordVBox);
 
         loginButton.setText("Enregistrer");
         loginButton.setOnAction(event -> changePassword());
@@ -163,7 +173,6 @@ public class LoginController implements Initializable {
         Stage stage = (Stage) scene.getWindow();
 
         stage.setTitle("Gestion Commercial");
-        stage.setResizable(false);
 
         Rectangle2D bounds = Screen.getPrimary().getVisualBounds();
 
@@ -175,6 +184,11 @@ public class LoginController implements Initializable {
         try {
             Parent load = fxmlLoader.load();
             scene.setRoot(load);
+
+            ((MainController) fxmlLoader.getController()).displayDashboard();
+
+            stage.setResizable(true);
+            stage.setMaximized(true);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

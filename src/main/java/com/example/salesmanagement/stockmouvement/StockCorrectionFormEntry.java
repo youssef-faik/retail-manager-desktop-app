@@ -1,7 +1,5 @@
 package com.example.salesmanagement.stockmouvement;
 
-import com.example.salesmanagement.document.DocumentController;
-import com.example.salesmanagement.document.DocumentItem;
 import com.example.salesmanagement.product.Product;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ComboBox;
@@ -15,11 +13,6 @@ public class StockCorrectionFormEntry {
     private Integer newQuantity;
     private Integer quantityToUpdate;
 
-    private StockCorrectionsController stockCorrectionsController;
-
-
-    private DocumentItem documentItem;
-
 
     public StockCorrectionFormEntry() {
     }
@@ -30,16 +23,6 @@ public class StockCorrectionFormEntry {
 
         initProductsComboBox(items);
         initStockCorrectionTypeComboBox();
-    }
-
-    public StockCorrectionFormEntry(ObservableList<Product> items,
-                                    DocumentController documentController,
-                                    StockCorrectionsController stockCorrectionsController) {
-        initProductsComboBox(items);
-        initStockCorrectionTypeComboBox();
-        getProductComboBox().setValue(documentItem.getProduct());
-
-        this.stockCorrectionsController = stockCorrectionsController;
     }
 
     private void initStockCorrectionTypeComboBox() {

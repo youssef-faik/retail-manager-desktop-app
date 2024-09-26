@@ -54,9 +54,17 @@
         <ButtonBar>
             <buttons>
                 <Button fx:id="saveButton" defaultButton="true" mnemonicParsing="false" prefHeight="25.0"
-                        prefWidth="75.0" text="Enregistrer"/>
+                        prefWidth="90.0" text="Enregistrer">
+                    <graphic>
+                        <FontAwesomeIconView fill="WHITE" glyphName="CHECK"/>
+                    </graphic>
+                </Button>
                 <Button fx:id="cancelButton" cancelButton="true" mnemonicParsing="false" prefHeight="25.0"
-                        prefWidth="75.0" text="Annuler"/>
+                        prefWidth="75.0" text="Annuler">
+                    <graphic>
+                        <FontAwesomeIconView glyphName="TIMES"/>
+                    </graphic>
+                </Button>
             </buttons>
         </ButtonBar>
     </children>

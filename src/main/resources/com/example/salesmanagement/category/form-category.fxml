@@ -5,7 +5,8 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
-<VBox prefHeight="184.0" prefWidth="400.0" spacing="8.0" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.salesmanagement.category.CategoryController">
+<VBox xmlns:fx="http://javafx.com/fxml/1" prefHeight="184.0" prefWidth="400.0" spacing="8.0"
+      xmlns="http://javafx.com/javafx/22" fx:controller="com.example.salesmanagement.category.CategoryController">
     <children>
         <Label graphicTextGap="8.0" text="Catégorie">
             <font>
@@ -20,25 +21,34 @@
         </Label>
         <HBox prefHeight="100.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
             <children>
-                <Label prefHeight="17.0" prefWidth="110.0" text="Nom *" HBox.hgrow="ALWAYS" />
-                <TextField fx:id="nameTextField" prefHeight="25.0" prefWidth="250.0" HBox.hgrow="ALWAYS" />
+                <Label prefHeight="17.0" prefWidth="110.0" text="Nom *" HBox.hgrow="ALWAYS"/>
+                <TextField fx:id="nameTextField" prefHeight="25.0" prefWidth="250.0" HBox.hgrow="ALWAYS"/>
             </children>
         </HBox>
         <HBox prefHeight="100.0" prefWidth="200.0">
             <children>
-                <Label prefHeight="17.0" prefWidth="110.0" text="Description" HBox.hgrow="ALWAYS" />
-                <TextArea fx:id="descriptionTextArea" minHeight="-Infinity" prefHeight="76.0" prefWidth="250.0" wrapText="true" HBox.hgrow="ALWAYS" />
+                <Label prefHeight="17.0" prefWidth="110.0" text="Description" HBox.hgrow="ALWAYS"/>
+                <TextArea fx:id="descriptionTextArea" minHeight="-Infinity" prefHeight="76.0" prefWidth="250.0"
+                          wrapText="true" HBox.hgrow="ALWAYS"/>
             </children>
         </HBox>
-        <Separator prefWidth="200.0" />
+        <Separator prefWidth="200.0"/>
         <ButtonBar prefHeight="40.0" prefWidth="200.0">
             <buttons>
-                <Button fx:id="saveButton" defaultButton="true" mnemonicParsing="false" text="Enregistrer" />
-                <Button fx:id="cancelButton" cancelButton="true" mnemonicParsing="false" text="Annuler" />
+                <Button fx:id="saveButton" defaultButton="true" mnemonicParsing="false" text="Enregistrer">
+                    <graphic>
+                        <FontAwesomeIconView fill="WHITE" glyphName="CHECK"/>
+                    </graphic>
+                </Button>
+                <Button fx:id="cancelButton" cancelButton="true" mnemonicParsing="false" text="Annuler">
+                    <graphic>
+                        <FontAwesomeIconView glyphName="TIMES"/>
+                    </graphic>
+                </Button>
             </buttons>
         </ButtonBar>
     </children>
     <padding>
-        <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+        <Insets bottom="8.0" left="8.0" right="8.0" top="8.0"/>
     </padding>
 </VBox>

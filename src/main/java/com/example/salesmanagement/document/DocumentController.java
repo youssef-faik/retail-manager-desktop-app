@@ -23,9 +23,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.effect.BlurType;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -85,6 +87,19 @@ public class DocumentController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        DropShadow dropShadow = new DropShadow(
+                BlurType.ONE_PASS_BOX,
+                Color.color(0.6392, 0.6392, 0.6392, 1.0),
+                10.0,
+                0,
+                0,
+                0
+        );
+
+        saveDocumentButton.setEffect(dropShadow);
+        saveDocumentButton.setTextFill(Color.color(1, 1, 1));
+        saveDocumentButton.setBackground(new Background(new BackgroundFill(Color.BLACK, new CornerRadii(3.0), null)));
+
         documentController = this;
 
         products = ProductRepository.findAll();
@@ -1175,7 +1190,6 @@ public class DocumentController implements Initializable {
             parent.setAlignment(Pos.BOTTOM_RIGHT);
 
             ((VBox) paidAmountHBox.getParent()).getChildren().removeAll(totalSeparator, paidAmountHBox, remainingAmountHBox);
-            documentItemEntryTableView.setPrefHeight(documentItemEntryTableView.getPrefHeight() + 100);
 
             documentStatusComboBox.getItems().addAll(QuotationStatus.values());
             documentStatusComboBox.setValue(QuotationStatus.DRAFT);
@@ -1193,8 +1207,6 @@ public class DocumentController implements Initializable {
             parent.setAlignment(Pos.BOTTOM_RIGHT);
 
             ((VBox) paidAmountHBox.getParent()).getChildren().removeAll(totalSeparator, paidAmountHBox, remainingAmountHBox);
-            documentItemEntryTableView.setPrefHeight(documentItemEntryTableView.getPrefHeight() + 100);
-
             ((VBox) dueDateLabel.getParent().getParent()).getChildren().remove(dueDateLabel.getParent());
 
 
@@ -1214,8 +1226,6 @@ public class DocumentController implements Initializable {
             parent.setAlignment(Pos.BOTTOM_RIGHT);
 
             ((VBox) paidAmountHBox.getParent()).getChildren().removeAll(totalSeparator, paidAmountHBox, remainingAmountHBox);
-            documentItemEntryTableView.setPrefHeight(documentItemEntryTableView.getPrefHeight() + 100);
-
             ((VBox) dueDateLabel.getParent().getParent()).getChildren().remove(dueDateLabel.getParent());
 
 
@@ -1235,7 +1245,6 @@ public class DocumentController implements Initializable {
             parent.setAlignment(Pos.BOTTOM_RIGHT);
 
             ((VBox) paidAmountHBox.getParent()).getChildren().removeAll(totalSeparator, paidAmountHBox, remainingAmountHBox);
-            documentItemEntryTableView.setPrefHeight(documentItemEntryTableView.getPrefHeight() + 100);
 
             ((VBox) dueDateLabel.getParent().getParent()).getChildren().remove(dueDateLabel.getParent());
 

@@ -198,6 +198,7 @@ public interface DocumentRepository {
         original.setTotalExcludingTaxes(updated.getTotalExcludingTaxes());
         original.setTotalTaxes(updated.getTotalTaxes());
         original.setTotalIncludingTaxes(updated.getTotalIncludingTaxes());
+        original.setTotalIncludingTaxes(updated.getTotalIncludingTaxes());
     }
 
     private static void updateItems(Document original, Document updated, Session session) {
@@ -207,6 +208,7 @@ public interface DocumentRepository {
                         original.updateItem(updatedItem);
                     } else {
                         original.addItem(updatedItem);
+                        updatedItem.setDocument(original);
                     }
                 }
         );
@@ -215,6 +217,7 @@ public interface DocumentRepository {
                 originalItem -> {
                     if (!updated.getItems().contains(originalItem)) {
                         original.removeItem(originalItem);
+                        originalItem.setDocument(null);
                         session.remove(originalItem);
                     }
                 }

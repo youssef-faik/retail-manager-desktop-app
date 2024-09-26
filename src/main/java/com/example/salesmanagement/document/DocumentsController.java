@@ -12,18 +12,21 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.effect.BlurType;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.Pair;
@@ -51,7 +54,7 @@ public class DocumentsController implements Initializable {
     private TableView<Document> documentsTableView;
 
     @FXML
-    private Button deleteButton, updateButton;
+    private Button deleteButton, updateButton, newButton;
 
     @FXML
     private ComboBox<Pair<Class<? extends Document>, String>> docsListComboBox;
@@ -61,6 +64,22 @@ public class DocumentsController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        DropShadow dropShadow = new DropShadow(
+                BlurType.ONE_PASS_BOX,
+                Color.color(0.6392, 0.6392, 0.6392, 1.0),
+                10.0,
+                0,
+                0,
+                0
+        );
+
+        updateButton.setEffect(dropShadow);
+        deleteButton.setEffect(dropShadow);
+        newButton.setEffect(dropShadow);
+        newButton.setTextFill(Color.color(1, 1, 1));
+        newButton.setBackground(new Background(new BackgroundFill(Color.BLACK, new CornerRadii(3.0), null)));
+        ((Text) newButton.getGraphic()).setFill(Color.WHITE);
+
         updateButton.setDisable(true);
         deleteButton.setDisable(true);
 
@@ -152,6 +171,14 @@ public class DocumentsController implements Initializable {
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.setScene(new Scene(root));
             stage.setResizable(false);
+
+            Rectangle2D bounds = Screen.getPrimary().getVisualBounds();
+
+            stage.setX(bounds.getMinX());
+            stage.setY(bounds.getMinY());
+            stage.setWidth(bounds.getWidth());
+            stage.setHeight(bounds.getHeight());
+
             stage.showAndWait();
 
             loadDocumentsData(formClass);
@@ -190,30 +217,6 @@ public class DocumentsController implements Initializable {
         loadDocumentsData(formClass);
 
         docsListComboBox.setValue(docsListComboBox.getItems().stream().filter(o -> o.getKey() == formClass).findFirst().get());
-
-//        if (formClass == PurchaseOrder.class) {
-//            formLabel.setText("Bons de commande");
-//        }
-//
-//        if (formClass == PurchaseDeliveryNote.class) {
-//            formLabel.setText("Bons de réception");
-//        }
-//
-//        if (formClass == Quotation.class) {
-//            formLabel.setText("Devis");
-//        }
-//
-//        if (formClass == DeliveryNote.class) {
-//            formLabel.setText("Bons de livraison");
-//        }
-//
-//        if (formClass == Invoice.class) {
-//            formLabel.setText("Factures");
-//        }
-//
-//        if (formClass == CreditInvoice.class) {
-//            formLabel.setText("Factures avoir");
-//        }
     }
 
     private <T extends Document> void initDocumentsTableView(Class<T> aClass) {
