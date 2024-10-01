@@ -42,12 +42,13 @@
                 <TextField fx:id="quantityUpdatedByTextField" prefHeight="25.0" prefWidth="250.0" HBox.hgrow="ALWAYS"/>
             </children>
         </HBox>
-        <!--      <HBox>-->
-        <!--         <children>-->
-        <!--            <Label prefHeight="17.0" prefWidth="110.0" text="Nouvelle Quantité" HBox.hgrow="ALWAYS" />-->
-        <!--            <TextField fx:id="newQuantityTextField" editable="false" prefHeight="25.0" prefWidth="250.0" HBox.hgrow="ALWAYS" />-->
-        <!--         </children>-->
-        <!--      </HBox>-->
+        <HBox>
+            <children>
+                <Label prefHeight="17.0" prefWidth="110.0" text="Nouvelle Quantité" HBox.hgrow="ALWAYS"/>
+                <TextField fx:id="newQuantityTextField" editable="false" prefHeight="25.0" prefWidth="250.0"
+                           HBox.hgrow="ALWAYS"/>
+            </children>
+        </HBox>
         <Separator prefWidth="200.0"/>
         <ButtonBar>
             <buttons>

@@ -101,11 +101,23 @@ public class LoginController implements Initializable {
 
     private void login() {
         String username = usernameTextField.getText();
+        String password = passwordField.getText();
+
+        if (username.isBlank()) {
+            displayErrorAlert("Identifiant est obligatoire");
+            return;
+        }
+
+        if (password.isBlank()) {
+            displayErrorAlert("Mot de passe est obligatoire");
+            return;
+        }
+
         Optional<User> optionalUser = UserRepository.findByUsername(username);
 
         if (optionalUser.isPresent()) {
             User authenticatedUser = optionalUser.get();
-            if (authenticatedUser.getPassword().equals(Encryptor.encryptPassword(passwordField.getText()))) {
+            if (authenticatedUser.getPassword().equals(Encryptor.encryptPassword(password))) {
                 System.out.println("Login successful");
                 AuthenticationService.setCurrentAuthenticatedUser(authenticatedUser);
 
@@ -116,9 +128,11 @@ public class LoginController implements Initializable {
                 }
             } else {
                 System.out.println("Login failed: " + authenticatedUser.getUsername());
+                displayErrorAlert("Identifiant ou mot de passe est incorrect");
             }
         } else {
             System.out.println("Login failed: user not found");
+            displayErrorAlert("Identifiant ou mot de passe est incorrect");
         }
 
     }
@@ -139,19 +153,33 @@ public class LoginController implements Initializable {
     }
 
     private void changePassword() {
+        String newPassword = newPasswordField.getText();
+        String confirmNewPassword = confirmNewPasswordField.getText();
+
+        if (newPassword.isBlank()) {
+            displayErrorAlert("Nouveau mot de passe est obligatoire");
+            return;
+        }
+
+        if (newPassword.length() < 8) {
+            displayErrorAlert("Nouveau mot de passe doit contenir au minimum 8 character");
+            return;
+        }
+
+        if (!newPassword.equals(confirmNewPassword)) {
+            System.out.println("New password doesn't match confirm password");
+            displayErrorAlert("Le mot de passe et la confirmation du mot de passe ne correspondent pas");
+            return;
+        }
+
         User authenticatedUser = AuthenticationService.getCurrentAuthenticatedUser();
-        String encryptedNewPassword = Encryptor.encryptPassword(newPasswordField.getText());
+        String encryptedNewPassword = Encryptor.encryptPassword(newPassword);
 
         if (encryptedNewPassword.equals(authenticatedUser.getPassword())) {
-            System.out.println("The new password is the same as the old password");
+            System.out.println("Le nouveau mot de passe doit être différent de l'ancien mot de passe");
+            displayErrorAlert("Le nouveau mot de passe doit être différent de l'ancien mot de passe");
             return;
         }
-
-        if (!newPasswordField.getText().equals(confirmNewPasswordField.getText())) {
-            System.out.println("New password doesn't match confirm password");
-            return;
-        }
-
 
         boolean passwordWasUpdated = UserRepository.updatePassword(authenticatedUser.getId(), encryptedNewPassword);
 
@@ -164,7 +192,6 @@ public class LoginController implements Initializable {
         }
 
     }
-
 
     private void displayMainStage() {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("main.fxml"));
@@ -199,6 +226,14 @@ public class LoginController implements Initializable {
         alert.setTitle("Success");
         alert.setHeaderText(null);
         alert.setContentText("Operation effectué avec success");
+        alert.showAndWait();
+    }
+
+    private void displayErrorAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
         alert.showAndWait();
     }
 

@@ -85,41 +85,6 @@ public interface StockCorrectionRepository {
     }
 
 
-//    static Optional<StockMovement> update(StockMovement stockMovement) {
-//        Session session = sessionFactory.openSession();
-//
-//        try {
-//            session.beginTransaction();
-//
-//            StockMovement oldStockMovement = session.find(StockMovement.class, stockMovement.getId());
-//
-//            if (oldStockMovement == null) {
-//                return Optional.empty();
-//            }
-//
-//            oldStockMovement.setMovementType(stockMovement.getMovementType());
-//            oldStockMovement.setDateTime(stockMovement.getDateTime());
-//            oldStockMovement.setQuantity(stockMovement.getQuantity());
-//            oldStockMovement.setProduct(stockMovement.getProduct());
-//            oldStockMovement.setMovementSource(stockMovement.getMovementSource());
-//
-//            session.getTransaction().commit();
-//
-//            return Optional.of(oldStockMovement);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//
-//            if (session.getTransaction().getStatus() == TransactionStatus.ACTIVE
-//                    || session.getTransaction().getStatus() == TransactionStatus.MARKED_ROLLBACK) {
-//                session.getTransaction().rollback();
-//            }
-//
-//            return Optional.empty();
-//        } finally {
-//            session.close();
-//        }
-//    }
-
     static boolean deleteById(Long id) {
         Session session = sessionFactory.openSession();
 

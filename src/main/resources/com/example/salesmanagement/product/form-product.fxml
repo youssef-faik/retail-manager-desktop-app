@@ -42,7 +42,7 @@
                                 </HBox>
                                 <HBox prefWidth="358.0">
                                     <children>
-                                        <Label prefWidth="110.0" text="Prix d'achat (HT) *" HBox.hgrow="ALWAYS"/>
+                                        <Label prefWidth="110.0" text="Prix d'achat (HT)" HBox.hgrow="ALWAYS"/>
                                         <TextField fx:id="purchasePriceExcludingTaxTextField"
                                                    maxWidth="1.7976931348623157E308" prefHeight="25.0"
                                                    HBox.hgrow="ALWAYS"/>

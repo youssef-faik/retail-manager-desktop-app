@@ -6,6 +6,7 @@ import com.example.salesmanagement.product.ProductRepository;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -49,6 +50,12 @@ public class StockCorrectionsController implements Initializable {
         saveButton.setEffect(dropShadow);
         saveButton.setTextFill(Color.color(1, 1, 1));
         saveButton.setBackground(new Background(new BackgroundFill(Color.BLACK, new CornerRadii(3.0), null)));
+        saveButton.setDisable(true);
+
+        stockCorrectionItemEntryTableView.getItems().addListener((ListChangeListener<StockCorrectionFormEntry>) c -> {
+            c.next();
+            saveButton.setDisable(!isItemTableViewValide());
+        });
 
         products = ProductRepository.findAll();
         stockCorrection = new StockCorrection();
@@ -56,7 +63,7 @@ public class StockCorrectionsController implements Initializable {
         initDocumentItemsTableView();
 
         addProductButton.setOnAction(event -> {
-            StockCorrectionFormEntry entry = new StockCorrectionFormEntry(products);
+            StockCorrectionFormEntry entry = new StockCorrectionFormEntry(products, this);
             stockCorrectionItemEntryTableView.getItems().add(entry);
         });
 
@@ -69,6 +76,9 @@ public class StockCorrectionsController implements Initializable {
         Optional<StockCorrection> optionalDocument = StockCorrectionRepository.save(stockCorrection);
 
         if (optionalDocument.isPresent()) {
+            saveButton.setDisable(true);
+            addProductButton.setDisable(true);
+            stockCorrectionItemEntryTableView.setDisable(true);
             displaySuccessAlert();
         } else {
             displayErrorAlert();
@@ -182,24 +192,58 @@ public class StockCorrectionsController implements Initializable {
 
         quantityToUpdateColumn.setOnEditCommit(event -> {
             StockCorrectionFormEntry entry = event.getTableView().getItems().get(event.getTablePosition().getRow());
-            try {
-                int quantityToUpdate = Integer.parseInt(event.getNewValue());
-                entry.setQuantityToUpdate(quantityToUpdate);
 
-                if (entry.getStockCorrectionTypeComboBox().getSelectionModel().getSelectedItem() == StockCorrectionType.POSITIVE) {
-                    entry.setNewQuantity(entry.getCurrentQuantity() + quantityToUpdate);
-                } else {
-                    entry.setNewQuantity(entry.getCurrentQuantity() - quantityToUpdate);
-                }
+            String newValueString = event.getNewValue().trim();
 
+            if (newValueString.isBlank()) {
                 stockCorrectionItemEntryTableView.refresh();
-            } catch (NumberFormatException e) {
-                // Handle the case where the input is not a valid integer
-                stockCorrectionItemEntryTableView.refresh();
-                System.out.println("Invalid input: " + event.getNewValue());
-                displayErrorAlert("valeur de quantité incorrecte: " + event.getNewValue());
+                displayErrorAlert("Quantité est obligatoire");
+                return;
             }
+
+            int quantity;
+
+            try {
+                quantity = Integer.parseInt(newValueString);
+            } catch (NumberFormatException e) {
+                stockCorrectionItemEntryTableView.refresh();
+                displayErrorAlert("La quantité ne doit contenir que des chiffres");
+                return;
+            }
+
+            if (quantity < 0 || quantity > 9_999_999) {
+                stockCorrectionItemEntryTableView.refresh();
+                displayErrorAlert("la valeur de la quantité doit être comprise entre 0 et 9,999,999");
+                return;
+            }
+
+            entry.setQuantityToUpdate(quantity);
+
+            if (entry.getStockCorrectionTypeComboBox().getSelectionModel().getSelectedItem() == StockCorrectionType.POSITIVE) {
+                entry.setNewQuantity(entry.getCurrentQuantity() + quantity);
+            } else {
+                entry.setNewQuantity(entry.getCurrentQuantity() - quantity);
+            }
+
+            stockCorrectionItemEntryTableView.refresh();
         });
+    }
+
+    private boolean isItemTableViewValide() {
+        if (stockCorrectionItemEntryTableView.getItems().isEmpty()) {
+            return false;
+        }
+
+        for (StockCorrectionFormEntry entry : stockCorrectionItemEntryTableView.getItems()) {
+            if (entry.getProductComboBox().getSelectionModel().getSelectedItem().getValue() == null) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public void validateForm() {
+        saveButton.setDisable(!isItemTableViewValide());
     }
 
     private void displaySuccessAlert() {

@@ -10,6 +10,7 @@ import org.hibernate.resource.transaction.spi.TransactionStatus;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public interface StockMovementRepository {
@@ -53,6 +54,19 @@ public interface StockMovementRepository {
 
             return Optional.ofNullable(stockMovement);
         }
+    }
+
+    static Long stockMovementsCountByStockCorrection(StockCorrection stockCorrection) {
+        Long count;
+
+        try (Session session = sessionFactory.openSession()) {
+            String query = "select count(*) from StockMovement S join MovementSource M on S.movementSource = M join StockCorrectionBasedMouvementSource D on M.id = D.id where D.source = :source";
+            Query<Long> nativeQuery = session.createQuery(query, long.class);
+            nativeQuery.setParameter("source", stockCorrection);
+            count = nativeQuery.getSingleResult();
+        }
+
+        return count;
     }
 
     static boolean save(StockMovement stockMovement) {
@@ -121,12 +135,32 @@ public interface StockMovementRepository {
         try {
             session.beginTransaction();
 
-            StockMovement deletedStockMovement = session.getReference(StockMovement.class, id);
+            StockMovement deletedStockMovement = session.find(StockMovement.class, id);
             if (deletedStockMovement == null) {
                 return false;
             }
 
             session.remove(deletedStockMovement);
+
+            StockCorrection stockCorrection = ((StockCorrectionBasedMovementSource) deletedStockMovement.getMovementSource()).getSource();
+            if (stockMovementsCountByStockCorrection(stockCorrection) <= 1) {
+                session.remove(stockCorrection);
+            } else {
+                StockCorrectionRepository.findById(stockCorrection.getId()).flatMap(
+                        correction -> correction.getItems()
+                                .stream()
+                                .filter(
+                                        stockCorrectionItem -> Objects.equals(stockCorrectionItem.getProduct().getId(), deletedStockMovement.getProduct().getId()))
+                                .findFirst()).ifPresent(object ->
+                {
+                    StockCorrectionItem managedItem = session.merge(object);  // Re-attach to the session
+                    stockCorrection.removeItem(managedItem);
+                    stockCorrection.removeItem(object);
+                    session.remove(managedItem);
+                });
+            }
+
+
             session.getTransaction().commit();
 
             return true;

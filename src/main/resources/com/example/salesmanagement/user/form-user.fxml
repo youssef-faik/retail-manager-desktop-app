@@ -33,7 +33,7 @@
         </HBox>
         <HBox>
             <children>
-                <Label prefWidth="110.0" text="identifiant" HBox.hgrow="ALWAYS"/>
+                <Label prefWidth="110.0" text="Identifiant *" HBox.hgrow="ALWAYS"/>
                 <TextField fx:id="usernameTextField" prefHeight="25.0" prefWidth="250.0" HBox.hgrow="ALWAYS"/>
             </children>
         </HBox>

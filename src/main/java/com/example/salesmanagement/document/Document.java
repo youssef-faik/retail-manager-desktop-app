@@ -40,7 +40,7 @@ public abstract class Document implements Serializable {
             referencedColumnName = "id",
             nullable = false,
             foreignKey = @ForeignKey(name = "sales_document_item_sales_document_fk"))
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DocumentItem> documentItems = new ArrayList<>();
 
     public Document() {

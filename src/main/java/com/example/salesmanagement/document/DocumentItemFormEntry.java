@@ -2,16 +2,22 @@ package com.example.salesmanagement.document;
 
 import com.example.salesmanagement.product.Product;
 import javafx.collections.ObservableList;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.TableRow;
+import javafx.scene.control.*;
+import javafx.util.Pair;
 
 import java.math.BigDecimal;
+import java.util.Objects;
+import java.util.function.Function;
 
 public class DocumentItemFormEntry {
-    private ComboBox<Product> productComboBox = new ComboBox<>();
+    private final Pair<String, Product> EMPTY_PRODUCT = new Pair<>(null, null);
+    private ComboBox<Pair<String, Product>> productComboBox = new ComboBox<>();
     private DocumentItem documentItem;
     private DocumentController documentController;
+    private Product selectedProduct;
+    private boolean isChanging = false;
+    private TableView<DocumentItemFormEntry> tableView;
+
 
     public DocumentItemFormEntry() {
     }
@@ -26,32 +32,90 @@ public class DocumentItemFormEntry {
 
     public DocumentItemFormEntry(ObservableList<Product> items,
                                  DocumentController documentController,
-                                 DocumentItem documentItem) {
-        initProductsComboBox(items);
-        getProductComboBox().setValue(documentItem.getProduct());
-
+                                 DocumentItem documentItem,
+                                 TableView<DocumentItemFormEntry> tableView) {
+        this.tableView = tableView;
         this.documentController = documentController;
         this.documentItem = documentItem;
+
+        initProductsComboBox(items);
+
+        Product product = documentItem.getProduct();
+
+        productComboBox.getItems()
+                .stream()
+                .filter(stringProductPair -> stringProductPair.getValue() != null && stringProductPair.getValue().equals(product))
+                .findFirst()
+                .ifPresentOrElse(
+                        stringProductPair -> productComboBox.setValue(stringProductPair),
+                        () -> {
+                            throw new RuntimeException("Product does not exist");
+                        }
+                );
     }
 
     private void initProductsComboBox(ObservableList<Product> items) {
-        this.productComboBox = new ComboBox<>(items);
-
+        this.productComboBox = new ComboBox<>();
         productComboBox.setCellFactory(x -> new ProductComboCell());
         productComboBox.setButtonCell(new ProductComboCell());
-        productComboBox.setPromptText("Sélectionnez un produit");
         productComboBox.setMinWidth(350);
 
-        productComboBox.setOnAction(event -> {
-            Product product = productComboBox.getSelectionModel().getSelectedItem();
+        productComboBox.getItems().add(EMPTY_PRODUCT);
+        Function<Product, Pair<String, Product>> productObjectFunction = product -> new Pair<>(product.getName(), product);
+        productComboBox.getItems().addAll(items.stream().map(productObjectFunction).toList());
+
+        productComboBox.getSelectionModel().selectFirst();
+
+        productComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (isChanging || Objects.equals(newValue, oldValue)) {
+                return;
+            }
+
+            tableView = tableView != null ? tableView : ((TableRow) productComboBox.getParent().getParent()).getTableView();
+
+            // check if the product was already selected
+            if (newValue.getValue() != null) {
+                for (DocumentItemFormEntry documentItemFormEntry : tableView.getItems()) {
+                    if (documentItemFormEntry.selectedProduct == newValue.getValue()) {
+                        // Set the flag to true before changing the value
+                        isChanging = true;
+
+                        // Set the selected item back to its previous value
+                        productComboBox.setValue(oldValue);
+
+                        // Reset the flag after changing the value
+                        isChanging = false;
+
+                        displayErrorAlert("Le produit est déjà choisi");
+                        return;
+                    }
+                }
+            }
+
+            selectedProduct = newValue.getValue();
+            this.documentItem.setProduct(selectedProduct);
+
+            if (selectedProduct == null) {
+                this.documentItem.setQuantity(0);
+                this.documentItem.setUnitPriceExcludingTaxes(BigDecimal.ZERO);
+
+                this.documentItem.setTotalExcludingTaxes(BigDecimal.ZERO);
+                this.documentItem.setTotalIncludingTaxes(BigDecimal.ZERO);
+                this.documentItem.setTotalTaxes(BigDecimal.ZERO);
+
+                tableView.refresh();
+                documentController.updateTotals();
+
+                return;
+            }
+
             // set new values for InvoiceItem
-            this.documentItem.setProduct(product);
             this.documentItem.setQuantity(1);
-            this.documentItem.setUnitPriceExcludingTaxes(product.getSellingPriceExcludingTax());
+            this.documentItem.setUnitPriceExcludingTaxes(selectedProduct.getSellingPriceExcludingTax());
 
             // find new document item totals
-            BigDecimal priceExcludingTaxes = product.getSellingPriceExcludingTax().multiply(BigDecimal.valueOf(this.documentItem.getQuantity()));
-            BigDecimal taxes = priceExcludingTaxes.multiply(product.getTaxRate().getValue().divide(BigDecimal.valueOf(100)));
+            BigDecimal priceExcludingTaxes = selectedProduct.getSellingPriceExcludingTax().multiply(BigDecimal.valueOf(this.documentItem.getQuantity()));
+            BigDecimal taxes = priceExcludingTaxes.multiply(selectedProduct.getTaxRate().getValue().divide(BigDecimal.valueOf(100)));
             BigDecimal priceIncludingTaxes = priceExcludingTaxes.add(taxes);
 
             // set new totals for InvoiceItem
@@ -59,8 +123,7 @@ public class DocumentItemFormEntry {
             this.documentItem.setTotalIncludingTaxes(priceIncludingTaxes);
             this.documentItem.setTotalTaxes(taxes);
 
-            TableRow parent = (TableRow) productComboBox.getParent().getParent();
-            parent.getTableView().refresh();
+            tableView.refresh();
 
             documentController.updateTotals();
         });
@@ -70,7 +133,7 @@ public class DocumentItemFormEntry {
         return documentItem;
     }
 
-    public ComboBox<Product> getProductComboBox() {
+    public ComboBox<Pair<String, Product>> getProductComboBox() {
         return productComboBox;
     }
 
@@ -123,11 +186,19 @@ public class DocumentItemFormEntry {
         this.documentItem.setTotalTaxes(totalTaxes);
     }
 
-    private static class ProductComboCell extends ListCell<Product> {
+    private void displayErrorAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Attention");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private static class ProductComboCell extends ListCell<Pair<String, Product>> {
         @Override
-        protected void updateItem(Product product, boolean bln) {
-            super.updateItem(product, bln);
-            setText(product != null ? product.getName() : null);
+        protected void updateItem(Pair<String, Product> pair, boolean bln) {
+            super.updateItem(pair, bln);
+            setText(pair == null ? null : (pair.getValue() != null ? pair.getValue().getName() : "Choisissez un produit"));
         }
     }
 }

@@ -9,12 +9,12 @@
       xmlns="http://javafx.com/javafx/22" fx:controller="com.example.salesmanagement.payment.PaymentController">
     <children>
 
-        <Label text="Règlement" graphicTextGap="8.0">
+        <Label graphicTextGap="8.0" text="Règlement">
             <font>
                 <Font name="System Bold" size="32.0"/>
             </font>
             <graphic>
-                <FontAwesomeIconView glyphName="DONATE"/>
+                <FontAwesomeIconView glyphName="MONEY"/>
             </graphic>
             <VBox.margin>
                 <Insets bottom="16.0"/>
@@ -63,7 +63,7 @@
         </HBox>
         <HBox fx:id="bankHBox" prefWidth="176.0" VBox.vgrow="ALWAYS">
             <children>
-                <Label prefHeight="0.0" prefWidth="116.0" text="Banque">
+                <Label prefHeight="0.0" prefWidth="116.0" text="Banque *">
                     <HBox.margin>
                         <Insets right="4.0"/>
                     </HBox.margin>
@@ -83,7 +83,7 @@
         </HBox>
         <HBox fx:id="payeeNameHBox" prefWidth="176.0" VBox.vgrow="ALWAYS">
             <children>
-                <Label prefHeight="17.0" prefWidth="116.0" text="Nom du bénéficiaire">
+                <Label prefHeight="17.0" prefWidth="117.0" text="Nom du bénéficiaire *">
                     <HBox.margin>
                         <Insets right="4.0"/>
                     </HBox.margin>
@@ -93,7 +93,7 @@
         </HBox>
         <HBox fx:id="senderAccountHBox" prefWidth="176.0" VBox.vgrow="ALWAYS">
             <children>
-                <Label prefHeight="17.0" prefWidth="116.0" text="Compte expéditeur">
+                <Label prefHeight="17.0" prefWidth="116.0" text="Compte expéditeur *">
                     <HBox.margin>
                         <Insets right="4.0"/>
                     </HBox.margin>
@@ -103,7 +103,7 @@
         </HBox>
         <HBox fx:id="checkDueDateHBox" prefWidth="176.0" VBox.vgrow="ALWAYS">
             <children>
-                <Label prefHeight="17.0" prefWidth="116.0" text="Date d'échéance">
+                <Label prefHeight="17.0" prefWidth="116.0" text="Date d'échéance *">
                     <HBox.margin>
                         <Insets right="4.0"/>
                     </HBox.margin>
@@ -113,13 +113,13 @@
         </HBox>
         <HBox fx:id="checkStatusHBox" prefWidth="176.0" VBox.vgrow="ALWAYS">
             <children>
-                <Label prefHeight="0.0" prefWidth="116.0" text="Status  *">
+                <Label prefHeight="0.0" prefWidth="116.0" text="Statut chéque  *">
                     <HBox.margin>
                         <Insets right="4.0"/>
                     </HBox.margin>
                 </Label>
                 <ComboBox fx:id="checkStatusComboBox" prefHeight="25.0" prefWidth="230.0"
-                          promptText="Sélectionnez status"/>
+                          promptText="Sélectionnez statut"/>
             </children>
         </HBox>
         <Separator prefWidth="200.0"/>

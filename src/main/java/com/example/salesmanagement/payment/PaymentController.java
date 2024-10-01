@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.time.LocalDate;
 import java.util.ResourceBundle;
+import java.util.regex.Pattern;
 
 public class PaymentController implements Initializable {
     @FXML
@@ -64,12 +65,30 @@ public class PaymentController implements Initializable {
         });
 
         addButton.setOnAction(e -> {
-            BigDecimal paymentAmount = BigDecimal.valueOf(Double.parseDouble(paymentAmountTextField.getText()));
-            BigDecimal remainingAmount = BigDecimal.valueOf(Double.parseDouble(documentController.getRemainingAmount()));
+            if (paymentDateDatePicker.getValue() == null) {
+                displayErrorAlert("La date de règlement saisie est invalide");
+                return;
+            }
 
-            if (documentController != null
-                    && paymentAmount.compareTo(remainingAmount) > 0 || paymentAmount.compareTo(BigDecimal.ZERO) <= 0) {
-                displayErrorAlert("Le montant saisie est invalide");
+            String paymentAmountText = paymentAmountTextField.getText().trim();
+            if (paymentAmountText.isBlank()) {
+                displayErrorAlert("Montant est obligatoire");
+                return;
+            }
+
+            BigDecimal paymentAmount;
+            try {
+                paymentAmount = new BigDecimal(paymentAmountText);
+            } catch (Exception exception) {
+                displayErrorAlert("le montant n'est pas valide");
+                return;
+            }
+
+            BigDecimal remainingAmount = BigDecimal.valueOf(Double.parseDouble(documentController.getRemainingAmount()));
+            if (!(paymentAmount.compareTo(BigDecimal.ZERO) > 0
+                    && paymentAmount.compareTo(remainingAmount) <= 0)
+            ) {
+                displayErrorAlert("le montant doit être comprise entre 0 et " + remainingAmount.toPlainString());
                 return;
             }
 
@@ -81,31 +100,106 @@ public class PaymentController implements Initializable {
                             PaymentMethod.CASH,
                             CashFlowType.REVENUE
                     );
+
                     paymentsTableView.getItems().add(new PaymentFormEntry(cash));
                     break;
                 case BANK_TRANSFER:
+                    String paymentReferenceText = paymentReferenceTextField.getText().trim();
+
+                    if (paymentReferenceText.isBlank()) {
+                        displayErrorAlert("Reference est obligatoire");
+                        return;
+                    }
+
+                    if (!Pattern.matches("^\\d+$", paymentReferenceText)) {
+                        displayErrorAlert("Reference ne doit contenir que des chiffres");
+                        return;
+                    }
+
+                    String bankNameText = bankNameTextField.getText().trim();
+
+                    if (bankNameText.isBlank()) {
+                        displayErrorAlert("Banque est obligatoire");
+                        return;
+                    }
+
                     BankTransfer bankTransfer = new BankTransfer(
                             paymentAmount,
                             paymentDateDatePicker.getValue(),
                             "",
-                            paymentReferenceTextField.getText(),
+                            paymentReferenceText,
                             PaymentMethod.BANK_TRANSFER,
-                            bankNameTextField.getText()
+                            bankNameText
                     );
+
                     paymentsTableView.getItems().add(new PaymentFormEntry(bankTransfer));
                     break;
                 case CHECK:
+                    String bankText = bankNameTextField.getText().trim();
+
+                    if (bankText.isBlank()) {
+                        displayErrorAlert("Banque est obligatoire");
+                        return;
+                    }
+
+
+                    String checkNumberText = checkNumberTextField.getText().trim();
+
+                    if (checkNumberText.isBlank()) {
+                        displayErrorAlert("Numéro de chéque est obligatoire");
+                        return;
+                    }
+
+                    if (!Pattern.matches("^\\d+$", checkNumberText)) {
+                        displayErrorAlert("Le numéro de chéque ne doit contenir que des chiffres");
+                        return;
+                    }
+
+
+                    String payeeNameText = payeeNameTextField.getText().trim();
+
+                    if (payeeNameText.isBlank()) {
+                        displayErrorAlert("Nom du bénéficiaire est obligatoire");
+                        return;
+                    }
+
+
+                    String senderAccountText = senderAccountTextField.getText().trim();
+
+                    if (senderAccountText.isBlank()) {
+                        displayErrorAlert("Compte expéditeur est obligatoire");
+                        return;
+                    }
+
+                    if (!Pattern.matches("^\\d+$", senderAccountText)) {
+                        displayErrorAlert("Le compte expéditeur ne doit contenir que des chiffres");
+                        return;
+                    }
+
+
+                    CheckStatus checkStatus = checkStatusComboBox.getSelectionModel().getSelectedItem();
+                    if (checkStatus == null) {
+                        displayErrorAlert("Statut est obligatoire");
+                        return;
+                    }
+
+                    if (checkDueDateDatePicker.getValue() == null) {
+                        displayErrorAlert("La date d'échéance saisie est invalide");
+                        return;
+                    }
+
                     Check check = new Check(
                             paymentAmount,
                             paymentDateDatePicker.getValue(),
-                            payeeNameTextField.getText(),
-                            senderAccountTextField.getText(),
-                            checkNumberTextField.getText(),
+                            payeeNameText,
+                            senderAccountText,
+                            senderAccountText,
                             PaymentMethod.CHECK,
                             checkDueDateDatePicker.getValue(),
-                            bankNameTextField.getText(),
-                            checkStatusComboBox.getSelectionModel().getSelectedItem()
+                            bankText,
+                            checkStatus
                     );
+
                     paymentsTableView.getItems().add(new PaymentFormEntry(check));
                     break;
             }

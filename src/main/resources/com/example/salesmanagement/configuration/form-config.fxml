@@ -26,7 +26,7 @@
                   <children>
                      <HBox layoutX="10.0" layoutY="54.0" prefWidth="176.0">
                         <children>
-                           <Label prefHeight="17.0" prefWidth="225.0" text="Nom de l'entreprise"
+                           <Label prefHeight="17.0" prefWidth="225.0" text="Nom de l'entreprise *"
                                   wrapText="true">
                               <HBox.margin>
                                  <Insets right="4.0"/>
@@ -68,7 +68,7 @@
                      </HBox>
                      <HBox prefWidth="176.0">
                         <children>
-                           <Label prefHeight="17.0" prefWidth="225.0" text="Numéro de patente">
+                           <Label prefHeight="17.0" prefWidth="225.0" text="Numéro de patente *">
                               <HBox.margin>
                                  <Insets right="4.0"/>
                               </HBox.margin>
@@ -130,7 +130,8 @@
                   <children>
                      <HBox prefWidth="176.0">
                         <children>
-                           <Label prefHeight="0.0" prefWidth="225.0" text="Numéro initiale de bon de commande">
+                           <Label prefHeight="0.0" prefWidth="225.0"
+                                  text="Numéro initiale de bon de commande *">
                               <HBox.margin>
                                  <Insets right="4.0"/>
                               </HBox.margin>
@@ -141,7 +142,7 @@
                      <HBox prefWidth="176.0">
                         <children>
                            <Label prefHeight="0.0" prefWidth="225.0"
-                                  text="Numéro initiale de Bon de réception">
+                                  text="Numéro initiale de Bon de réception *">
                               <HBox.margin>
                                  <Insets right="4.0"/>
                               </HBox.margin>
@@ -151,7 +152,7 @@
                      </HBox>
                      <HBox prefWidth="176.0">
                         <children>
-                           <Label prefHeight="0.0" prefWidth="225.0" text="Numéro initiale de devis">
+                           <Label prefHeight="0.0" prefWidth="225.0" text="Numéro initiale de devis *">
                               <HBox.margin>
                                  <Insets right="4.0"/>
                               </HBox.margin>
@@ -162,7 +163,7 @@
                      <HBox prefWidth="176.0">
                         <children>
                            <Label prefHeight="0.0" prefWidth="225.0"
-                                  text="Numéro initiale de bon de livraison">
+                                  text="Numéro initiale de bon de livraison *">
                               <HBox.margin>
                                  <Insets right="4.0"/>
                               </HBox.margin>
@@ -172,7 +173,7 @@
                      </HBox>
                      <HBox prefWidth="176.0">
                         <children>
-                           <Label prefHeight="0.0" prefWidth="225.0" text="Numéro initiale de facture doit">
+                           <Label prefHeight="0.0" prefWidth="225.0" text="Numéro initiale de facture doit *">
                               <HBox.margin>
                                  <Insets right="4.0"/>
                               </HBox.margin>
@@ -182,7 +183,7 @@
                      </HBox>
                      <HBox prefWidth="176.0">
                         <children>
-                           <Label prefHeight="0.0" prefWidth="225.0" text="Numéro initiale de facture avoir">
+                           <Label prefHeight="0.0" prefWidth="225.0" text="Numéro initiale de facture avoir *">
                               <HBox.margin>
                                  <Insets right="4.0"/>
                               </HBox.margin>

@@ -74,6 +74,9 @@ public class ListUsersController implements Initializable {
         stage.setScene(new Scene(root));
         stage.setResizable(false);
         stage.showAndWait();
+        updateButton.setDisable(true);
+        deleteButton.setDisable(true);
+        usersTableView.getSelectionModel().clearSelection();
     }
 
     public void updateUser() throws IOException {
@@ -91,6 +94,9 @@ public class ListUsersController implements Initializable {
             stage.setScene(new Scene(root));
             stage.setResizable(false);
             stage.showAndWait();
+            updateButton.setDisable(true);
+            deleteButton.setDisable(true);
+            usersTableView.getSelectionModel().clearSelection();
         }
     }
 
@@ -98,7 +104,7 @@ public class ListUsersController implements Initializable {
         User selectedItem = usersTableView.getSelectionModel().getSelectedItem();
 
         if (selectedItem.getRole() == Role.ADMIN) {
-            displayErrorAlert();
+            displayErrorAlert("Impossible de supprimer l'utilisateur administrateur");
             return;
         }
 
@@ -111,12 +117,16 @@ public class ListUsersController implements Initializable {
 
             if (result.isPresent() && result.get() == ButtonType.OK) {
                 if (UserRepository.deleteById(selectedItem.getId())) {
+                    usersTableView.getSelectionModel().clearSelection();
                     usersTableView.getItems().remove(selectedItem);
                     displaySuccessAlert();
                 } else {
                     displayErrorAlert();
                 }
             }
+
+            updateButton.setDisable(true);
+            deleteButton.setDisable(true);
         }
     }
 
@@ -253,6 +263,14 @@ public class ListUsersController implements Initializable {
         alert.setTitle("Error");
         alert.setHeaderText(null);
         alert.setContentText("Une erreur est survenue lors de l'opération.");
+        alert.showAndWait();
+    }
+
+    private void displayErrorAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
         alert.showAndWait();
     }
 

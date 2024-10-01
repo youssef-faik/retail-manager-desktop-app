@@ -1,5 +1,6 @@
 package com.example.salesmanagement.configuration;
 
+import com.example.salesmanagement.document.*;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -13,6 +14,7 @@ import javafx.scene.paint.Color;
 import java.net.URL;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.regex.Pattern;
 
 public class ConfigurationController implements Initializable {
     Map<ConfigKey, String> allConfigurations;
@@ -95,22 +97,107 @@ public class ConfigurationController implements Initializable {
         thread.start();
 
         saveButton.setOnAction(event -> {
-            allConfigurations.put(ConfigKey.COMPANY_NAME, companyNameTextField.getText());
-            allConfigurations.put(ConfigKey.COMMON_IDENTIFIER_NUMBER, commonCompanyIdentifierTextField.getText());
-            allConfigurations.put(ConfigKey.TAX_IDENTIFIER_NUMBER, taxIdentificationNumberTextField.getText());
-            allConfigurations.put(ConfigKey.COMMERCIAL_REGISTRATION_NUMBER, commercialRegistrationNumberTextField.getText());
-            allConfigurations.put(ConfigKey.COMPANY_PATENT_NUMBER, patentNumberTextField.getText());
-            allConfigurations.put(ConfigKey.COMPANY_PHONE_NUMBER, phoneNumberTextField.getText());
-            allConfigurations.put(ConfigKey.COMPANY_FIXED_PHONE_NUMBER, fixedPhoneNumberTextField.getText());
-            allConfigurations.put(ConfigKey.BUSINESS_ADDRESS, addressTextArea.getText());
-            allConfigurations.put(ConfigKey.COMPANY_EMAIL_ADDRESS, emailTextField.getText());
+            String companyNameText = companyNameTextField.getText().trim();
+            if (companyNameText.isBlank()) {
+                displayErrorAlert("Nom de l'entreprise est obligatoire");
+                return;
+            }
 
-            allConfigurations.put(ConfigKey.NEXT_PURCHASE_ORDER_NUMBER, purchaseOrderNumberTextField.getText());
-            allConfigurations.put(ConfigKey.NEXT_PURCHASE_DELIVERY_NOTE_NUMBER, purchaseDeliveryNoteNumberTextField.getText());
-            allConfigurations.put(ConfigKey.NEXT_QUOTATION_NUMBER, quotationNumberTextField.getText());
-            allConfigurations.put(ConfigKey.NEXT_DELIVERY_NOTE_NUMBER, deliveryNoteNumberTextField.getText());
-            allConfigurations.put(ConfigKey.NEXT_INVOICE_NUMBER, invoiceNumberTextField.getText());
-            allConfigurations.put(ConfigKey.NEXT_CREDIT_INVOICE_NUMBER, creditInvoiceNumberTextField.getText());
+            allConfigurations.put(ConfigKey.COMPANY_NAME, companyNameText);
+
+            if (setNumericCompanyInfo(commonCompanyIdentifierTextField, ConfigKey.COMMON_IDENTIFIER_NUMBER, "L'ICE ne doit contenir que des chiffres")) {
+                return;
+            }
+
+            if (setNumericCompanyInfo(taxIdentificationNumberTextField, ConfigKey.TAX_IDENTIFIER_NUMBER, "Le numéro d'identification fiscale ne doit contenir que des chiffres")) {
+                return;
+            }
+
+            if (setNumericCompanyInfo(commercialRegistrationNumberTextField, ConfigKey.COMMERCIAL_REGISTRATION_NUMBER, "Le numéro du registre de commerce ne doit contenir que des chiffres")) {
+                return;
+            }
+
+            if (setNumericCompanyInfo(patentNumberTextField, ConfigKey.COMPANY_PATENT_NUMBER, "Le numéro de patente ne doit contenir que des chiffres")) {
+                return;
+            }
+
+            allConfigurations.put(ConfigKey.COMPANY_PHONE_NUMBER, phoneNumberTextField.getText().trim());
+            allConfigurations.put(ConfigKey.COMPANY_FIXED_PHONE_NUMBER, fixedPhoneNumberTextField.getText().trim());
+            allConfigurations.put(ConfigKey.COMPANY_EMAIL_ADDRESS, emailTextField.getText().trim());
+
+            String addressText = emailTextField.getText().trim();
+            if (addressText.isBlank()) {
+                displayErrorAlert("Adresse est obligatoire");
+                return;
+            }
+            allConfigurations.put(ConfigKey.BUSINESS_ADDRESS, addressText);
+
+
+            if (setDocumentReference(
+                    PurchaseOrder.class,
+                    purchaseOrderNumberTextField,
+                    "Le numéro initiale de bon de commande est obligatoire",
+                    "la valeur du numéro initiale de bon de commande n'est pas valide",
+                    "la valeur du numéro initiale de bon de commande doit être comprise entre 1 et 9,999,999",
+                    "Le prochain numéro de bon de commande doit être égal ou supérieur à ",
+                    ConfigKey.NEXT_PURCHASE_ORDER_NUMBER)) {
+                return;
+            }
+
+            if (setDocumentReference(
+                    PurchaseDeliveryNote.class,
+                    purchaseDeliveryNoteNumberTextField,
+                    "Le numéro initiale de bon de réception est obligatoire",
+                    "la valeur du numéro initiale de bon de réception n'est pas valide",
+                    "la valeur du numéro initiale de bon de réception doit être comprise entre 1 et 9,999,999",
+                    "Le prochain numéro de bon de réception doit être égal ou supérieur à ",
+                    ConfigKey.NEXT_PURCHASE_DELIVERY_NOTE_NUMBER)) {
+                return;
+            }
+
+            if (setDocumentReference(
+                    Quotation.class,
+                    quotationNumberTextField,
+                    "Le numéro initiale de devis est obligatoire",
+                    "la valeur du numéro initiale de devis n'est pas valide",
+                    "la valeur du numéro initiale de devis doit être comprise entre 1 et 9,999,999",
+                    "Le prochain numéro de devis doit être égal ou supérieur à ",
+                    ConfigKey.NEXT_QUOTATION_NUMBER)) {
+                return;
+            }
+
+            if (setDocumentReference(
+                    DeliveryNote.class,
+                    deliveryNoteNumberTextField,
+                    "Le numéro initiale de bon de livraison est obligatoire",
+                    "la valeur du numéro initiale de bon de livraison n'est pas valide",
+                    "la valeur du numéro initiale de bon de livraison doit être comprise entre 1 et 9,999,999",
+                    "Le prochain numéro de bon de livraison doit être égal ou supérieur à ",
+                    ConfigKey.NEXT_DELIVERY_NOTE_NUMBER)) {
+                return;
+            }
+
+            if (setDocumentReference(
+                    Invoice.class,
+                    invoiceNumberTextField,
+                    "Le numéro initiale de facture doit est obligatoire",
+                    "la valeur du numéro initiale de facture doit n'est pas valide",
+                    "la valeur du numéro initiale de facture doit doit être comprise entre 1 et 9,999,999",
+                    "Le prochain numéro de facture doit doit être égal ou supérieur à ",
+                    ConfigKey.NEXT_INVOICE_NUMBER)) {
+                return;
+            }
+
+            if (setDocumentReference(
+                    CreditInvoice.class,
+                    creditInvoiceNumberTextField,
+                    "Le numéro initiale de facture avoir est obligatoire",
+                    "la valeur du numéro initiale de facture avoir n'est pas valide",
+                    "la valeur du numéro initiale de facture avoir doit être comprise entre 1 et 9,999,999",
+                    "Le prochain numéro de facture avoir doit être égal ou supérieur à ",
+                    ConfigKey.NEXT_CREDIT_INVOICE_NUMBER)) {
+                return;
+            }
 
             allConfigurations.put(ConfigKey.PRINT_SALES_DOCUMENT_HEADING, String.valueOf(printHeaderCheckBox.isSelected()));
             allConfigurations.put(ConfigKey.PRINT_DELIVERY_NOTE_UNIT_PRICE, String.valueOf(printDeliveryNoteUnitPriceCheckBox.isSelected()));
@@ -120,6 +207,54 @@ public class ConfigurationController implements Initializable {
         });
     }
 
+    private boolean setDocumentReference(Class<? extends Document> DocumentClass, TextField textField, String mandatoryValueMessage, String invalideValueMessage, String valueOutOfRangeMessage, String nextDocumentNumberMessage, ConfigKey configKey) {
+        String purchaseOrderNumberText = textField.getText().trim();
+        if (purchaseOrderNumberText.isBlank()) {
+            displayErrorAlert(mandatoryValueMessage);
+            return true;
+        }
+
+        long purchaseOrderNumber;
+        try {
+            purchaseOrderNumber = Long.parseLong(purchaseOrderNumberText);
+        } catch (NumberFormatException e) {
+            displayErrorAlert(invalideValueMessage);
+            return true;
+        }
+
+        if (!(purchaseOrderNumber >= 1 && purchaseOrderNumber <= 9_999_999)
+        ) {
+            displayErrorAlert(valueOutOfRangeMessage);
+            return true;
+        }
+
+        try {
+            AppConfiguration.validateNextSalesDocumentReference(purchaseOrderNumber, DocumentClass);
+        } catch (InvalideDocumentReferenceException e) {
+            displayErrorAlert(nextDocumentNumberMessage + e.getNextValideDocumentReference());
+            return true;
+        }
+
+        allConfigurations.put(configKey, Long.toString(purchaseOrderNumber));
+        return false;
+    }
+
+    private boolean setNumericCompanyInfo(TextField textField, ConfigKey configKey, String errorMessage) {
+        String text = textField.getText().trim();
+        if (text.isBlank()) {
+            text = null;
+        } else {
+            if (!Pattern.matches("^\\d+$", text)) {
+                displayErrorAlert(errorMessage);
+                return true;
+            }
+        }
+
+        allConfigurations.put(configKey, text);
+        return false;
+    }
+
+
     private void displaySuccessAlert() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Success");
@@ -127,4 +262,13 @@ public class ConfigurationController implements Initializable {
         alert.setContentText("Operation effectué avec success");
         alert.showAndWait();
     }
+
+    private void displayErrorAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
 }

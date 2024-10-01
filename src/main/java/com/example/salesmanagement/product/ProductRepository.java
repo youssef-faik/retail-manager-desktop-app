@@ -5,6 +5,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.query.Query;
 import org.hibernate.resource.transaction.spi.TransactionStatus;
 
 import java.util.Optional;
@@ -26,9 +27,16 @@ public interface ProductRepository {
         return products;
     }
 
-    static Optional<Product> findById(Long id) {
+    static Optional<Product> findByName(String name) {
         try (Session session = sessionFactory.openSession()) {
-            Product product = session.find(Product.class, id);
+            Query<Product> query = session.createQuery("select c from Product c where lower(c.name) = lower(:name)", Product.class);
+            query.setParameter("name", name);
+            Product product = query.uniqueResult();
+
+            if (product != null) {
+                session.refresh(product);
+            }
+
             return Optional.ofNullable(product);
         }
     }

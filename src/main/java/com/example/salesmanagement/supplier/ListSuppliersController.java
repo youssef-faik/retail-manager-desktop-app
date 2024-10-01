@@ -66,6 +66,10 @@ public class ListSuppliersController implements Initializable {
         stage.setScene(new Scene(root));
         stage.setResizable(false);
         stage.showAndWait();
+
+        updateButton.setDisable(true);
+        deleteButton.setDisable(true);
+        supplierTableView.getSelectionModel().clearSelection();
     }
 
     public void updateSupplier() throws IOException {
@@ -83,6 +87,10 @@ public class ListSuppliersController implements Initializable {
             stage.setScene(new Scene(root));
             stage.setResizable(false);
             stage.showAndWait();
+
+            updateButton.setDisable(true);
+            deleteButton.setDisable(true);
+            supplierTableView.getSelectionModel().clearSelection();
         }
     }
 
@@ -98,11 +106,15 @@ public class ListSuppliersController implements Initializable {
             if (result.isPresent() && result.get() == ButtonType.OK) {
                 if (SupplierRepository.deleteById(selectedSupplier.getId())) {
                     supplierTableView.getItems().remove(selectedSupplier);
+                    supplierTableView.getSelectionModel().clearSelection();
                     displaySuccessAlert();
                 } else {
-                    displayErrorAlert();
+                    displayErrorAlert("Cet enregistrement ne peut pas être supprimé, car il est référencé par d'autres enregistrements.");
                 }
             }
+
+            updateButton.setDisable(true);
+            deleteButton.setDisable(true);
         }
     }
 
@@ -165,6 +177,14 @@ public class ListSuppliersController implements Initializable {
         alert.setTitle("Error");
         alert.setHeaderText(null);
         alert.setContentText("Une erreur est survenue lors de l'opération.");
+        alert.showAndWait();
+    }
+
+    private void displayErrorAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
         alert.showAndWait();
     }
 

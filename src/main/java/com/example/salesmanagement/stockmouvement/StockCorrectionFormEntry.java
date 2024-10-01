@@ -2,22 +2,27 @@ package com.example.salesmanagement.stockmouvement;
 
 import com.example.salesmanagement.product.Product;
 import javafx.collections.ObservableList;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.TableRow;
+import javafx.scene.control.*;
+import javafx.util.Pair;
+
+import java.util.Objects;
+import java.util.function.Function;
 
 public class StockCorrectionFormEntry {
-    private ComboBox<Product> productComboBox = new ComboBox<>();
-    private ComboBox<StockCorrectionType> stockCorrectionTypeComboBox = new ComboBox<>();
+    private final Pair<String, Product> EMPTY_PRODUCT = new Pair<>(null, null);
+    private final ComboBox<StockCorrectionType> stockCorrectionTypeComboBox = new ComboBox<>();
+    private ComboBox<Pair<String, Product>> productComboBox = new ComboBox<>();
     private StockCorrectionItem stockCorrectionItem;
     private Integer newQuantity;
     private Integer quantityToUpdate;
+    private boolean isChanging = false;
+    private Product selectedProduct;
+    private StockCorrectionsController stockCorrectionsController;
 
 
-    public StockCorrectionFormEntry() {
-    }
-
-    public StockCorrectionFormEntry(ObservableList<Product> items) {
+    public StockCorrectionFormEntry(ObservableList<Product> items,
+                                    StockCorrectionsController stockCorrectionsController) {
+        this.stockCorrectionsController = stockCorrectionsController;
         this.stockCorrectionItem = new StockCorrectionItem();
         newQuantity = quantityToUpdate = 0;
 
@@ -44,25 +49,64 @@ public class StockCorrectionFormEntry {
     }
 
     private void initProductsComboBox(ObservableList<Product> items) {
-        this.productComboBox = new ComboBox<>(items);
-
+        this.productComboBox = new ComboBox<>();
         productComboBox.setCellFactory(x -> new ProductComboCell());
         productComboBox.setButtonCell(new ProductComboCell());
-        productComboBox.setPromptText("Sélectionnez un produit");
         productComboBox.setMinWidth(300);
 
-        productComboBox.setOnAction(event -> {
-            Product product = productComboBox.getSelectionModel().getSelectedItem();
+        productComboBox.getItems().add(EMPTY_PRODUCT);
+        Function<Product, Pair<String, Product>> productObjectFunction = product -> new Pair<>(product.getName(), product);
+        productComboBox.getItems().addAll(items.stream().map(productObjectFunction).toList());
 
-            // set new values for InvoiceItem
-            this.stockCorrectionItem.setProduct(product);
-            setCurrentQuantity(product.getQuantity());
+        productComboBox.getSelectionModel().selectFirst();
+
+        productComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (isChanging || Objects.equals(newValue, oldValue)) {
+                return;
+            }
+
+            TableView<StockCorrectionFormEntry> tableView = ((TableRow) productComboBox.getParent().getParent()).getTableView();
+
+            // check if the product was already selected
+            if (newValue.getValue() != null) {
+                for (StockCorrectionFormEntry stockCorrectionFormEntry : tableView.getItems()) {
+                    if (stockCorrectionFormEntry.selectedProduct == newValue.getValue()) {
+                        // Set the flag to true before changing the value
+                        isChanging = true;
+
+                        // Set the selected item back to its previous value
+                        productComboBox.setValue(oldValue);
+
+                        // Reset the flag after changing the value
+                        isChanging = false;
+
+                        displayErrorAlert("Le produit est déjà choisi");
+                        return;
+                    }
+                }
+            }
+
+            selectedProduct = newValue.getValue();
+            this.stockCorrectionItem.setProduct(selectedProduct);
+
+            if (selectedProduct == null) {
+                setCurrentQuantity(0);
+                setQuantityToUpdate(0);
+                setNewQuantity(0);
+
+                tableView.refresh();
+                stockCorrectionsController.validateForm();
+
+                return;
+            }
+
+            setCurrentQuantity(selectedProduct.getQuantity());
             setQuantityToUpdate(0);
-            stockCorrectionTypeComboBox.getSelectionModel().select(StockCorrectionType.POSITIVE);
             setNewQuantity(getCurrentQuantity());
+            stockCorrectionTypeComboBox.getSelectionModel().select(StockCorrectionType.POSITIVE);
 
-            TableRow parent = (TableRow) productComboBox.getParent().getParent();
-            parent.getTableView().refresh();
+            tableView.refresh();
+            stockCorrectionsController.validateForm();
         });
     }
 
@@ -70,16 +114,12 @@ public class StockCorrectionFormEntry {
         return stockCorrectionItem;
     }
 
-    public ComboBox<Product> getProductComboBox() {
+    public ComboBox<Pair<String, Product>> getProductComboBox() {
         return productComboBox;
     }
 
     public ComboBox<StockCorrectionType> getStockCorrectionTypeComboBox() {
         return stockCorrectionTypeComboBox;
-    }
-
-    public void setStockCorrectionTypeComboBox(ComboBox<StockCorrectionType> stockCorrectionTypeComboBox) {
-        this.stockCorrectionTypeComboBox = stockCorrectionTypeComboBox;
     }
 
     public Integer getQuantityToUpdate() {
@@ -106,11 +146,19 @@ public class StockCorrectionFormEntry {
         this.stockCorrectionItem.setQuantity(quantity);
     }
 
-    private static class ProductComboCell extends ListCell<Product> {
+    private void displayErrorAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Attention");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private static class ProductComboCell extends ListCell<Pair<String, Product>> {
         @Override
-        protected void updateItem(Product product, boolean bln) {
-            super.updateItem(product, bln);
-            setText(product != null ? product.getName() : null);
+        protected void updateItem(Pair<String, Product> pair, boolean bln) {
+            super.updateItem(pair, bln);
+            setText(pair == null ? null : (pair.getValue() != null ? pair.getValue().getName() : "Choisissez un produit"));
         }
     }
 }

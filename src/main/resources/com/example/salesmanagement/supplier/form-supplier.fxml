@@ -22,7 +22,7 @@
 
         <HBox>
             <children>
-                <Label prefWidth="110.0" text="Nom" HBox.hgrow="ALWAYS"/>
+                <Label prefWidth="110.0" text="Nom *" HBox.hgrow="ALWAYS"/>
                 <TextField fx:id="nameTextField" prefHeight="25.0" prefWidth="250.0" HBox.hgrow="ALWAYS"/>
             </children>
         </HBox>

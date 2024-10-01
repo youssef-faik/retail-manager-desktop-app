@@ -42,9 +42,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class DocumentsController implements Initializable {
-    @FXML
-    public Label formLabel;
-
     Class<? extends Document> formClass;
     FilteredList<Document> filteredList;
     SortedList<Document> sortedList;
@@ -196,17 +193,16 @@ public class DocumentsController implements Initializable {
             Optional<ButtonType> result = alert.showAndWait();
 
             if (result.isPresent() && result.get() == ButtonType.OK) {
-
                 if (DocumentRepository.deleteById(selectedDocument.getId())) {
                     loadDocumentsData(formClass);
-                    updateButton.setDisable(true);
-                    deleteButton.setDisable(true);
                     displaySuccessAlert();
                 } else {
                     displayErrorAlert();
                 }
-
             }
+
+            updateButton.setDisable(true);
+            deleteButton.setDisable(true);
         }
     }
 

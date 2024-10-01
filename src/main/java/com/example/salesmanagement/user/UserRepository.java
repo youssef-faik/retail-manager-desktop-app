@@ -30,14 +30,6 @@ public interface UserRepository {
         return users;
     }
 
-    static Optional<User> findById(Long id) {
-        try (Session session = sessionFactory.openSession()) {
-            User user = session.find(User.class, id);
-            session.refresh(user);
-
-            return Optional.ofNullable(user);
-        }
-    }
 
     static boolean save(User user) {
         Session session = sessionFactory.openSession();

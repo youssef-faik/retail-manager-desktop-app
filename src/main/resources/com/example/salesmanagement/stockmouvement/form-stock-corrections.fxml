@@ -5,7 +5,8 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
-<VBox xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+<VBox xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+      minWidth="-Infinity"
       prefHeight="549.0" prefWidth="843.0" spacing="10.0" xmlns="http://javafx.com/javafx/22"
       fx:controller="com.example.salesmanagement.stockmouvement.StockCorrectionsController">
     <Label graphicTextGap="8.0" prefHeight="35.0" prefWidth="1150.0" text="Correction de stock">

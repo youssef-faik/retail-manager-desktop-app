@@ -23,7 +23,7 @@ public class StockCorrection {
             referencedColumnName = "id",
             nullable = false,
             foreignKey = @ForeignKey(name = "stock_correction_item_fk"))
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StockCorrectionItem> items = new ArrayList<>();
 
     public StockCorrection() {

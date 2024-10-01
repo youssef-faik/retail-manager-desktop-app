@@ -20,12 +20,11 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class TaxRateController implements Initializable {
+    private final TaxRate taxRate = new TaxRate();
     @FXML
     public TextField labelTextField, valueTextField;
     @FXML
     public Button saveButton, cancelButton;
-
-    private Long id;
     private ListTaxRatesController listTaxRatesController;
 
     @Override
@@ -53,6 +52,11 @@ public class TaxRateController implements Initializable {
 
     public void saveTaxRate() {
         TaxRate taxRate = mapTaxRate();
+
+        if (taxRate == null) {
+            return;
+        }
+
         if (TaxRateRepository.save(taxRate)) {
             clearTextFields();
 
@@ -68,6 +72,11 @@ public class TaxRateController implements Initializable {
 
     public void updateTaxRate() {
         TaxRate taxRate = mapTaxRate();
+
+        if (taxRate == null) {
+            return;
+        }
+
         Optional<TaxRate> optionalTaxRate = TaxRateRepository.update(taxRate);
 
         if (optionalTaxRate.isPresent()) {
@@ -83,6 +92,8 @@ public class TaxRateController implements Initializable {
                 }
             }
 
+            this.taxRate.setValue(optionalTaxRate.get().getValue());
+            this.taxRate.setLabel(optionalTaxRate.get().getLabel());
             displaySuccessAlert();
         } else {
             displayErrorAlert();
@@ -90,11 +101,67 @@ public class TaxRateController implements Initializable {
     }
 
     private TaxRate mapTaxRate() {
-        TaxRate taxRate = new TaxRate();
+        String label = labelTextField.getText().trim();
 
-        taxRate.setId(id);
-        taxRate.setLabel(labelTextField.getText());
-        taxRate.setValue(new BigDecimal(valueTextField.getText()));
+        if (label.isBlank()) {
+            displayErrorAlert("Libellé est obligatoire");
+            return null;
+        }
+
+        Optional<TaxRate> byLabel = TaxRateRepository.findByLabel(label.toLowerCase());
+
+        if (taxRate.getId() == null) {
+            if (byLabel.isPresent()) {
+                displayErrorAlert("Un taux de taxe avec le même libellé existe déjà");
+                return null;
+            }
+        } else {
+            if (!label.equalsIgnoreCase(taxRate.getLabel()) && byLabel.isPresent()) {
+                displayErrorAlert("Un taux de taxe avec le même libellé existe déjà");
+                return null;
+            }
+        }
+
+        String value = valueTextField.getText().trim();
+        if (value.isBlank()) {
+            displayErrorAlert("Valeur est obligatoire");
+            return null;
+        }
+
+        BigDecimal bigDecimalValue;
+        try {
+            bigDecimalValue = new BigDecimal(value);
+        } catch (NumberFormatException e) {
+            displayErrorAlert("la valeur du taux de taxe n'est pas valide");
+            return null;
+        }
+
+        if (!(bigDecimalValue.compareTo(BigDecimal.ZERO) >= 0
+                && bigDecimalValue.compareTo(BigDecimal.valueOf(100L)) <= 0)
+        ) {
+            displayErrorAlert("la valeur du taux de taxe doit être comprise entre 0 et 100");
+            return null;
+        }
+
+        Optional<TaxRate> byValue = TaxRateRepository.findByValue(bigDecimalValue);
+
+        if (taxRate.getId() == null) {
+            if (byValue.isPresent()) {
+                displayErrorAlert("Un taux de taxe avec la même valeur existe déjà");
+                return null;
+            }
+        } else {
+            if (byValue.isPresent() && bigDecimalValue.compareTo(taxRate.getValue()) != 0) {
+                displayErrorAlert("Un taux de taxe avec la même valeur existe déjà");
+                return null;
+            }
+        }
+
+
+        TaxRate taxRate = new TaxRate();
+        taxRate.setId(this.taxRate.getId());
+        taxRate.setLabel(label);
+        taxRate.setValue(bigDecimalValue);
 
         return taxRate;
     }
@@ -112,6 +179,14 @@ public class TaxRateController implements Initializable {
         alert.showAndWait();
     }
 
+    private void displayErrorAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
     private void displayErrorAlert() {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Error");
@@ -125,9 +200,12 @@ public class TaxRateController implements Initializable {
     }
 
     public void initTaxRateUpdate(TaxRate taxRate) {
-        this.id = taxRate.getId();
-        this.labelTextField.setText(taxRate.getLabel());
-        this.valueTextField.setText(taxRate.getValue().toString());
+        this.taxRate.setId(taxRate.getId());
+        this.taxRate.setLabel(taxRate.getLabel());
+        this.taxRate.setValue(taxRate.getValue());
+
+        this.labelTextField.setText(this.taxRate.getLabel());
+        this.valueTextField.setText(this.taxRate.getValue().toString());
 
         saveButton.setOnAction(e -> updateTaxRate());
     }

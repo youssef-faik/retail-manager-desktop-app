@@ -67,6 +67,9 @@ public class ListProductsController implements Initializable {
         stage.setScene(new Scene(root));
         stage.setResizable(false);
         stage.showAndWait();
+        updateButton.setDisable(true);
+        deleteButton.setDisable(true);
+        productsTableView.getSelectionModel().clearSelection();
     }
 
     public void updateProduct(ActionEvent actionEvent) throws IOException {
@@ -84,6 +87,9 @@ public class ListProductsController implements Initializable {
             stage.setScene(new Scene(root));
             stage.setResizable(false);
             stage.showAndWait();
+            updateButton.setDisable(true);
+            deleteButton.setDisable(true);
+            productsTableView.getSelectionModel().clearSelection();
         }
     }
 
@@ -98,15 +104,16 @@ public class ListProductsController implements Initializable {
 
             if (result.isPresent() && result.get() == ButtonType.OK) {
                 if (ProductRepository.deleteById(selectedProduct.getId())) {
+                    productsTableView.getSelectionModel().clearSelection();
                     productsTableView.getItems().remove(selectedProduct);
                     displaySuccessAlert();
                 } else {
-                    displayErrorAlert();
+                    displayErrorAlert("Cet enregistrement ne peut pas être supprimé, car il est référencé par d'autres enregistrements.");
                 }
-
-                updateButton.setDisable(true);
-                deleteButton.setDisable(true);
             }
+
+            updateButton.setDisable(true);
+            deleteButton.setDisable(true);
         }
     }
 
@@ -185,6 +192,14 @@ public class ListProductsController implements Initializable {
         alert.setTitle("Error");
         alert.setHeaderText(null);
         alert.setContentText("Une erreur est survenue lors de l'opération.");
+        alert.showAndWait();
+    }
+
+    private void displayErrorAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
         alert.showAndWait();
     }
 

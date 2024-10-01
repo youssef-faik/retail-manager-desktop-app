@@ -13,10 +13,7 @@ import org.hibernate.query.Query;
 import org.hibernate.resource.transaction.spi.TransactionStatus;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 public interface DocumentRepository {
@@ -176,6 +173,7 @@ public interface DocumentRepository {
                 updateCreditInvoice((CreditInvoice) originalDocument, (CreditInvoice) updatedDocument, session);
             }
 
+
             session.merge(originalDocument);
             session.getTransaction().commit();
 
@@ -213,15 +211,20 @@ public interface DocumentRepository {
                 }
         );
 
-        original.getItems().forEach(
-                originalItem -> {
-                    if (!updated.getItems().contains(originalItem)) {
-                        original.removeItem(originalItem);
-                        originalItem.setDocument(null);
-                        session.remove(originalItem);
-                    }
-                }
-        );
+
+        Iterator<DocumentItem> originalItemsIterator = original.getItems().iterator();
+        while (originalItemsIterator.hasNext()) {
+            DocumentItem originalItem = originalItemsIterator.next();
+            if (!updated.getItems().contains(originalItem)) {
+                // Remove from the collection
+                originalItemsIterator.remove();
+                original.removeItem(originalItem);
+//                originalItem.setDocument(null);
+
+                // Mark the item for deletion
+                session.remove(originalItem);
+            }
+        }
     }
 
     private static void updateQuotation(Quotation original, Quotation updated) {
@@ -632,6 +635,24 @@ public interface DocumentRepository {
 
             if (deletedDocument == null) {
                 return false;
+            }
+
+            if (deletedDocument instanceof Invoice
+                    || deletedDocument instanceof CreditInvoice
+                    || deletedDocument instanceof DeliveryNote
+                    || deletedDocument instanceof PurchaseDeliveryNote) {
+
+
+                String queryString = "select S from StockMovement S join MovementSource M on S.movementSource.id = M.id join DocumentBasedMovementSource D on M.id = D.id where D.source = :source";
+                Query<StockMovement> query = session.createQuery(queryString, StockMovement.class);
+                query.setParameter("source", deletedDocument);
+
+                List<StockMovement> stockMovements = query.list();
+
+                stockMovements.forEach(object -> {
+                    StockMovement merge = session.merge(object);
+                    session.remove(merge);
+                });
             }
 
             session.remove(deletedDocument);

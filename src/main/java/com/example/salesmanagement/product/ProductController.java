@@ -36,13 +36,14 @@ import java.util.function.Function;
 public class ProductController implements Initializable {
     private final Pair<String, Category> EMPTY_CATEGORY = new Pair<>(null, null);
     private final Pair<String, TaxRate> EMPTY_TAX_RATE = new Pair<>(null, null);
+    private final Product product = new Product();
     @FXML
     public Tab stockMouvementsTab;
     @FXML
     public TableView<StockMovement> stockMouvementsTable;
     public VBox parentVBox;
     TabPane tabPane;
-    private Long id;
+
     private ListProductsController listProductsController;
     @FXML
     private Button saveButton, cancelButton;
@@ -86,6 +87,28 @@ public class ProductController implements Initializable {
 
     public void saveProduct() {
         Product product = mapProduct();
+
+        if (product == null) {
+            return;
+        }
+
+        if (product.getPurchasePriceExcludingTax() != null
+                && (product.getSellingPriceExcludingTax().compareTo(product.getPurchasePriceExcludingTax()) <= 0)) {
+            Alert alert = new Alert(Alert.AlertType.WARNING,
+                    "le prix de vente (" + product.getSellingPriceExcludingTax() + ") est inférieur ou égal au prix d'achat(" + product.getPurchasePriceExcludingTax() + "). \nVous souhaitez continuer tel quel ?",
+                    ButtonType.CANCEL,
+                    ButtonType.OK
+            );
+
+            alert.setTitle("Attention");
+            alert.setHeaderText("Confirmation des valeurs des prix d'achat et prix de vente");
+            Optional<ButtonType> result = alert.showAndWait();
+
+            if (result.isEmpty() || result.get() != ButtonType.OK) {
+                return;
+            }
+        }
+
         if (ProductRepository.save(product)) {
             resetForm();
 
@@ -101,6 +124,28 @@ public class ProductController implements Initializable {
 
     public void updateProduct() {
         Product product = mapProduct();
+
+        if (product == null) {
+            return;
+        }
+
+        if (product.getPurchasePriceExcludingTax() != null
+                && (product.getSellingPriceExcludingTax().compareTo(product.getPurchasePriceExcludingTax()) <= 0)) {
+            Alert alert = new Alert(Alert.AlertType.WARNING,
+                    "le prix de vente (" + product.getSellingPriceExcludingTax() + ") est inférieur ou égal au prix d'achat(" + product.getPurchasePriceExcludingTax() + "). \nVous souhaitez continuer tel quel ?",
+                    ButtonType.CANCEL,
+                    ButtonType.OK
+            );
+
+            alert.setTitle("Attention");
+            alert.setHeaderText("Confirmation des valeurs des prix d'achat et prix de vente");
+            Optional<ButtonType> result = alert.showAndWait();
+
+            if (result.isEmpty() || result.get() != ButtonType.OK) {
+                return;
+            }
+        }
+
         Optional<Product> optionalProduct = ProductRepository.update(product);
 
         if (optionalProduct.isPresent()) {
@@ -117,6 +162,7 @@ public class ProductController implements Initializable {
                 }
             }
 
+            initProductUpdate(optionalProduct.get());
             displaySuccessAlert();
         } else {
             displayErrorAlert();
@@ -124,13 +170,92 @@ public class ProductController implements Initializable {
     }
 
     private Product mapProduct() {
-        Product product = new Product();
+        String name = nameTextField.getText().trim();
 
-        product.setId(id);
-        product.setName(nameTextField.getText());
-        product.setDescription(descriptionTextArea.getText());
-        product.setSellingPriceExcludingTax(new BigDecimal(sellingPriceExcludingTaxTextField.getText()));
-        product.setPurchasePriceExcludingTax(new BigDecimal(purchasePriceExcludingTaxTextField.getText()));
+        if (name.isBlank()) {
+            displayErrorAlert("Nom du produit est obligatoire");
+            return null;
+        }
+
+        Optional<Product> byName = ProductRepository.findByName(name.toLowerCase());
+
+        if (this.product.getId() == null) {
+            if (byName.isPresent()) {
+                displayErrorAlert("Un produit avec le même nom existe déjà");
+                return null;
+            }
+        } else {
+            if (!name.equalsIgnoreCase(this.product.getName()) && byName.isPresent()) {
+                displayErrorAlert("Un produit avec le même nom existe déjà");
+                return null;
+            }
+        }
+
+
+        String description = null;
+        if (descriptionTextArea.getText() != null) {
+            description = descriptionTextArea.getText().trim();
+            if (description.isBlank()) {
+                description = null;
+            }
+        }
+
+
+        String purchasePriceExcludingTaxText;
+        BigDecimal purchasePriceExcludingTax = null;
+        if (purchasePriceExcludingTaxTextField.getText() != null) {
+            purchasePriceExcludingTaxText = purchasePriceExcludingTaxTextField.getText().trim();
+            if (purchasePriceExcludingTaxText.isBlank()) {
+                purchasePriceExcludingTax = null;
+            } else {
+                try {
+                    purchasePriceExcludingTax = new BigDecimal(purchasePriceExcludingTaxText);
+                } catch (Exception e) {
+                    displayErrorAlert("la valeur du prix d'achat n'est pas valide");
+                    return null;
+                }
+
+                if (!(purchasePriceExcludingTax.compareTo(BigDecimal.ZERO) >= 0
+                        && purchasePriceExcludingTax.compareTo(BigDecimal.valueOf(9_999_999L)) <= 0)
+                ) {
+                    displayErrorAlert("la valeur du prix d'achat doit être comprise entre 0 et 9,999,999.00");
+                    return null;
+                }
+            }
+        }
+
+        String sellingPriceExcludingTaxText = sellingPriceExcludingTaxTextField.getText().trim();
+        if (sellingPriceExcludingTaxText.isBlank()) {
+            displayErrorAlert("Prix de vente est obligatoire");
+            return null;
+        }
+
+        BigDecimal sellingPriceExcludingTax;
+        try {
+            sellingPriceExcludingTax = new BigDecimal(sellingPriceExcludingTaxText);
+        } catch (Exception e) {
+            displayErrorAlert("la valeur du prix de vente n'est pas valide");
+            return null;
+        }
+
+        if (!(sellingPriceExcludingTax.compareTo(BigDecimal.ZERO) >= 0
+                && sellingPriceExcludingTax.compareTo(BigDecimal.valueOf(9_999_999L)) <= 0)
+        ) {
+            displayErrorAlert("la valeur du prix de vente doit être comprise entre 0 et 9,999,999.00");
+            return null;
+        }
+
+        if (taxRateComboBox.getValue() == EMPTY_TAX_RATE) {
+            displayErrorAlert("Taux de TVA est obligatoire");
+            return null;
+        }
+
+        Product product = new Product();
+        product.setId(this.product.getId());
+        product.setName(name);
+        product.setDescription(description);
+        product.setSellingPriceExcludingTax(sellingPriceExcludingTax);
+        product.setPurchasePriceExcludingTax(purchasePriceExcludingTax);
         product.setTaxRate(taxRateComboBox.getValue().getValue());
         product.setCategory(categoryComboBox.getValue().getValue());
 
@@ -138,15 +263,22 @@ public class ProductController implements Initializable {
     }
 
     public void initProductUpdate(Product product) {
-        this.id = product.getId();
         this.nameTextField.setText(product.getName());
-        this.descriptionTextArea.setText(product.getDescription());
-        this.purchasePriceExcludingTaxTextField.setText(String.valueOf(product.getPurchasePriceExcludingTax()));
+        this.descriptionTextArea.setText(product.getDescription() == null ? "" : product.getDescription());
+        this.purchasePriceExcludingTaxTextField.setText(String.valueOf(product.getPurchasePriceExcludingTax() == null ? "" : product.getPurchasePriceExcludingTax()));
         this.sellingPriceExcludingTaxTextField.setText(String.valueOf(product.getSellingPriceExcludingTax()));
 
-        tabPane.getTabs().add(stockMouvementsTab);
-        initStockMovementsTableView(product);
-        parentVBox.setPrefWidth(550);
+        this.product.setId(product.getId());
+        this.product.setName(product.getName());
+        this.product.setDescription(product.getDescription());
+        this.product.setPurchasePriceExcludingTax(product.getPurchasePriceExcludingTax());
+        this.product.setSellingPriceExcludingTax(product.getSellingPriceExcludingTax());
+
+        if (!tabPane.getTabs().contains(stockMouvementsTab)) {
+            tabPane.getTabs().add(stockMouvementsTab);
+            initStockMovementsTableView(product);
+            parentVBox.setPrefWidth(550);
+        }
 
         if (product.getCategory() != null) {
             categoryComboBox.getItems()
@@ -217,6 +349,14 @@ public class ProductController implements Initializable {
         alert.showAndWait();
     }
 
+    private void displayErrorAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
     private void displayErrorAlert() {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Error");
@@ -228,7 +368,6 @@ public class ProductController implements Initializable {
     public void setListProductsController(ListProductsController listProductsController) {
         this.listProductsController = listProductsController;
     }
-
 
     private void initStockMovementsTableView(Product product) {
         TableColumn<StockMovement, String> movementTypeColumn = new TableColumn<>("Type movement");
@@ -295,7 +434,6 @@ public class ProductController implements Initializable {
         stockMouvementsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         stockMouvementsTable.getItems().addAll(StockMovementRepository.findAllByProduct(product));
     }
-
 
     private static class CategoryComboCell extends ListCell<Pair<String, Category>> {
         @Override

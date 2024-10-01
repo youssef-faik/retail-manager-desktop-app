@@ -5,6 +5,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.query.Query;
 import org.hibernate.resource.transaction.spi.TransactionStatus;
 
 import java.util.Optional;
@@ -26,10 +27,43 @@ public interface ClientRepository {
         return clients;
     }
 
-    static Optional<Client> findById(Long id) {
+    static Optional<Client> findByName(String name) {
         try (Session session = sessionFactory.openSession()) {
-            Client client = session.find(Client.class, id);
-            session.refresh(client);
+            Query<Client> query = session.createQuery("select c from Client c where lower(c.name) = lower(:name)", Client.class);
+            query.setParameter("name", name);
+            Client client = query.uniqueResult();
+
+            if (client != null) {
+                session.refresh(client);
+            }
+
+            return Optional.ofNullable(client);
+        }
+    }
+
+    static Optional<Client> findByICE(String ice) {
+        try (Session session = sessionFactory.openSession()) {
+            Query<Client> query = session.createQuery("select c from Client c where c.commonCompanyIdentifier = :ice", Client.class);
+            query.setParameter("ice", ice);
+            Client client = query.uniqueResult();
+
+            if (client != null) {
+                session.refresh(client);
+            }
+
+            return Optional.ofNullable(client);
+        }
+    }
+
+    static Optional<Client> findByIF(String IF) {
+        try (Session session = sessionFactory.openSession()) {
+            Query<Client> query = session.createQuery("select c from Client c where c.taxIdentificationNumber = :IF", Client.class);
+            query.setParameter("IF", IF);
+            Client client = query.uniqueResult();
+
+            if (client != null) {
+                session.refresh(client);
+            }
 
             return Optional.ofNullable(client);
         }

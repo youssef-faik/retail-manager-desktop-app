@@ -93,27 +93,52 @@ public class ChangePasswordController implements Initializable {
         confirmNewPasswordTextField.textProperty().addListener((observable, oldValue, newValue) -> {
             confirmNewPasswordField.setText(newValue);
         });
-
-
     }
 
     private void changePassword() {
+        String oldPasswordText = oldpasswordField.getText();
+        if (oldPasswordText.isBlank()) {
+            displayErrorAlert("Ancien mot de passe est obligatoire");
+            return;
+        }
+
         User user = AuthenticationService.getCurrentAuthenticatedUser();
-
-
-        if (!user.getPassword().equals(Encryptor.encryptPassword(oldpasswordField.getText()))) {
-            System.out.println("Wrong old password");
+        if (!user.getPassword().equals(Encryptor.encryptPassword(oldPasswordText))) {
+            displayErrorAlert("Ancien mot de passe erroné");
+            System.out.println("Ancien mot de passe erroné");
             return;
         }
 
-        if (!newPasswordField.getText().equals(confirmNewPasswordField.getText())) {
-            System.out.println("New password doesn't match confirm password");
+        String newPasswordText = newPasswordField.getText();
+        if (newPasswordText.isBlank()) {
+            displayErrorAlert("Le nouveau mot de passe est obligatoire");
             return;
         }
 
-        boolean passwordWasUpdated = UserRepository.updatePassword(user.getId(), Encryptor.encryptPassword(newPasswordField.getText()));
+        String confirmNewPasswordText = confirmNewPasswordField.getText();
+        if (confirmNewPasswordText.isBlank()) {
+            displayErrorAlert("La confirmation du nouveau mot de passe est requise");
+            return;
+        }
+
+        if (!newPasswordText.equals(confirmNewPasswordText)) {
+            displayErrorAlert("Le nouveau mot de passe ne correspond pas au mot de passe confirmé");
+            System.out.println("Le nouveau mot de passe ne correspond pas au mot de passe confirmé");
+            return;
+        }
+
+        String encryptedNewPassword = Encryptor.encryptPassword(newPasswordText);
+
+        if (encryptedNewPassword.equals(user.getPassword())) {
+            displayErrorAlert("Le nouveau mot de passe doit être différent de l'ancien mot de passe");
+            System.out.println("Le nouveau mot de passe doit être différent de l'ancien mot de passe");
+            return;
+        }
+
+        boolean passwordWasUpdated = UserRepository.updatePassword(user.getId(), encryptedNewPassword);
 
         if (passwordWasUpdated) {
+            user.setPassword(encryptedNewPassword);
             displaySuccessAlert();
         } else {
             displayErrorAlert();
@@ -126,6 +151,14 @@ public class ChangePasswordController implements Initializable {
         alert.setTitle("Success");
         alert.setHeaderText(null);
         alert.setContentText("Operation effectué avec success");
+        alert.showAndWait();
+    }
+
+    private void displayErrorAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
         alert.showAndWait();
     }
 

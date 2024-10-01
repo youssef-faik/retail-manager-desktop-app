@@ -5,8 +5,10 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.query.Query;
 import org.hibernate.resource.transaction.spi.TransactionStatus;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 public interface TaxRateRepository {
@@ -24,6 +26,34 @@ public interface TaxRateRepository {
         }
 
         return taxRates;
+    }
+
+    static Optional<TaxRate> findByLabel(String label) {
+        try (Session session = sessionFactory.openSession()) {
+            Query<TaxRate> query = session.createQuery("select c from TaxRate c where lower(c.label) = lower(:label)", TaxRate.class);
+            query.setParameter("label", label);
+            TaxRate taxRate = query.uniqueResult();
+
+            if (taxRate != null) {
+                session.refresh(taxRate);
+            }
+
+            return Optional.ofNullable(taxRate);
+        }
+    }
+
+    static Optional<TaxRate> findByValue(BigDecimal value) {
+        try (Session session = sessionFactory.openSession()) {
+            Query<TaxRate> query = session.createQuery("select c from TaxRate c where value = :value", TaxRate.class);
+            query.setParameter("value", value);
+            TaxRate taxRate = query.uniqueResult();
+
+            if (taxRate != null) {
+                session.refresh(taxRate);
+            }
+
+            return Optional.ofNullable(taxRate);
+        }
     }
 
     static boolean save(TaxRate taxRate) {

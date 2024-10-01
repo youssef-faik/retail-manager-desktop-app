@@ -20,14 +20,13 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class CategoryController implements Initializable {
+    private final Category category = new Category();
     @FXML
     public TextField nameTextField;
     @FXML
     public TextArea descriptionTextArea;
     @FXML
     public Button saveButton, cancelButton;
-
-    private Long id;
     private ListCategoriesController listCategoriesController;
 
     @Override
@@ -56,6 +55,11 @@ public class CategoryController implements Initializable {
 
     public void saveCategory() {
         Category category = mapCategory();
+
+        if (category == null) {
+            return;
+        }
+
         if (CategoryRepository.save(category)) {
             clearTextFields();
 
@@ -71,6 +75,11 @@ public class CategoryController implements Initializable {
 
     public void updateCategory() {
         Category category = mapCategory();
+
+        if (category == null) {
+            return;
+        }
+
         Optional<Category> optionalCategory = CategoryRepository.update(category);
 
         if (optionalCategory.isPresent()) {
@@ -82,9 +91,11 @@ public class CategoryController implements Initializable {
 
                     listCategoriesController.getCategoriesTableView().getItems().remove(oldCategory);
                     listCategoriesController.getCategoriesTableView().getItems().add(optionalCategory.get());
+                    listCategoriesController.categoriesTableView.refresh();
                 }
             }
 
+            this.category.setName(nameTextField.getText().trim());
             displaySuccessAlert();
         } else {
             displayErrorAlert();
@@ -92,11 +103,32 @@ public class CategoryController implements Initializable {
     }
 
     private Category mapCategory() {
+        String name = nameTextField.getText().trim();
+
+        if (name.isBlank()) {
+            displayErrorAlert("Nom de la catégorie est obligatoire");
+            return null;
+        }
+
+        Optional<Category> byName = CategoryRepository.findByName(name.toLowerCase());
+
+        if (category.getId() == null) {
+            if (byName.isPresent()) {
+                displayErrorAlert("Une catégorie avec le même nom existe déjà");
+                return null;
+            }
+        } else {
+            if (!name.equalsIgnoreCase(category.getName()) && byName.isPresent()) {
+                displayErrorAlert("Une catégorie avec le même nom existe déjà");
+                return null;
+            }
+        }
+
         Category category = new Category();
 
-        category.setId(id);
-        category.setName(nameTextField.getText());
-        category.setDescription(descriptionTextArea.getText());
+        category.setId(this.category.getId());
+        category.setName(name);
+        category.setDescription(descriptionTextArea.getText() == null ? "" : descriptionTextArea.getText().trim());
 
         return category;
     }
@@ -114,6 +146,14 @@ public class CategoryController implements Initializable {
         alert.showAndWait();
     }
 
+    private void displayErrorAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
     private void displayErrorAlert() {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Error");
@@ -127,9 +167,12 @@ public class CategoryController implements Initializable {
     }
 
     public void initCategoryUpdate(Category category) {
-        this.id = category.getId();
-        this.nameTextField.setText(category.getName());
-        this.descriptionTextArea.setText(category.getDescription());
+        this.category.setId(category.getId());
+        this.category.setName(category.getName());
+        this.category.setDescription(category.getDescription() == null ? "" : category.getDescription());
+
+        this.nameTextField.setText(this.category.getName());
+        this.descriptionTextArea.setText(this.category.getDescription());
 
         saveButton.setOnAction(e -> updateCategory());
     }

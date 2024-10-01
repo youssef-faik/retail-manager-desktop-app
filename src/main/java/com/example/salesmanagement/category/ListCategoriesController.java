@@ -66,6 +66,9 @@ public class ListCategoriesController implements Initializable {
         stage.setScene(new Scene(root));
         stage.setResizable(false);
         stage.showAndWait();
+        updateButton.setDisable(true);
+        deleteButton.setDisable(true);
+        categoriesTableView.getSelectionModel().clearSelection();
     }
 
     public void updateCategory(ActionEvent actionEvent) throws IOException {
@@ -83,6 +86,9 @@ public class ListCategoriesController implements Initializable {
             stage.setScene(new Scene(root));
             stage.setResizable(false);
             stage.showAndWait();
+            updateButton.setDisable(true);
+            deleteButton.setDisable(true);
+            categoriesTableView.getSelectionModel().clearSelection();
         }
     }
 
@@ -97,15 +103,17 @@ public class ListCategoriesController implements Initializable {
 
             if (result.isPresent() && result.get() == ButtonType.OK) {
                 if (CategoryRepository.deleteById(selectedCategory.getId())) {
+                    categoriesTableView.getSelectionModel().clearSelection();
                     categoriesTableView.getItems().remove(selectedCategory);
                     displaySuccessAlert();
                 } else {
-                    displayErrorAlert();
+                    displayErrorAlert("Cet enregistrement ne peut pas être supprimé, car il est référencé par d'autres enregistrements.");
                 }
 
-                updateButton.setDisable(true);
-                deleteButton.setDisable(true);
             }
+
+            updateButton.setDisable(true);
+            deleteButton.setDisable(true);
         }
     }
 
@@ -147,6 +155,14 @@ public class ListCategoriesController implements Initializable {
         alert.setTitle("Error");
         alert.setHeaderText(null);
         alert.setContentText("Une erreur est survenue lors de l'opération.");
+        alert.showAndWait();
+    }
+
+    private void displayErrorAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
         alert.showAndWait();
     }
 

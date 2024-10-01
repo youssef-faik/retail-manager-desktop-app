@@ -5,6 +5,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.query.Query;
 import org.hibernate.resource.transaction.spi.TransactionStatus;
 
 import java.util.Optional;
@@ -24,6 +25,20 @@ public interface CategoryRepository {
         }
 
         return categories;
+    }
+
+    static Optional<Category> findByName(String name) {
+        try (Session session = sessionFactory.openSession()) {
+            Query<Category> query = session.createQuery("select c from Category c where lower(c.name) = lower(:name)", Category.class);
+            query.setParameter("name", name);
+            Category category = query.uniqueResult();
+
+            if (category != null) {
+                session.refresh(category);
+            }
+
+            return Optional.ofNullable(category);
+        }
     }
 
     static boolean save(Category category) {

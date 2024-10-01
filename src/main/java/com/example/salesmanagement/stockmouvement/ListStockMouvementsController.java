@@ -5,6 +5,7 @@ import com.example.salesmanagement.document.DeliveryNote;
 import com.example.salesmanagement.document.Invoice;
 import com.example.salesmanagement.document.PurchaseDeliveryNote;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
@@ -106,13 +107,14 @@ public class ListStockMouvementsController implements Initializable {
 
             StockCorrectionController stockCorrectionController = fxmlLoader.getController();
             stockCorrectionController.setStockMovement(selectedStockMovement);
+            stockCorrectionController.setStockMovementTableView(stockMovementTableView);
 
             Stage stage = new Stage();
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.setScene(new Scene(root));
             stage.setResizable(false);
             stage.showAndWait();
-            refreshStockMovementsTable();
+            stockMovementTableView.getSelectionModel().clearSelection();
         }
     }
 
@@ -127,11 +129,11 @@ public class ListStockMouvementsController implements Initializable {
 
             if (result.isPresent() && result.get() == ButtonType.OK) {
                 if (StockMovementRepository.deleteById(selectedStockMovement.getId())) {
-                    stockMovementTableView.getItems().remove(selectedStockMovement);
-                    displaySuccessAlert();
-
+                    refreshStockMovementsTable();
                     updateButton.setDisable(true);
                     deleteButton.setDisable(true);
+
+                    displaySuccessAlert();
                 } else {
                     displayErrorAlert();
                 }
@@ -209,7 +211,7 @@ public class ListStockMouvementsController implements Initializable {
     }
 
     public void refreshStockMovementsTable() {
-        stockMovementTableView.getItems().addAll(StockMovementRepository.findAll());
+        stockMovementTableView.setItems(FXCollections.observableArrayList(StockMovementRepository.findAll()));
 
         observableList = stockMovementTableView.getItems();
 

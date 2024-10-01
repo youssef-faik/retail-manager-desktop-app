@@ -144,7 +144,7 @@ public class DocumentController implements Initializable {
         }
 
         for (DocumentItemFormEntry entry : documentItemEntryTableView.getItems()) {
-            if (entry.getProductComboBox().getSelectionModel().getSelectedItem() == null) {
+            if (entry.getProductComboBox().getSelectionModel().getSelectedItem().getValue() == null) {
                 return false;
             }
         }
@@ -397,34 +397,72 @@ public class DocumentController implements Initializable {
 
         quantityColumn.setOnEditCommit(event -> {
             DocumentItemFormEntry entry = event.getTableView().getItems().get(event.getTablePosition().getRow());
-            try {
-                entry.setQuantity(Integer.parseInt(event.getNewValue()));
-                updateItemTotals(entry);
-                updateTotals();
+            String newValue = event.getNewValue().trim();
 
-                refreshTableView();
-            } catch (NumberFormatException e) {
-                // Handle the case where the input is not a valid integer
+            if (newValue.isBlank()) {
                 documentItemEntryTableView.refresh();
-                System.out.println("Invalid input: " + event.getNewValue());
-                displayErrorAlert("valeur de quantité incorrecte: " + event.getNewValue());
+                System.out.println("Invalid input: " + newValue);
+                displayErrorAlert("Quantité est obligatoire");
+                return;
             }
+
+            int quantity;
+
+            try {
+                quantity = Integer.parseInt(newValue);
+            } catch (NumberFormatException e) {
+                documentItemEntryTableView.refresh();
+                System.out.println("Invalid input: " + newValue);
+                displayErrorAlert("La quantité ne doit contenir que des chiffres");
+                return;
+            }
+
+            if (quantity <= 0 || quantity > 9_999_999) {
+                documentItemEntryTableView.refresh();
+                System.out.println("Invalid input: " + newValue);
+                displayErrorAlert("la valeur de la quantité doit être comprise entre 1 et 9,999,999");
+                return;
+            }
+
+            entry.setQuantity(quantity);
+            updateItemTotals(entry);
+            updateTotals();
+            refreshTableView();
         });
 
         unitPriceColumn.setOnEditCommit(event -> {
             DocumentItemFormEntry entry = event.getTableView().getItems().get(event.getTablePosition().getRow());
-            try {
-                entry.setUnitPriceExcludingTaxes(BigDecimal.valueOf(Double.parseDouble(event.getNewValue())));
-                updateItemTotals(entry);
-                updateTotals();
-
-                refreshTableView();
-            } catch (NumberFormatException e) {
-                // Handle the case where the input is not a valid integer
+            String newValue = event.getNewValue().trim();
+            if (newValue.isBlank()) {
                 documentItemEntryTableView.refresh();
-                System.out.println("Invalid input: " + event.getNewValue());
-                displayErrorAlert("valeur de prix unitaire incorrecte: " + event.getNewValue());
+                System.out.println("Invalid input: " + newValue);
+                displayErrorAlert("Le prix unitaire est obligatoire");
+                return;
             }
+
+            BigDecimal price;
+
+            try {
+                price = BigDecimal.valueOf(Double.parseDouble(newValue));
+            } catch (NumberFormatException e) {
+                documentItemEntryTableView.refresh();
+                System.out.println("Invalid input: " + newValue);
+                displayErrorAlert("Le prix unitaire ne doit contenir que des chiffres");
+                return;
+            }
+
+            if (!(price.compareTo(BigDecimal.ZERO) > 0
+                    && price.compareTo(BigDecimal.valueOf(9_999_999L)) <= 0)
+            ) {
+                displayErrorAlert("Le prix unitaire doit être comprise entre 1 et 9,999,999.00");
+                return;
+            }
+
+            entry.setUnitPriceExcludingTaxes(price);
+            updateItemTotals(entry);
+            updateTotals();
+
+            refreshTableView();
         });
 
     }
@@ -673,7 +711,7 @@ public class DocumentController implements Initializable {
         documentItemEntryTableView.getItems().clear();
         originalDocument.getItems().forEach(
                 invoiceItem -> documentItemEntryTableView.getItems().add(
-                        new DocumentItemFormEntry(products, this, invoiceItem)
+                        new DocumentItemFormEntry(products, this, invoiceItem, documentItemEntryTableView)
                 )
         );
 

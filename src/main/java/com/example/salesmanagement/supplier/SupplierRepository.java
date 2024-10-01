@@ -5,6 +5,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.query.Query;
 import org.hibernate.resource.transaction.spi.TransactionStatus;
 
 import java.util.Optional;
@@ -26,14 +27,48 @@ public interface SupplierRepository {
         return suppliers;
     }
 
-    static Optional<Supplier> findById(Long id) {
+    static Optional<Supplier> findByName(String name) {
         try (Session session = sessionFactory.openSession()) {
-            Supplier supplier = session.find(Supplier.class, id);
-            session.refresh(supplier);
+            Query<Supplier> query = session.createQuery("select c from Supplier c where lower(c.name) = lower(:name)", Supplier.class);
+            query.setParameter("name", name);
+            Supplier supplier = query.uniqueResult();
+
+            if (supplier != null) {
+                session.refresh(supplier);
+            }
 
             return Optional.ofNullable(supplier);
         }
     }
+
+    static Optional<Supplier> findByICE(String ice) {
+        try (Session session = sessionFactory.openSession()) {
+            Query<Supplier> query = session.createQuery("select c from Supplier c where c.commonCompanyIdentifier = :ice", Supplier.class);
+            query.setParameter("ice", ice);
+            Supplier supplier = query.uniqueResult();
+
+            if (supplier != null) {
+                session.refresh(supplier);
+            }
+
+            return Optional.ofNullable(supplier);
+        }
+    }
+
+    static Optional<Supplier> findByIF(String IF) {
+        try (Session session = sessionFactory.openSession()) {
+            Query<Supplier> query = session.createQuery("select c from Supplier c where c.taxIdentificationNumber = :IF", Supplier.class);
+            query.setParameter("IF", IF);
+            Supplier supplier = query.uniqueResult();
+
+            if (supplier != null) {
+                session.refresh(supplier);
+            }
+
+            return Optional.ofNullable(supplier);
+        }
+    }
+
 
     static boolean save(Supplier supplier) {
         Session session = sessionFactory.openSession();

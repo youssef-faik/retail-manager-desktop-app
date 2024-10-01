@@ -18,9 +18,10 @@ import javafx.stage.Stage;
 import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.regex.Pattern;
 
 public class SupplierController implements Initializable {
-    private Long id;
+    private final Supplier supplier = new Supplier();
     private ListSuppliersController listSuppliersController;
 
     @FXML
@@ -55,6 +56,11 @@ public class SupplierController implements Initializable {
 
     public void saveClient() {
         Supplier supplier = mapSupplier();
+
+        if (supplier == null) {
+            return;
+        }
+
         if (SupplierRepository.save(supplier)) {
             clearTextFields();
             if (listSuppliersController != null) {
@@ -69,6 +75,11 @@ public class SupplierController implements Initializable {
 
     public void updateClient() {
         Supplier supplier = mapSupplier();
+
+        if (supplier == null) {
+            return;
+        }
+
         Optional<Supplier> optionalSupplier = SupplierRepository.update(supplier);
 
         if (optionalSupplier.isPresent()) {
@@ -83,6 +94,7 @@ public class SupplierController implements Initializable {
                 }
             }
 
+            initSupplierUpdate(optionalSupplier.get());
             displaySuccessAlert();
         } else {
             displayErrorAlert();
@@ -90,24 +102,107 @@ public class SupplierController implements Initializable {
     }
 
     private Supplier mapSupplier() {
+        String name = nameTextField.getText().trim();
+
+        if (name.isBlank()) {
+            displayErrorAlert("Nom du fournisseur est obligatoire");
+            return null;
+        }
+
+        Optional<Supplier> byName = SupplierRepository.findByName(name.toLowerCase());
+
+        if (supplier.getId() == null) {
+            if (byName.isPresent()) {
+                displayErrorAlert("Un fournisseur avec le même nom existe déjà");
+                return null;
+            }
+        } else {
+            if (!name.equalsIgnoreCase(supplier.getName())) {
+                if (byName.isPresent()) {
+                    displayErrorAlert("Un fournisseur avec le même nom existe déjà");
+                    return null;
+                }
+            }
+        }
+
+        String commonCompanyIdentifier = null;
+        if (commonCompanyIdentifierTextField.getText() != null) {
+            commonCompanyIdentifier = commonCompanyIdentifierTextField.getText().trim();
+            if (commonCompanyIdentifier.isBlank()) {
+                commonCompanyIdentifier = null;
+            } else {
+                if (!Pattern.matches("^\\d+$", commonCompanyIdentifier)) {
+                    displayErrorAlert("L'ICE ne doit contenir que des chiffres");
+                    return null;
+                }
+
+                Optional<Supplier> byICE = SupplierRepository.findByICE(commonCompanyIdentifier);
+                if (supplier.getId() == null) {
+                    if (byICE.isPresent()) {
+                        displayErrorAlert("Un fournisseur avec le même ICE existe déjà");
+                        return null;
+                    }
+                } else {
+                    if (!commonCompanyIdentifier.equals(supplier.getCommonCompanyIdentifier())) {
+                        if (byICE.isPresent()) {
+                            displayErrorAlert("Un fournisseur avec le même ICE existe déjà");
+                            return null;
+                        }
+                    }
+                }
+            }
+        }
+
+        String taxIdentificationNumber = null;
+        if (taxIdentificationNumberTextField.getText() != null) {
+            taxIdentificationNumber = taxIdentificationNumberTextField.getText().trim();
+            if (taxIdentificationNumber.isBlank()) {
+                taxIdentificationNumber = null;
+            } else {
+                if (!Pattern.matches("^\\d+$", taxIdentificationNumber)) {
+                    displayErrorAlert("Le numéro d'identification fiscale ne doit contenir que des chiffres");
+                    return null;
+                }
+
+                Optional<Supplier> byIF = SupplierRepository.findByIF(taxIdentificationNumber);
+                if (supplier.getId() == null) {
+                    if (byIF.isPresent()) {
+                        displayErrorAlert("Un fournisseur avec le même IF existe déjà");
+                        return null;
+                    }
+                } else {
+                    if (!taxIdentificationNumber.equals(supplier.getTaxIdentificationNumber())) {
+                        if (byIF.isPresent()) {
+                            displayErrorAlert("Un fournisseur avec le même IF existe déjà");
+                            return null;
+                        }
+                    }
+                }
+            }
+        }
+
         Supplier supplier = new Supplier();
-        supplier.setId(id);
-        supplier.setName(nameTextField.getText());
-        supplier.setPhoneNumber(phoneNumberTextField.getText());
-        supplier.setAddress(addressTextArea.getText());
-        supplier.setCommonCompanyIdentifier(commonCompanyIdentifierTextField.getText());
-        supplier.setTaxIdentificationNumber(taxIdentificationNumberTextField.getText());
+        supplier.setId(this.supplier.getId());
+        supplier.setName(name);
+        supplier.setCommonCompanyIdentifier(commonCompanyIdentifier);
+        supplier.setTaxIdentificationNumber(taxIdentificationNumber);
+        supplier.setPhoneNumber(phoneNumberTextField.getText() == null ? "" : phoneNumberTextField.getText().trim());
+        supplier.setAddress(addressTextArea.getText() == null ? "" : addressTextArea.getText().trim());
 
         return supplier;
     }
 
     public void initSupplierUpdate(Supplier supplier) {
-        this.id = supplier.getId();
-        this.nameTextField.setText(supplier.getName());
-        this.phoneNumberTextField.setText(supplier.getPhoneNumber());
-        this.addressTextArea.setText(supplier.getAddress());
-        this.commonCompanyIdentifierTextField.setText(supplier.getCommonCompanyIdentifier());
-        this.taxIdentificationNumberTextField.setText(supplier.getTaxIdentificationNumber());
+        this.supplier.setId(supplier.getId());
+        this.supplier.setName(supplier.getName());
+        this.supplier.setCommonCompanyIdentifier(supplier.getCommonCompanyIdentifier());
+        this.supplier.setTaxIdentificationNumber(supplier.getTaxIdentificationNumber());
+
+        this.nameTextField.setText(this.supplier.getName());
+        this.commonCompanyIdentifierTextField.setText(this.supplier.getCommonCompanyIdentifier());
+        this.taxIdentificationNumberTextField.setText(this.supplier.getTaxIdentificationNumber());
+        this.phoneNumberTextField.setText(this.supplier.getPhoneNumber());
+        this.addressTextArea.setText(this.supplier.getAddress());
 
         saveButton.setOnAction(e -> updateClient());
     }
@@ -125,6 +220,14 @@ public class SupplierController implements Initializable {
         alert.setTitle("Success");
         alert.setHeaderText(null);
         alert.setContentText("Operation effectué avec success");
+        alert.showAndWait();
+    }
+
+    private void displayErrorAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
         alert.showAndWait();
     }
 

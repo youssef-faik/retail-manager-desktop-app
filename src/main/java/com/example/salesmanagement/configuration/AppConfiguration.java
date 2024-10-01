@@ -48,7 +48,7 @@ public class AppConfiguration {
         return instance;
     }
 
-    private static <T extends Document> void validateNextSalesDocumentReference(Long nextReference, Class<T> aClass) {
+    public static <T extends Document> void validateNextSalesDocumentReference(Long nextReference, Class<T> aClass) {
         if (nextReference <= 0) {
             throw new RuntimeException("The next sales document number must be strictly greater than 0.");
         }
@@ -56,8 +56,7 @@ public class AppConfiguration {
         if (DocumentRepository.count(aClass) > 0) {
             DocumentRepository.findFirstByOrderByIdDesc(aClass).ifPresent(document -> {
                 if (nextReference <= document.getReference()) {
-                            throw new RuntimeException(
-                                    "The next sales document number must be greater than or equal to " + (document.getReference() + 1));
+                    throw new InvalideDocumentReferenceException(document.getReference() + 1);
                         }
                     }
             );

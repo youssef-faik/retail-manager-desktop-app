@@ -16,7 +16,7 @@ public abstract class SalesDocument extends Document implements Serializable {
             referencedColumnName = "id",
             nullable = false,
             foreignKey = @ForeignKey(name = "sales_document_client_fk"))
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.DETACH})
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH})
     private Client client;
 
     public Client getClient() {

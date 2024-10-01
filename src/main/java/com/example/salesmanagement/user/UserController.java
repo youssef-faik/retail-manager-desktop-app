@@ -20,7 +20,7 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class UserController implements Initializable {
-    private Long id;
+    private final User user = new User();
     private ListUsersController listUsersController;
 
     @FXML
@@ -56,6 +56,10 @@ public class UserController implements Initializable {
     public void saveUser() {
         User user = mapUser();
 
+        if (user == null) {
+            return;
+        }
+
         // encrypt password and save it
         user.setPassword(Encryptor.encryptPassword(user.getUsername().trim()));
 
@@ -73,20 +77,26 @@ public class UserController implements Initializable {
 
     public void updateClient() {
         User user = mapUser();
-        Optional<User> optionalClient = UserRepository.update(user);
 
-        if (optionalClient.isPresent()) {
+        if (user == null) {
+            return;
+        }
+
+        Optional<User> optionalUser = UserRepository.update(user);
+
+        if (optionalUser.isPresent()) {
             if (listUsersController != null) {
                 int index = listUsersController.getUsersTable().getItems().indexOf(user);
 
                 if (index != -1) {
-                    User oldClient = listUsersController.getUsersTable().getItems().get(index);
+                    User oldUser = listUsersController.getUsersTable().getItems().get(index);
 
-                    listUsersController.getUsersTable().getItems().remove(oldClient);
-                    listUsersController.getUsersTable().getItems().add(optionalClient.get());
+                    listUsersController.getUsersTable().getItems().remove(oldUser);
+                    listUsersController.getUsersTable().getItems().add(optionalUser.get());
                 }
             }
 
+            initUserUpdate(optionalUser.get());
             displaySuccessAlert();
         } else {
             displayErrorAlert();
@@ -94,24 +104,52 @@ public class UserController implements Initializable {
     }
 
     private User mapUser() {
+        String username = usernameTextField.getText().trim();
+
+        if (username.isBlank()) {
+            displayErrorAlert("Identifiant est obligatoire");
+            return null;
+        }
+
+        Optional<User> byUsername = UserRepository.findByUsername(username.toLowerCase());
+
+        if (user.getId() == null) {
+            if (byUsername.isPresent()) {
+                displayErrorAlert("Un utilisateur avec le identifiant existe déjà");
+                return null;
+            }
+        } else {
+            if (!username.equalsIgnoreCase(user.getUsername()) && byUsername.isPresent()) {
+                displayErrorAlert("Un utilisateur avec le identifiant existe déjà");
+                return null;
+            }
+        }
+
         User user = new User();
-        user.setId(id);
-        user.setFirstName(firstnameTextField.getText());
-        user.setLastName(lastnameTextField.getText());
-        user.setUsername(usernameTextField.getText());
-        user.setPhoneNumber(phoneNumberTextField.getText());
-        user.setAddress(addressTextArea.getText());
+        user.setId(this.user.getId());
+        user.setUsername(username);
+        user.setFirstName(firstnameTextField.getText().trim());
+        user.setLastName(lastnameTextField.getText().trim());
+        user.setPhoneNumber(phoneNumberTextField.getText().trim());
+        user.setAddress(addressTextArea.getText().trim());
 
         return user;
     }
 
-    public void initUserUpdate(User User) {
-        this.id = User.getId();
-        this.firstnameTextField.setText(User.getFirstName());
-        this.lastnameTextField.setText(User.getLastName());
-        this.usernameTextField.setText(User.getUsername());
-        this.phoneNumberTextField.setText(User.getPhoneNumber());
-        this.addressTextArea.setText(User.getAddress());
+    public void initUserUpdate(User user) {
+        this.user.setId(user.getId());
+        this.user.setFirstName(user.getFirstName() == null ? "" : user.getFirstName());
+        this.user.setLastName(user.getLastName() == null ? "" : user.getLastName());
+        this.user.setUsername(user.getUsername());
+        this.user.setRole(user.getRole());
+        this.user.setPhoneNumber(user.getPhoneNumber() == null ? "" : user.getPhoneNumber());
+        this.user.setAddress(user.getAddress() == null ? "" : user.getAddress());
+
+        this.firstnameTextField.setText(this.user.getFirstName());
+        this.lastnameTextField.setText(this.user.getLastName());
+        this.usernameTextField.setText(this.user.getUsername());
+        this.phoneNumberTextField.setText(this.user.getPhoneNumber());
+        this.addressTextArea.setText(this.user.getAddress());
 
         saveButton.setOnAction(e -> updateClient());
     }
@@ -129,6 +167,14 @@ public class UserController implements Initializable {
         alert.setTitle("Success");
         alert.setHeaderText(null);
         alert.setContentText("Operation effectué avec success");
+        alert.showAndWait();
+    }
+
+    private void displayErrorAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
         alert.showAndWait();
     }
 
