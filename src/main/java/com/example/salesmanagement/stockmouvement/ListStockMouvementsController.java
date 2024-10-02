@@ -12,6 +12,7 @@ import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -29,10 +30,12 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.net.URL;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class ListStockMouvementsController implements Initializable {
+    private static final int ROWS_PER_PAGE = 13;
     @FXML
     public TableView<StockMovement> stockMovementTableView;
     FilteredList<StockMovement> filteredList;
@@ -42,6 +45,8 @@ public class ListStockMouvementsController implements Initializable {
     private Button deleteButton, updateButton, newButton;
     @FXML
     private TextField searchTextField;
+    @FXML
+    private Pagination pagination;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -67,6 +72,10 @@ public class ListStockMouvementsController implements Initializable {
         initStockMovementsTableView();
         refreshStockMovementsTable();
 
+        int dataSize = (stockMovementTableView.getItems().size() / ROWS_PER_PAGE) + 1;
+        pagination.setPageCount(dataSize);
+        pagination.setPageFactory(this::createPage);
+
         searchTextField.textProperty().addListener((observable, oldValue, newValue) -> {
             filteredList.setPredicate(stockMouvement -> {
                 if (newValue == null || newValue.isEmpty() || newValue.isBlank()) {
@@ -79,6 +88,14 @@ public class ListStockMouvementsController implements Initializable {
                         || stockMouvement.getDateTime().format(DateTimeFormatter.ofPattern("yyyy MMM dd - HH:mm:ss")).toLowerCase().contains(lowerCaseFilter);
 
             });
+
+            // Update pagination after filtering
+            int pageCount = (filteredList.size() / ROWS_PER_PAGE) + 1;
+            pagination.setPageCount(pageCount);
+            // Reset to first page after filter change
+            pagination.setCurrentPageIndex(0);
+            // Update the table view with the new first page
+            createPage(0);
         });
 
     }
@@ -220,6 +237,9 @@ public class ListStockMouvementsController implements Initializable {
         sortedList.comparatorProperty().bind(stockMovementTableView.comparatorProperty());
         stockMovementTableView.setItems(sortedList);
 
+        // Update pagination
+        int pageCount = (filteredList.size() / ROWS_PER_PAGE) + 1;
+        pagination.setPageCount(pageCount);
 
         stockMovementTableView.refresh();
         updateButton.setDisable(true);
@@ -242,4 +262,12 @@ public class ListStockMouvementsController implements Initializable {
         alert.showAndWait();
     }
 
+    private Node createPage(int pageIndex) {
+        int fromIndex = pageIndex * ROWS_PER_PAGE;
+        int toIndex = Math.min(fromIndex + ROWS_PER_PAGE, filteredList.size());
+
+        List<StockMovement> subbedList = filteredList.subList(fromIndex, toIndex);
+        stockMovementTableView.setItems(FXCollections.observableArrayList(subbedList));
+        return stockMovementTableView;
+    }
 }

@@ -1,9 +1,14 @@
 package com.example.salesmanagement.client;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -20,15 +25,23 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class ListClientsController implements Initializable {
+    private static final int ROWS_PER_PAGE = 13;
+    FilteredList<Client> filteredList;
+    SortedList<Client> sortedList;
+    ObservableList<Client> observableList;
     @FXML
     private TableView<Client> clientsTableView;
-
     @FXML
     private Button deleteButton, updateButton, newButton;
+    @FXML
+    private Pagination pagination;
+    @FXML
+    private TextField searchTextField;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -53,6 +66,35 @@ public class ListClientsController implements Initializable {
 
         initClientsTableView();
         refreshClientsTable();
+
+        int dataSize = (clientsTableView.getItems().size() / ROWS_PER_PAGE) + 1;
+        pagination.setPageCount(dataSize);
+        pagination.setPageFactory(this::createPage);
+
+        searchTextField.textProperty().addListener((observable, oldValue, newValue) -> {
+            filteredList.setPredicate(client -> {
+                if (newValue == null || newValue.isEmpty() || newValue.isBlank()) {
+                    return true;
+                }
+
+                String lowerCaseFilter = newValue.toLowerCase();
+
+                return client.getName().toLowerCase().contains(lowerCaseFilter)
+                        || (client.getCommonCompanyIdentifier() != null && client.getCommonCompanyIdentifier().toLowerCase().contains(lowerCaseFilter))
+                        || (client.getTaxIdentificationNumber() != null && client.getTaxIdentificationNumber().toLowerCase().contains(lowerCaseFilter))
+                        || client.getPhoneNumber().toLowerCase().contains(lowerCaseFilter)
+                        || client.getAddress().toLowerCase().contains(lowerCaseFilter);
+
+            });
+
+            // Update pagination after filtering
+            int pageCount = (filteredList.size() / ROWS_PER_PAGE) + 1;
+            pagination.setPageCount(pageCount);
+            // Reset to first page after filter change
+            pagination.setCurrentPageIndex(0);
+            // Update the table view with the new first page
+            createPage(0);
+        });
     }
 
     public void addClient(ActionEvent actionEvent) throws IOException {
@@ -158,6 +200,18 @@ public class ListClientsController implements Initializable {
 
     public void refreshClientsTable() {
         clientsTableView.setItems(ClientRepository.findAll());
+
+        observableList = clientsTableView.getItems();
+
+        filteredList = new FilteredList<>(observableList);
+        sortedList = new SortedList<>(filteredList);
+        sortedList.comparatorProperty().bind(clientsTableView.comparatorProperty());
+        clientsTableView.setItems(sortedList);
+
+        // Update pagination
+        int pageCount = (filteredList.size() / ROWS_PER_PAGE) + 1;
+        pagination.setPageCount(pageCount);
+
         clientsTableView.refresh();
         updateButton.setDisable(true);
         deleteButton.setDisable(true);
@@ -185,6 +239,15 @@ public class ListClientsController implements Initializable {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private Node createPage(int pageIndex) {
+        int fromIndex = pageIndex * ROWS_PER_PAGE;
+        int toIndex = Math.min(fromIndex + ROWS_PER_PAGE, filteredList.size());
+
+        List<Client> subbedList = filteredList.subList(fromIndex, toIndex);
+        clientsTableView.setItems(FXCollections.observableArrayList(subbedList));
+        return clientsTableView;
     }
 
     public TableView<Client> getClientsTable() {

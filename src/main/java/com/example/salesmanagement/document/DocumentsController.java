@@ -13,6 +13,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Rectangle2D;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -42,11 +43,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class DocumentsController implements Initializable {
+    private static final int ROWS_PER_PAGE = 13;
     Class<? extends Document> formClass;
     FilteredList<Document> filteredList;
     SortedList<Document> sortedList;
     ObservableList<Document> observableList;
-
+    @FXML
+    private Pagination pagination;
     @FXML
     private TableView<Document> documentsTableView;
 
@@ -119,6 +122,14 @@ public class DocumentsController implements Initializable {
                 }
 
             });
+
+            // Update pagination after filtering
+            int pageCount = (filteredList.size() / ROWS_PER_PAGE) + 1;
+            pagination.setPageCount(pageCount);
+            // Reset to first page after filter change
+            pagination.setCurrentPageIndex(0);
+            // Update the table view with the new first page
+            createPage(0);
         });
     }
 
@@ -211,6 +222,10 @@ public class DocumentsController implements Initializable {
 
         initDocumentsTableView(formClass);
         loadDocumentsData(formClass);
+
+        int dataSize = (docsListComboBox.getItems().size() / ROWS_PER_PAGE) + 1;
+        pagination.setPageCount(dataSize);
+        pagination.setPageFactory(this::createPage);
 
         docsListComboBox.setValue(docsListComboBox.getItems().stream().filter(o -> o.getKey() == formClass).findFirst().get());
     }
@@ -408,6 +423,10 @@ public class DocumentsController implements Initializable {
         sortedList.comparatorProperty().bind(documentsTableView.comparatorProperty());
         documentsTableView.setItems(sortedList);
 
+        // Update pagination
+        int pageCount = (filteredList.size() / ROWS_PER_PAGE) + 1;
+        pagination.setPageCount(pageCount);
+
         updateButton.setDisable(true);
         deleteButton.setDisable(true);
     }
@@ -426,6 +445,15 @@ public class DocumentsController implements Initializable {
         alert.setHeaderText(null);
         alert.setContentText("Une erreur est survenue lors de l'opération.");
         alert.showAndWait();
+    }
+
+    private Node createPage(int pageIndex) {
+        int fromIndex = pageIndex * ROWS_PER_PAGE;
+        int toIndex = Math.min(fromIndex + ROWS_PER_PAGE, filteredList.size());
+
+        List<Document> subbedList = filteredList.subList(fromIndex, toIndex);
+        documentsTableView.setItems(FXCollections.observableArrayList(subbedList));
+        return documentsTableView;
     }
 
     private static class DocumentComboCell extends ListCell<Pair<Class<? extends Document>, String>> {

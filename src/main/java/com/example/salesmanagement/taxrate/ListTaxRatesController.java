@@ -1,9 +1,14 @@
 package com.example.salesmanagement.taxrate;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -20,15 +25,23 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class ListTaxRatesController implements Initializable {
+    private static final int ROWS_PER_PAGE = 13;
     @FXML
     public Button newButton, updateButton, deleteButton;
     @FXML
     public TableView<TaxRate> taxRateTableView;
-
+    FilteredList<TaxRate> filteredList;
+    SortedList<TaxRate> sortedList;
+    ObservableList<TaxRate> observableList;
+    @FXML
+    private Pagination pagination;
+    @FXML
+    private TextField searchTextField;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -52,6 +65,33 @@ public class ListTaxRatesController implements Initializable {
         deleteButton.setDisable(true);
 
         initTaxRatesTableView();
+        refreshTaxRatesTable();
+
+        int dataSize = (taxRateTableView.getItems().size() / ROWS_PER_PAGE) + 1;
+        pagination.setPageCount(dataSize);
+        pagination.setPageFactory(this::createPage);
+
+        searchTextField.textProperty().addListener((observable, oldValue, newValue) -> {
+            filteredList.setPredicate(taxRate -> {
+                if (newValue == null || newValue.isEmpty() || newValue.isBlank()) {
+                    return true;
+                }
+
+                String lowerCaseFilter = newValue.toLowerCase();
+
+                return taxRate.getLabel().toLowerCase().contains(lowerCaseFilter)
+                        || taxRate.getValue().toPlainString().contains(lowerCaseFilter);
+
+            });
+
+            // Update pagination after filtering
+            int pageCount = (filteredList.size() / ROWS_PER_PAGE) + 1;
+            pagination.setPageCount(pageCount);
+            // Reset to first page after filter change
+            pagination.setCurrentPageIndex(0);
+            // Update the table view with the new first page
+            createPage(0);
+        });
     }
 
     public void addTaxRate(ActionEvent actionEvent) throws IOException {
@@ -136,9 +176,25 @@ public class ListTaxRatesController implements Initializable {
                 deleteButton.setDisable(true);
             }
         });
+    }
 
+    public void refreshTaxRatesTable() {
         taxRateTableView.setItems(TaxRateRepository.findAll());
+
+        observableList = taxRateTableView.getItems();
+
+        filteredList = new FilteredList<>(observableList);
+        sortedList = new SortedList<>(filteredList);
+        sortedList.comparatorProperty().bind(taxRateTableView.comparatorProperty());
+        taxRateTableView.setItems(sortedList);
+
+        // Update pagination
+        int pageCount = (filteredList.size() / ROWS_PER_PAGE) + 1;
+        pagination.setPageCount(pageCount);
+
         taxRateTableView.refresh();
+        updateButton.setDisable(true);
+        deleteButton.setDisable(true);
     }
 
     private void displaySuccessAlert() {
@@ -164,4 +220,14 @@ public class ListTaxRatesController implements Initializable {
         alert.setContentText(message);
         alert.showAndWait();
     }
+
+    private Node createPage(int pageIndex) {
+        int fromIndex = pageIndex * ROWS_PER_PAGE;
+        int toIndex = Math.min(fromIndex + ROWS_PER_PAGE, filteredList.size());
+
+        List<TaxRate> subbedList = filteredList.subList(fromIndex, toIndex);
+        taxRateTableView.setItems(FXCollections.observableArrayList(subbedList));
+        return taxRateTableView;
+    }
+
 }

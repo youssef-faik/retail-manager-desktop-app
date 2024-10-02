@@ -1,9 +1,14 @@
 package com.example.salesmanagement.category;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -20,14 +25,23 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class ListCategoriesController implements Initializable {
+    private static final int ROWS_PER_PAGE = 13;
     @FXML
     public Button newButton, updateButton, deleteButton;
     @FXML
     public TableView<Category> categoriesTableView;
+    FilteredList<Category> filteredList;
+    SortedList<Category> sortedList;
+    ObservableList<Category> observableList;
+    @FXML
+    private TextField searchTextField;
+    @FXML
+    private Pagination pagination;
 
 
     @Override
@@ -52,6 +66,32 @@ public class ListCategoriesController implements Initializable {
         deleteButton.setDisable(true);
 
         initCategoriesTableView();
+        refreshCategoriesTable();
+
+        int dataSize = (categoriesTableView.getItems().size() / ROWS_PER_PAGE) + 1;
+        pagination.setPageCount(dataSize);
+        pagination.setPageFactory(this::createPage);
+
+        searchTextField.textProperty().addListener((observable, oldValue, newValue) -> {
+            filteredList.setPredicate(category -> {
+                if (newValue == null || newValue.isEmpty() || newValue.isBlank()) {
+                    return true;
+                }
+
+                String lowerCaseFilter = newValue.toLowerCase();
+
+                return category.getName().toLowerCase().contains(lowerCaseFilter)
+                        || (category.getDescription() != null && category.getDescription().toLowerCase().contains(lowerCaseFilter));
+            });
+
+            // Update pagination after filtering
+            int pageCount = (filteredList.size() / ROWS_PER_PAGE) + 1;
+            pagination.setPageCount(pageCount);
+            // Reset to first page after filter change
+            pagination.setCurrentPageIndex(0);
+            // Update the table view with the new first page
+            createPage(0);
+        });
     }
 
     public void addCategory(ActionEvent actionEvent) throws IOException {
@@ -137,9 +177,25 @@ public class ListCategoriesController implements Initializable {
                 deleteButton.setDisable(true);
             }
         });
+    }
 
+    public void refreshCategoriesTable() {
         categoriesTableView.setItems(CategoryRepository.findAll());
+
+        observableList = categoriesTableView.getItems();
+
+        filteredList = new FilteredList<>(observableList);
+        sortedList = new SortedList<>(filteredList);
+        sortedList.comparatorProperty().bind(categoriesTableView.comparatorProperty());
+        categoriesTableView.setItems(sortedList);
+
+        // Update pagination
+        int pageCount = (filteredList.size() / ROWS_PER_PAGE) + 1;
+        pagination.setPageCount(pageCount);
+
         categoriesTableView.refresh();
+        updateButton.setDisable(true);
+        deleteButton.setDisable(true);
     }
 
     private void displaySuccessAlert() {
@@ -164,6 +220,15 @@ public class ListCategoriesController implements Initializable {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private Node createPage(int pageIndex) {
+        int fromIndex = pageIndex * ROWS_PER_PAGE;
+        int toIndex = Math.min(fromIndex + ROWS_PER_PAGE, filteredList.size());
+
+        List<Category> subbedList = filteredList.subList(fromIndex, toIndex);
+        categoriesTableView.setItems(FXCollections.observableArrayList(subbedList));
+        return categoriesTableView;
     }
 
     public TableView<Category> getCategoriesTableView() {

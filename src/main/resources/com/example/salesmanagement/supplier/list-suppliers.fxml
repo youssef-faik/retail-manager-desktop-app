@@ -20,30 +20,50 @@
     </Label>
     <HBox alignment="TOP_RIGHT" spacing="8.0">
         <children>
-            <Button fx:id="newButton" mnemonicParsing="false" onAction="#addSupplier" prefHeight="25.0" prefWidth="90.0"
-                    text="Nouveau">
-                <graphic>
-                    <FontAwesomeIconView glyphName="PLUS"/>
-                </graphic>
-            </Button>
-            <Button fx:id="updateButton" mnemonicParsing="false" onAction="#updateSupplier" prefHeight="25.0"
-                    prefWidth="90.0" text="Modifier">
-                <graphic>
-                    <FontAwesomeIconView glyphName="EDIT"/>
-                </graphic>
-            </Button>
-            <Button fx:id="deleteButton" mnemonicParsing="false" onAction="#deleteSupplier" prefHeight="25.0"
-                    prefWidth="90.0" text="Supprimer">
-                <graphic>
-                    <FontAwesomeIconView glyphName="TRASH"/>
-                </graphic>
-            </Button>
+            <HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+                <children>
+                    <Label text="Recherche" HBox.hgrow="ALWAYS">
+                        <HBox.margin>
+                            <Insets right="8.0"/>
+                        </HBox.margin>
+                        <font>
+                            <Font name="System Bold" size="12.0"/>
+                        </font>
+                    </Label>
+                    <TextField fx:id="searchTextField" focusTraversable="false"
+                               promptText="Rechercher un fournisseur par nom, ICE, IF, numéro de téléphone ou adresse"
+                               HBox.hgrow="ALWAYS"/>
+                </children>
+            </HBox>
+            <HBox alignment="CENTER_RIGHT" spacing="8.0" HBox.hgrow="ALWAYS">
+                <children>
+                    <Button fx:id="newButton" mnemonicParsing="false" onAction="#addSupplier" prefHeight="25.0"
+                            prefWidth="90.0" text="Nouveau">
+                        <graphic>
+                            <FontAwesomeIconView glyphName="PLUS"/>
+                        </graphic>
+                    </Button>
+                    <Button fx:id="updateButton" mnemonicParsing="false" onAction="#updateSupplier" prefHeight="25.0"
+                            prefWidth="90.0" text="Modifier">
+                        <graphic>
+                            <FontAwesomeIconView glyphName="EDIT"/>
+                        </graphic>
+                    </Button>
+                    <Button fx:id="deleteButton" mnemonicParsing="false" onAction="#deleteSupplier" prefHeight="25.0"
+                            prefWidth="90.0" text="Supprimer">
+                        <graphic>
+                            <FontAwesomeIconView glyphName="TRASH"/>
+                        </graphic>
+                    </Button>
+                </children>
+            </HBox>
         </children>
         <VBox.margin>
             <Insets/>
         </VBox.margin>
     </HBox>
     <TableView fx:id="supplierTableView" VBox.vgrow="ALWAYS"/>
+    <Pagination fx:id="pagination" VBox.vgrow="ALWAYS"/>
     <padding>
         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
     </padding>
