@@ -12,6 +12,7 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
@@ -289,8 +290,16 @@ public class MainController implements Initializable {
         Button[] buttons = {dashboardNavBarButton, clientsNavBarButton, suppliersNavBarButton, productsNavBarButton, stockNavBarButton, PurchaseDeliveryNoteNavBarButton, invoiceNavBarButton, usersNavBarButton, settingsNavBarButton, signoutNavBarButton};
 
         for (Button button : buttons) {
-            button.setOnMouseEntered(event -> button.setStyle("-fx-background-color: rgba(255, 255, 255, 0.4)"));
-            button.setOnMouseExited(event -> button.setStyle("-fx-background-color: rgba(0, 0, 0, 0)"));
+            button.setOnMouseEntered(event -> {
+                button.setStyle("-fx-background-color: rgba(255, 255, 255, 0.4)");
+                ((Text) button.getGraphic()).setFill(Color.WHITE);
+                button.setTextFill(Color.WHITE);
+            });
+            button.setOnMouseExited(event -> {
+                button.setStyle("-fx-background-color: rgba(0, 0, 0, 0)");
+                ((Text) button.getGraphic()).setFill(Color.color(0.4549, 0.5098, 0.6078, 1.0));
+                button.setTextFill(Color.color(0.4549, 0.5098, 0.6078, 1.0));
+            });
         }
     }
 }

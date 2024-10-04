@@ -4,9 +4,11 @@
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.*?>
+<?import javafx.scene.effect.*?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
 <?import javafx.scene.text.*?>
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:id="borderPane" prefHeight="480.0" prefWidth="640.0"
             xmlns="http://javafx.com/javafx/22" fx:controller="com.example.salesmanagement.MainController">
@@ -15,19 +17,6 @@
             <menus>
                 <Menu mnemonicParsing="false" text="Contact">
                     <items>
-                        <MenuItem fx:id="addSupplierMenuItem" mnemonicParsing="false" onAction="#addSupplier"
-                                  text="Nouveau fournisseur">
-                            <graphic>
-                                <FontAwesomeIconView glyphName="PLUS"/>
-                            </graphic>
-                        </MenuItem>
-                        <MenuItem fx:id="listSuppliersMenuItem" mnemonicParsing="false" onAction="#listSuppliers"
-                                  text="Liste des fournisseurs">
-                            <graphic>
-                                <FontAwesomeIconView glyphName="USERS"/>
-                            </graphic>
-                        </MenuItem>
-                        <SeparatorMenuItem/>
                         <MenuItem fx:id="addClientMenuItem" mnemonicParsing="false" onAction="#addClient"
                                   text="Nouveau client">
                             <graphic>
@@ -36,6 +25,19 @@
                         </MenuItem>
                         <MenuItem fx:id="listClientsMenuItem" mnemonicParsing="false" onAction="#listClients"
                                   text="Liste des clients">
+                            <graphic>
+                                <FontAwesomeIconView glyphName="USERS"/>
+                            </graphic>
+                        </MenuItem>
+                        <SeparatorMenuItem/>
+                        <MenuItem fx:id="addSupplierMenuItem" mnemonicParsing="false" onAction="#addSupplier"
+                                  text="Nouveau fournisseur">
+                            <graphic>
+                                <FontAwesomeIconView glyphName="PLUS"/>
+                            </graphic>
+                        </MenuItem>
+                        <MenuItem fx:id="listSuppliersMenuItem" mnemonicParsing="false" onAction="#listSuppliers"
+                                  text="Liste des fournisseurs">
                             <graphic>
                                 <FontAwesomeIconView glyphName="USERS"/>
                             </graphic>
@@ -246,12 +248,12 @@
         </MenuBar>
     </top>
     <left>
-        <VBox fx:id="sidenavVBox" prefHeight="455.0" prefWidth="185.0" spacing="8.0"
-              style="-fx-background-color: BLACK;" BorderPane.alignment="CENTER">
+        <VBox fx:id="sidenavVBox" prefHeight="455.0" prefWidth="200.0" spacing="8.0" style="-fx-background-color: #000;"
+              BorderPane.alignment="CENTER">
             <children>
                 <HBox fx:id="logoHBox" alignment="CENTER" prefHeight="33.0" prefWidth="170.0" VBox.vgrow="ALWAYS">
                     <children>
-                        <ImageView fx:id="logoImageView" fitHeight="42.0" fitWidth="150.0" pickOnBounds="true"
+                        <ImageView fx:id="logoImageView" fitHeight="68.0" fitWidth="195.0" pickOnBounds="true"
                                    preserveRatio="true" HBox.hgrow="ALWAYS">
                             <image>
                                 <Image url="@../../../IBSYS%20LOGO.png"/>
@@ -273,13 +275,13 @@
                             </VBox.margin>
                         </Text>
                         <Button fx:id="dashboardNavBarButton" alignment="BASELINE_LEFT" graphicTextGap="8.0"
-                                mnemonicParsing="false" onAction="#displayDashboard" prefHeight="25.0" prefWidth="192.0"
-                                style="-fx-background-color: BLACK;" text="Tableau de bord" textFill="#c3c3c3">
+                                mnemonicParsing="false" onAction="#displayDashboard" prefHeight="25.0" prefWidth="184.0"
+                                style="-fx-background-color: #000;" text="Tableau de bord" textFill="#74829b">
                             <font>
                                 <Font name="System Bold" size="12.0"/>
                             </font>
                             <graphic>
-                                <FontAwesomeIconView fill="#c3c3c3" glyphName="TH_LARGE"/>
+                                <FontAwesomeIconView fill="#74829b" glyphName="TH_LARGE"/>
                             </graphic>
                             <cursor>
                                 <Cursor fx:constant="HAND"/>
@@ -295,39 +297,39 @@
                             </VBox.margin>
                         </Text>
                         <Button fx:id="clientsNavBarButton" alignment="BASELINE_LEFT" graphicTextGap="8.0"
-                                mnemonicParsing="false" onAction="#listClients" prefHeight="30.0" prefWidth="192.0"
-                                style="-fx-background-color: BLACK;" text="Clients" textFill="#c3c3c3">
+                                mnemonicParsing="false" onAction="#listClients" prefHeight="30.0" prefWidth="184.0"
+                                style="-fx-background-color: #000;" text="Clients" textFill="#74829b">
                             <font>
                                 <Font name="System Bold" size="12.0"/>
                             </font>
                             <graphic>
-                                <FontAwesomeIconView fill="#c3c3c3" glyphName="USERS"/>
+                                <FontAwesomeIconView fill="#74829b" glyphName="USERS"/>
                             </graphic>
                             <cursor>
                                 <Cursor fx:constant="HAND"/>
                             </cursor>
                         </Button>
                         <Button fx:id="suppliersNavBarButton" alignment="BASELINE_LEFT" graphicTextGap="8.0"
-                                mnemonicParsing="false" onAction="#listSuppliers" prefHeight="30.0" prefWidth="192.0"
-                                style="-fx-background-color: BLACK;" text="Fournisseur" textFill="#c3c3c3">
+                                mnemonicParsing="false" onAction="#listSuppliers" prefHeight="30.0" prefWidth="184.0"
+                                style="-fx-background-color: #000;" text="Fournisseur" textFill="#74829b">
                             <font>
                                 <Font name="System Bold" size="12.0"/>
                             </font>
                             <graphic>
-                                <FontAwesomeIconView fill="#c3c3c3" glyphName="USERS"/>
+                                <FontAwesomeIconView fill="#74829b" glyphName="USERS"/>
                             </graphic>
                             <cursor>
                                 <Cursor fx:constant="HAND"/>
                             </cursor>
                         </Button>
                         <Button fx:id="productsNavBarButton" alignment="BASELINE_LEFT" graphicTextGap="8.0"
-                                mnemonicParsing="false" onAction="#listProducts" prefHeight="30.0" prefWidth="192.0"
-                                style="-fx-background-color: BLACK;" text="Produits" textFill="#c3c3c3">
+                                mnemonicParsing="false" onAction="#listProducts" prefHeight="30.0" prefWidth="184.0"
+                                style="-fx-background-color: #000;" text="Produits" textFill="#74829b">
                             <font>
                                 <Font name="System Bold" size="12.0"/>
                             </font>
                             <graphic>
-                                <FontAwesomeIconView fill="#c3c3c3" glyphName="CUBES"/>
+                                <FontAwesomeIconView fill="#74829b" glyphName="CUBES"/>
                             </graphic>
                             <cursor>
                                 <Cursor fx:constant="HAND"/>
@@ -335,13 +337,13 @@
                         </Button>
                         <Button fx:id="stockNavBarButton" alignment="BASELINE_LEFT" graphicTextGap="8.0"
                                 mnemonicParsing="false" onAction="#listStockMouvements" prefHeight="30.0"
-                                prefWidth="192.0" style="-fx-background-color: BLACK;" text="Mouvements Stock"
-                                textFill="#c3c3c3">
+                                prefWidth="184.0" style="-fx-background-color: #000;" text="Mouvements Stock"
+                                textFill="#74829b">
                             <font>
                                 <Font name="System Bold" size="12.0"/>
                             </font>
                             <graphic>
-                                <FontAwesomeIconView fill="#c3c3c3" glyphName="EXCHANGE"/>
+                                <FontAwesomeIconView fill="#74829b" glyphName="EXCHANGE"/>
                             </graphic>
                             <cursor>
                                 <Cursor fx:constant="HAND"/>
@@ -349,39 +351,39 @@
                         </Button>
                         <Button fx:id="PurchaseDeliveryNoteNavBarButton" alignment="BASELINE_LEFT" graphicTextGap="8.0"
                                 mnemonicParsing="false" onAction="#listPurchaseDeliveryNotes" prefHeight="30.0"
-                                prefWidth="192.0" style="-fx-background-color: BLACK;" text="Commandes fournisseurs"
-                                textFill="#c3c3c3">
+                                prefWidth="184.0" style="-fx-background-color: #000;" text="Commandes fournisseurs"
+                                textFill="#74829b">
                             <font>
                                 <Font name="System Bold" size="12.0"/>
                             </font>
                             <graphic>
-                                <FontAwesomeIconView fill="#c3c3c3" glyphName="SHOPPING_CART"/>
+                                <FontAwesomeIconView fill="#74829b" glyphName="SHOPPING_CART"/>
                             </graphic>
                             <cursor>
                                 <Cursor fx:constant="HAND"/>
                             </cursor>
                         </Button>
                         <Button fx:id="invoiceNavBarButton" alignment="BASELINE_LEFT" graphicTextGap="8.0"
-                                mnemonicParsing="false" onAction="#listInvoices" prefHeight="25.0" prefWidth="192.0"
-                                style="-fx-background-color: BLACK;" text="Factures" textFill="#c3c3c3">
+                                mnemonicParsing="false" onAction="#listInvoices" prefHeight="25.0" prefWidth="184.0"
+                                style="-fx-background-color: #000;" text="Factures" textFill="#74829b">
                             <font>
                                 <Font name="System Bold" size="12.0"/>
                             </font>
                             <graphic>
-                                <FontAwesomeIconView fill="#c3c3c3" glyphName="SHOPPING_CART"/>
+                                <FontAwesomeIconView fill="#74829b" glyphName="SHOPPING_CART"/>
                             </graphic>
                             <cursor>
                                 <Cursor fx:constant="HAND"/>
                             </cursor>
                         </Button>
                         <Button fx:id="usersNavBarButton" alignment="BASELINE_LEFT" graphicTextGap="8.0"
-                                mnemonicParsing="false" onAction="#listUsers" prefHeight="30.0" prefWidth="192.0"
-                                style="-fx-background-color: BLACK;" text="Utilisateurs" textFill="#c3c3c3">
+                                mnemonicParsing="false" onAction="#listUsers" prefHeight="30.0" prefWidth="184.0"
+                                style="-fx-background-color: #000;" text="Utilisateurs" textFill="#74829b">
                             <font>
                                 <Font name="System Bold" size="12.0"/>
                             </font>
                             <graphic>
-                                <FontAwesomeIconView fill="#c3c3c3" glyphName="USERS"/>
+                                <FontAwesomeIconView fill="#74829b" glyphName="USERS"/>
                             </graphic>
                             <cursor>
                                 <Cursor fx:constant="HAND"/>
@@ -397,13 +399,13 @@
                             </VBox.margin>
                         </Text>
                         <Button fx:id="settingsNavBarButton" alignment="BASELINE_LEFT" graphicTextGap="8.0"
-                                mnemonicParsing="false" onAction="#editConfig" prefHeight="25.0" prefWidth="192.0"
-                                style="-fx-background-color: BLACK;" text="Paramètres" textFill="#c3c3c3">
+                                mnemonicParsing="false" onAction="#editConfig" prefHeight="25.0" prefWidth="184.0"
+                                style="-fx-background-color: #000;" text="Paramètres" textFill="#74829b">
                             <font>
                                 <Font name="System Bold" size="12.0"/>
                             </font>
                             <graphic>
-                                <FontAwesomeIconView fill="#c3c3c3" glyphName="COGS"/>
+                                <FontAwesomeIconView fill="#74829b" glyphName="COGS"/>
                             </graphic>
                             <cursor>
                                 <Cursor fx:constant="HAND"/>
@@ -421,12 +423,12 @@
                     <children>
                         <Button fx:id="signoutNavBarButton" alignment="BASELINE_LEFT" graphicTextGap="8.0"
                                 mnemonicParsing="false" onAction="#signout" prefHeight="30.0" prefWidth="200.0"
-                                style="-fx-background-color: BLACK;" text="Se déconnecter" textFill="#c3c3c3">
+                                style="-fx-background-color: #000;" text="Se déconnecter" textFill="#74829b">
                             <font>
                                 <Font name="System Bold" size="12.0"/>
                             </font>
                             <graphic>
-                                <FontAwesomeIconView fill="#c3c3c3" glyphName="SIGN_OUT"/>
+                                <FontAwesomeIconView fill="#74829b" glyphName="SIGN_OUT"/>
                             </graphic>
                             <cursor>
                                 <Cursor fx:constant="HAND"/>
@@ -441,6 +443,140 @@
             <padding>
                 <Insets top="16.0"/>
             </padding>
+            <effect>
+                <DropShadow height="11.0" radius="5.0" width="11.0">
+                    <color>
+                        <Color red="0.800000011920929" green="0.800000011920929" blue="0.800000011920929"/>
+                    </color>
+                </DropShadow>
+            </effect>
         </VBox>
     </left>
+    <center>
+        <VBox spacing="8.0" BorderPane.alignment="CENTER">
+            <children>
+                <Label text="Tableau de board">
+                    <font>
+                        <Font name="System Bold" size="32.0"/>
+                    </font>
+                    <VBox.margin>
+                        <Insets bottom="16.0"/>
+                    </VBox.margin>
+                </Label>
+                <GridPane hgap="8.0" prefWidth="1106.0" vgap="8.0" VBox.vgrow="ALWAYS">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="ALWAYS"/>
+                        <ColumnConstraints hgrow="ALWAYS"/>
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints vgrow="ALWAYS"/>
+                        <RowConstraints vgrow="ALWAYS"/>
+                    </rowConstraints>
+                    <children>
+                        <VBox spacing="4.0" style="-fx-background-color: #ffffff; -fx-background-radius: 3;">
+                            <children>
+                                <Label text="Résultats des 30 derniers jours">
+                                    <font>
+                                        <Font name="System Bold" size="12.0"/>
+                                    </font>
+                                    <VBox.margin>
+                                        <Insets left="16.0"/>
+                                    </VBox.margin>
+                                </Label>
+                            </children>
+                            <effect>
+                                <DropShadow height="11.0" radius="5.0" width="11.0">
+                                    <color>
+                                        <Color red="0.800000011920929" green="0.800000011920929"
+                                               blue="0.800000011920929"/>
+                                    </color>
+                                </DropShadow>
+                            </effect>
+                            <padding>
+                                <Insets bottom="8.0" right="8.0" top="8.0"/>
+                            </padding>
+                        </VBox>
+                        <VBox spacing="4.0" style="-fx-background-color: #ffffff; -fx-background-radius: 3;"
+                              GridPane.columnIndex="1">
+                            <children>
+                                <Label text="Résultats mensuelles">
+                                    <font>
+                                        <Font name="System Bold" size="12.0"/>
+                                    </font>
+                                    <VBox.margin>
+                                        <Insets left="16.0"/>
+                                    </VBox.margin>
+                                </Label>
+                            </children>
+                            <effect>
+                                <DropShadow height="11.0" radius="5.0" width="11.0">
+                                    <color>
+                                        <Color red="0.800000011920929" green="0.800000011920929"
+                                               blue="0.800000011920929"/>
+                                    </color>
+                                </DropShadow>
+                            </effect>
+                            <padding>
+                                <Insets bottom="8.0" right="8.0" top="8.0"/>
+                            </padding>
+                        </VBox>
+                        <VBox spacing="4.0" style="-fx-background-color: #ffffff; -fx-background-radius: 3;"
+                              GridPane.rowIndex="1">
+                            <children>
+                                <Label text="Les categories les plus vendues">
+                                    <font>
+                                        <Font name="System Bold" size="12.0"/>
+                                    </font>
+                                    <VBox.margin>
+                                        <Insets left="8.0"/>
+                                    </VBox.margin>
+                                </Label>
+                            </children>
+                            <effect>
+                                <DropShadow height="11.0" radius="5.0" width="11.0">
+                                    <color>
+                                        <Color red="0.800000011920929" green="0.800000011920929"
+                                               blue="0.800000011920929"/>
+                                    </color>
+                                </DropShadow>
+                            </effect>
+                            <padding>
+                                <Insets bottom="8.0" left="8.0" right="8.0" top="8.0"/>
+                            </padding>
+                        </VBox>
+                        <VBox spacing="4.0" style="-fx-background-color: #ffffff; -fx-background-radius: 3;"
+                              GridPane.columnIndex="1" GridPane.rowIndex="1">
+                            <children>
+                                <Label text="Les produits les plus vendus">
+                                    <font>
+                                        <Font name="System Bold" size="12.0"/>
+                                    </font>
+                                    <VBox.margin>
+                                        <Insets left="8.0"/>
+                                    </VBox.margin>
+                                </Label>
+                            </children>
+                            <GridPane.margin>
+                                <Insets/>
+                            </GridPane.margin>
+                            <padding>
+                                <Insets bottom="8.0" left="8.0" right="8.0" top="8.0"/>
+                            </padding>
+                            <effect>
+                                <DropShadow height="11.0" radius="5.0" width="11.0">
+                                    <color>
+                                        <Color red="0.800000011920929" green="0.800000011920929"
+                                               blue="0.800000011920929"/>
+                                    </color>
+                                </DropShadow>
+                            </effect>
+                        </VBox>
+                    </children>
+                </GridPane>
+            </children>
+            <padding>
+                <Insets bottom="8.0" left="8.0" right="8.0" top="8.0"/>
+            </padding>
+        </VBox>
+    </center>
 </BorderPane>

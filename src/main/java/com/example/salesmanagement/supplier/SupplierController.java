@@ -45,7 +45,7 @@ public class SupplierController implements Initializable {
         cancelButton.setEffect(dropShadow);
         saveButton.setEffect(dropShadow);
         saveButton.setTextFill(Color.color(1, 1, 1));
-        saveButton.setBackground(new Background(new BackgroundFill(Color.BLACK, new CornerRadii(3.0), null)));
+        saveButton.setBackground(new Background(new BackgroundFill(Color.color(0.4, 0.44, 1, 1.0), new CornerRadii(3.0), null)));
 
         saveButton.setOnAction(e -> saveClient());
         cancelButton.setOnAction(e -> {

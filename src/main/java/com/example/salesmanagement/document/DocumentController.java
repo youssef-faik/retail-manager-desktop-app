@@ -98,7 +98,8 @@ public class DocumentController implements Initializable {
 
         saveDocumentButton.setEffect(dropShadow);
         saveDocumentButton.setTextFill(Color.color(1, 1, 1));
-        saveDocumentButton.setBackground(new Background(new BackgroundFill(Color.BLACK, new CornerRadii(3.0), null)));
+        saveDocumentButton.setBackground(new Background(new BackgroundFill(Color.color(0.4, 0.44, 1, 1.0), new CornerRadii(3.0), null)));
+        ((Text) saveDocumentButton.getGraphic()).setFill(Color.WHITE);
 
         documentController = this;
 
@@ -168,6 +169,8 @@ public class DocumentController implements Initializable {
             saveDocumentButton.setText("Modifier");
             Text icon = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.EDIT);
             saveDocumentButton.setGraphic(icon);
+            ((Text) saveDocumentButton.getGraphic()).setFill(Color.WHITE);
+
 
             saveDocumentButton.setOnAction(
                     e -> {

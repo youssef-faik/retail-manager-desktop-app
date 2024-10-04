@@ -3,10 +3,10 @@ package com.example.salesmanagement;
 import com.example.salesmanagement.user.Encryptor;
 import com.example.salesmanagement.user.User;
 import com.example.salesmanagement.user.UserRepository;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -18,7 +18,6 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -54,7 +53,7 @@ public class LoginController implements Initializable {
 
         loginButton.setEffect(dropShadow);
         loginButton.setTextFill(Color.color(1, 1, 1));
-        loginButton.setBackground(new Background(new BackgroundFill(Color.BLACK, new CornerRadii(3.0), null)));
+        loginButton.setBackground(new Background(new BackgroundFill(Color.color(0.4, 0.44, 1, 1.0), new CornerRadii(3.0), null)));
         ((Text) loginButton.getGraphic()).setFill(Color.WHITE);
 
         parentNode = (VBox) newPasswordVBox.getParent();
@@ -142,7 +141,7 @@ public class LoginController implements Initializable {
         passwordTextField.setDisable(true);
         usernameTextField.setDisable(true);
 
-        parentNode.getScene().getWindow().setHeight(602);
+        parentNode.getScene().getWindow().setHeight(640);
 
         int index = parentNode.getChildren().indexOf(showPasswordVBox);
         parentNode.getChildren().add(index, newPasswordVBox);
@@ -195,31 +194,48 @@ public class LoginController implements Initializable {
 
     private void displayMainStage() {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("main.fxml"));
-
         Scene scene = usernameTextField.getScene();
         Stage stage = (Stage) scene.getWindow();
-
         stage.setTitle("Gestion Commercial");
 
-        Rectangle2D bounds = Screen.getPrimary().getVisualBounds();
+        // Load FXML in a background thread
+        new Thread(() -> {
+            try {
+                Parent load = fxmlLoader.load();
 
-        stage.setX(bounds.getMinX());
-        stage.setY(bounds.getMinY());
-        stage.setWidth(bounds.getWidth());
-        stage.setHeight(bounds.getHeight());
+                // Switch to the JavaFX Application Thread to update the UI
+                Platform.runLater(() -> {
+                    scene.setRoot(load);
+                    stage.setResizable(true);
+                    stage.setMaximized(true);
 
-        try {
-            Parent load = fxmlLoader.load();
-            scene.setRoot(load);
-
-            ((MainController) fxmlLoader.getController()).displayDashboard();
-
-            stage.setResizable(true);
-            stage.setMaximized(true);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+                    // Now load the dashboard components
+                    MainController mainController = fxmlLoader.getController();
+                    try {
+                        mainController.displayDashboard();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+            } catch (IOException e) {
+                // Handle the exception on the JavaFX Application Thread
+                Platform.runLater(() -> {
+                    // You can show an alert or log the error
+                    showError("Failed to load the main interface: " + e.getMessage());
+                });
+            }
+        }).start();
     }
+
+    private void showError(String message) {
+        // Create and show an error alert dialog
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
 
     private void displaySuccessAlert() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);

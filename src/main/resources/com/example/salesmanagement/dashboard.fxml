@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
+<?import javafx.geometry.*?>
 <?import javafx.scene.chart.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.Color?>
 <?import javafx.scene.text.*?>
 <VBox xmlns:fx="http://javafx.com/fxml/1" spacing="8.0" xmlns="http://javafx.com/javafx/22"
       fx:controller="com.example.salesmanagement.DashboardController">
@@ -16,7 +18,7 @@
                 <Insets bottom="16.0"/>
             </VBox.margin>
         </Label>
-        <GridPane hgap="16.0" prefWidth="1106.0" vgap="16.0" VBox.vgrow="ALWAYS">
+        <GridPane hgap="8.0" prefWidth="1106.0" vgap="8.0" VBox.vgrow="ALWAYS">
             <columnConstraints>
                 <ColumnConstraints hgrow="ALWAYS"/>
                 <ColumnConstraints hgrow="ALWAYS"/>
@@ -26,65 +28,127 @@
                 <RowConstraints vgrow="ALWAYS"/>
             </rowConstraints>
             <children>
-                <VBox spacing="4.0">
+                <VBox spacing="4.0" style="-fx-background-color: #ffffff; -fx-background-radius: 3;">
                     <children>
-                        <Label text="Ventes des 30 derniers jours">
+                        <Label text="Résultats des 30 derniers jours">
                             <font>
                                 <Font name="System Bold" size="12.0"/>
                             </font>
                             <VBox.margin>
-                                <Insets/>
+                                <Insets left="16.0"/>
                             </VBox.margin>
                         </Label>
-                        <LineChart fx:id="lastMonthSalesLineChart">
+                        <LineChart fx:id="lastMonthResultsLineChart" animated="false" verticalZeroLineVisible="false"
+                                   VBox.vgrow="ALWAYS">
                             <xAxis>
-                                <CategoryAxis side="BOTTOM"/>
+                                <NumberAxis animated="false" forceZeroInRange="false" minorTickVisible="false"
+                                            side="BOTTOM"/>
                             </xAxis>
                             <yAxis>
-                                <NumberAxis side="LEFT"/>
+                                <NumberAxis animated="false" minorTickVisible="false" side="LEFT"/>
                             </yAxis>
                             <VBox.margin>
                                 <Insets/>
                             </VBox.margin>
                         </LineChart>
                     </children>
+                    <effect>
+                        <DropShadow height="11.0" radius="5.0" width="11.0">
+                            <color>
+                                <Color red="0.800000011920929" green="0.800000011920929" blue="0.800000011920929"/>
+                            </color>
+                        </DropShadow>
+                    </effect>
+                    <padding>
+                        <Insets bottom="8.0" right="8.0" top="8.0"/>
+                    </padding>
                 </VBox>
-                <VBox spacing="4.0" GridPane.columnIndex="1">
+                <VBox spacing="4.0" style="-fx-background-color: #ffffff; -fx-background-radius: 3;"
+                      GridPane.columnIndex="1">
                     <children>
-                        <Label text="Ventes mensuelles">
+                        <Label text="Résultats mensuelles">
                             <font>
                                 <Font name="System Bold" size="12.0"/>
                             </font>
+                            <VBox.margin>
+                                <Insets left="16.0"/>
+                            </VBox.margin>
                         </Label>
-                        <BarChart fx:id="monthlySalesLineChart">
+                        <BarChart fx:id="monthlyResultsBarChart" animated="false" VBox.vgrow="ALWAYS">
                             <xAxis>
-                                <CategoryAxis side="BOTTOM"/>
+                                <CategoryAxis animated="false" side="BOTTOM"/>
                             </xAxis>
                             <yAxis>
-                                <NumberAxis side="LEFT"/>
+                                <NumberAxis animated="false" minorTickVisible="false" side="LEFT"
+                                            upperBound="100000.0"/>
                             </yAxis>
                         </BarChart>
                     </children>
+                    <effect>
+                        <DropShadow height="11.0" radius="5.0" width="11.0">
+                            <color>
+                                <Color red="0.800000011920929" green="0.800000011920929" blue="0.800000011920929"/>
+                            </color>
+                        </DropShadow>
+                    </effect>
+                    <padding>
+                        <Insets bottom="8.0" right="8.0" top="8.0"/>
+                    </padding>
                 </VBox>
-                <VBox spacing="4.0" GridPane.rowIndex="1">
-                    <children>
-                        <Label text="Les produits les plus vendus">
-                            <font>
-                                <Font name="System Bold" size="12.0"/>
-                            </font>
-                        </Label>
-                        <TableView fx:id="topSellingProductsTableView"/>
-                    </children>
-                </VBox>
-                <VBox spacing="4.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                <VBox spacing="4.0" style="-fx-background-color: #ffffff; -fx-background-radius: 3;"
+                      GridPane.rowIndex="1">
                     <children>
                         <Label text="Les categories les plus vendues">
                             <font>
                                 <Font name="System Bold" size="12.0"/>
                             </font>
+                            <VBox.margin>
+                                <Insets left="8.0"/>
+                            </VBox.margin>
                         </Label>
-                        <PieChart fx:id="topSellingCategoriesPieChart"/>
+                        <PieChart fx:id="topSellingCategoriesPieChart" VBox.vgrow="ALWAYS"/>
                     </children>
+                    <effect>
+                        <DropShadow height="11.0" radius="5.0" width="11.0">
+                            <color>
+                                <Color red="0.800000011920929" green="0.800000011920929" blue="0.800000011920929"/>
+                            </color>
+                        </DropShadow>
+                    </effect>
+                    <padding>
+                        <Insets bottom="8.0" left="8.0" right="8.0" top="8.0"/>
+                    </padding>
+                </VBox>
+                <VBox spacing="4.0" style="-fx-background-color: #ffffff; -fx-background-radius: 3;"
+                      GridPane.columnIndex="1" GridPane.rowIndex="1">
+                    <children>
+                        <Label text="Les produits les plus vendus">
+                            <font>
+                                <Font name="System Bold" size="12.0"/>
+                            </font>
+                            <VBox.margin>
+                                <Insets left="8.0"/>
+                            </VBox.margin>
+                        </Label>
+                        <TableView fx:id="topSellingProductsTableView">
+                            <VBox.margin>
+                                <Insets/>
+                            </VBox.margin>
+                        </TableView>
+                    </children>
+                    <GridPane.margin>
+                        <Insets/>
+                    </GridPane.margin>
+                    <padding>
+                        <Insets bottom="8.0" left="8.0" right="8.0" top="8.0"/>
+                    </padding>
+                    <effect>
+                        <DropShadow height="11.0" radius="5.0" width="11.0">
+                            <color>
+                                <Color red="0.800000011920929" green="0.800000011920929" blue="0.800000011920929"/>
+                            </color>
+                        </DropShadow>
+                    </effect>
                 </VBox>
             </children>
         </GridPane>

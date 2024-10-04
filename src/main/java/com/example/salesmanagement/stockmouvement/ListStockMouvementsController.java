@@ -35,7 +35,7 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class ListStockMouvementsController implements Initializable {
-    private static final int ROWS_PER_PAGE = 13;
+    private static final int ROWS_PER_PAGE = 17;
     @FXML
     public TableView<StockMovement> stockMovementTableView;
     FilteredList<StockMovement> filteredList;
@@ -66,7 +66,7 @@ public class ListStockMouvementsController implements Initializable {
         deleteButton.setEffect(dropShadow);
         newButton.setEffect(dropShadow);
         newButton.setTextFill(Color.color(1, 1, 1));
-        newButton.setBackground(new Background(new BackgroundFill(Color.BLACK, new CornerRadii(3.0), null)));
+        newButton.setBackground(new Background(new BackgroundFill(Color.color(0.4, 0.44, 1, 1.0), new CornerRadii(3.0), null)));
         ((Text) newButton.getGraphic()).setFill(Color.WHITE);
 
         initStockMovementsTableView();

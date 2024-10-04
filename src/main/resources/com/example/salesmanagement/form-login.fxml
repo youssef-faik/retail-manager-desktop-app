@@ -6,92 +6,102 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
-<VBox xmlns:fx="http://javafx.com/fxml/1" alignment="TOP_CENTER" prefWidth="330.0" spacing="8.0"
+<VBox xmlns:fx="http://javafx.com/fxml/1" alignment="TOP_CENTER" prefHeight="600.0" prefWidth="330.0" spacing="8.0"
       xmlns="http://javafx.com/javafx/22" fx:controller="com.example.salesmanagement.LoginController">
     <children>
-        <Pane prefHeight="75.0" prefWidth="314.0" VBox.vgrow="ALWAYS">
+        <VBox alignment="CENTER_LEFT" prefWidth="318.0" spacing="8.0"
+              style="-fx-background-color: #ffffff; -fx-background-radius: 5;" VBox.vgrow="ALWAYS">
             <children>
-                <ImageView fitHeight="80.0" fitWidth="160.0" layoutX="71.0" layoutY="-1.0" pickOnBounds="true"
-                           preserveRatio="true">
-                    <image>
-                        <Image url="@../../../auth-logo.png"/>
-                    </image>
-                </ImageView>
+                <Pane prefHeight="75.0" prefWidth="314.0">
+                    <children>
+                        <ImageView fitHeight="80.0" fitWidth="160.0" layoutX="53.0" pickOnBounds="true"
+                                   preserveRatio="true">
+                            <image>
+                                <Image url="@../../../auth-logo.png"/>
+                            </image>
+                        </ImageView>
+                    </children>
+                    <VBox.margin>
+                        <Insets bottom="8.0"/>
+                    </VBox.margin>
+                </Pane>
+                <VBox prefWidth="298.0" spacing="8.0">
+                    <children>
+                        <VBox VBox.vgrow="NEVER">
+                            <children>
+                                <Label prefWidth="200.0" text="Identifiant"/>
+                                <TextField fx:id="usernameTextField" prefWidth="165.0" text="admin"/>
+                            </children>
+                        </VBox>
+                        <VBox VBox.vgrow="NEVER">
+                            <children>
+                                <Label prefWidth="200.0" text="Mot de passe"/>
+                                <Pane>
+                                    <children>
+                                        <PasswordField fx:id="passwordField" minWidth="-Infinity" prefHeight="25.0"
+                                                       prefWidth="266.0" text="12345678"/>
+                                        <TextField fx:id="passwordTextField" prefHeight="25.0" prefWidth="266.0"
+                                                   text="12345678" visible="false"/>
+                                    </children>
+                                </Pane>
+                            </children>
+                        </VBox>
+                        <VBox fx:id="newPasswordVBox" VBox.vgrow="NEVER">
+                            <children>
+                                <Label prefHeight="17.0" prefWidth="200.0" text="Nouveau mot de passe"/>
+                                <Pane>
+                                    <children>
+                                        <PasswordField fx:id="newPasswordField" prefHeight="25.0" prefWidth="266.0"/>
+                                        <TextField fx:id="newPasswordTextField" prefHeight="25.0" prefWidth="266.0"
+                                                   visible="false"/>
+                                    </children>
+                                </Pane>
+                            </children>
+                        </VBox>
+                        <VBox fx:id="confirmNewPasswordVBox" VBox.vgrow="NEVER">
+                            <children>
+                                <Label prefHeight="17.0" prefWidth="200.0" text="Confirmer le nouveau mot de passe"
+                                       wrapText="true"/>
+                                <Pane>
+                                    <children>
+                                        <PasswordField fx:id="confirmNewPasswordField" prefHeight="25.0"
+                                                       prefWidth="266.0"/>
+                                        <TextField fx:id="confirmNewPasswordTextField" prefHeight="25.0"
+                                                   prefWidth="266.0" visible="false"/>
+                                    </children>
+                                </Pane>
+                            </children>
+                        </VBox>
+                        <VBox fx:id="showPasswordVBox">
+                            <children>
+                                <CheckBox fx:id="showPasswordCheckBox" mnemonicParsing="false"
+                                          text="Afficher mot de passe">
+                                    <VBox.margin>
+                                        <Insets bottom="8.0"/>
+                                    </VBox.margin>
+                                </CheckBox>
+                            </children>
+                        </VBox>
+                    </children>
+                </VBox>
+                <Pane>
+                    <children>
+                        <Button fx:id="loginButton" defaultButton="true" layoutX="83.0" layoutY="8.0"
+                                mnemonicParsing="false" prefHeight="25.0" text="S'authentifier">
+                            <graphic>
+                                <FontAwesomeIconView glyphName="SIGN_IN"/>
+                            </graphic>
+                        </Button>
+                    </children>
+                    <VBox.margin>
+                        <Insets top="8.0"/>
+                    </VBox.margin>
+                </Pane>
             </children>
-            <VBox.margin>
-                <Insets bottom="16.0"/>
-            </VBox.margin>
-        </Pane>
-        <VBox prefWidth="298.0" spacing="8.0" VBox.vgrow="ALWAYS">
-            <children>
-                <VBox VBox.vgrow="NEVER">
-                    <children>
-                        <Label prefWidth="200.0" text="Identifiant"/>
-                        <TextField fx:id="usernameTextField" prefWidth="250.0" text="admin"/>
-                    </children>
-                </VBox>
-                <VBox VBox.vgrow="NEVER">
-                    <children>
-                        <Label prefWidth="200.0" text="Mot de passe"/>
-                        <Pane>
-                            <children>
-                                <PasswordField fx:id="passwordField" minWidth="-Infinity" prefHeight="25.0"
-                                               prefWidth="298.0" text="12345678"/>
-                                <TextField fx:id="passwordTextField" prefHeight="25.0" prefWidth="298.0" text="12345678"
-                                           visible="false"/>
-                            </children>
-                        </Pane>
-                    </children>
-                </VBox>
-                <VBox fx:id="newPasswordVBox" VBox.vgrow="NEVER">
-                    <children>
-                        <Label prefHeight="17.0" prefWidth="200.0" text="Nouveau mot de passe"/>
-                        <Pane>
-                            <children>
-                                <PasswordField fx:id="newPasswordField" prefHeight="25.0" prefWidth="298.0"/>
-                                <TextField fx:id="newPasswordTextField" prefHeight="25.0" prefWidth="298.0"
-                                           visible="false"/>
-                            </children>
-                        </Pane>
-                    </children>
-                </VBox>
-                <VBox fx:id="confirmNewPasswordVBox" VBox.vgrow="NEVER">
-                    <children>
-                        <Label prefHeight="17.0" prefWidth="200.0" text="Confirmer le nouveau mot de passe"
-                               wrapText="true"/>
-                        <Pane>
-                            <children>
-                                <PasswordField fx:id="confirmNewPasswordField" prefHeight="25.0" prefWidth="298.0"/>
-                                <TextField fx:id="confirmNewPasswordTextField" prefHeight="25.0" prefWidth="298.0"
-                                           visible="false"/>
-                            </children>
-                        </Pane>
-                    </children>
-                </VBox>
-                <VBox fx:id="showPasswordVBox">
-                    <children>
-                        <CheckBox fx:id="showPasswordCheckBox" mnemonicParsing="false" text="Afficher mot de passe">
-                            <VBox.margin>
-                                <Insets bottom="8.0"/>
-                            </VBox.margin>
-                        </CheckBox>
-                    </children>
-                </VBox>
-            </children>
+            <padding>
+                <Insets bottom="16.0" left="16.0" right="16.0" top="16.0"/>
+            </padding>
         </VBox>
-        <Pane VBox.vgrow="ALWAYS">
-            <children>
-                <Button fx:id="loginButton" defaultButton="true" layoutX="107.0" mnemonicParsing="false"
-                        prefHeight="25.0" text="S'authentifier">
-                    <graphic>
-                        <FontAwesomeIconView glyphName="SIGN_IN"/>
-                    </graphic>
-                </Button>
-            </children>
-            <VBox.margin>
-                <Insets top="16.0"/>
-            </VBox.margin>
-        </Pane>
         <Label alignment="CENTER" disable="true" prefHeight="17.0" prefWidth="314.0"
                text="© 2024 IBSYS SARL. Tous droits réservés." VBox.vgrow="ALWAYS">
             <VBox.margin>

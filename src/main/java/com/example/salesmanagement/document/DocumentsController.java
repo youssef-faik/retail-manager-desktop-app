@@ -77,7 +77,7 @@ public class DocumentsController implements Initializable {
         deleteButton.setEffect(dropShadow);
         newButton.setEffect(dropShadow);
         newButton.setTextFill(Color.color(1, 1, 1));
-        newButton.setBackground(new Background(new BackgroundFill(Color.BLACK, new CornerRadii(3.0), null)));
+        newButton.setBackground(new Background(new BackgroundFill(Color.color(0.4, 0.44, 1, 1.0), new CornerRadii(3.0), null)));
         ((Text) newButton.getGraphic()).setFill(Color.WHITE);
 
         updateButton.setDisable(true);

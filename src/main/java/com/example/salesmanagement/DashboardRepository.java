@@ -13,8 +13,7 @@ import java.util.List;
 public interface DashboardRepository {
     SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
 
-    static List<ChartData> getLastMonthSales() {
-
+    static List<TemporalChartData> getLastMonthSales() {
         // Default to the last 30 days
         LocalDate startDate = LocalDate.now().minusDays(30);
 
@@ -23,7 +22,7 @@ public interface DashboardRepository {
 
         Session session = sessionFactory.openSession();
 
-        List<ChartData> data = null;
+        List<TemporalChartData> data = null;
 
         try (session) {
             String queryString = "select  D.issueDate as date, sum(D.totalIncludingTaxes) as total_sales from Invoice as I join Document D on D.id = I.id where I.status not in (:draft_status, :cancelled_status) and D.issueDate between :start_date and :end_date group by D.issueDate order by D.issueDate";
@@ -35,7 +34,7 @@ public interface DashboardRepository {
 
             data = query.list().
                     stream()
-                    .map(entry -> new ChartData(entry[0], entry[1]))
+                    .map(entry -> new TemporalChartData((LocalDate) entry[0], (Number) entry[1]))
                     .toList();
         } catch (Exception e) {
             e.printStackTrace();
@@ -44,7 +43,7 @@ public interface DashboardRepository {
         return data;
     }
 
-    static List<ChartData> getLastMonthReturns() {
+    static List<TemporalChartData> getLastMonthReturns() {
 
         // Default to the last 30 days
         LocalDate startDate = LocalDate.now().minusDays(30);
@@ -54,7 +53,7 @@ public interface DashboardRepository {
 
         Session session = sessionFactory.openSession();
 
-        List<ChartData> data = null;
+        List<TemporalChartData> data = null;
 
         try (session) {
             String queryString = "select  D.issueDate as date, sum(D.totalIncludingTaxes) as total_sales from CreditInvoice as CI join Document D on D.id = CI.id where CI.status not in (:draft_status, :cancelled_status) and D.issueDate between :start_date and :end_date group by D.issueDate order by D.issueDate";
@@ -66,7 +65,7 @@ public interface DashboardRepository {
 
             data = query.list().
                     stream()
-                    .map(entry -> new ChartData(entry[0], entry[1]))
+                    .map(entry -> new TemporalChartData((LocalDate) entry[0], (Number) entry[1]))
                     .toList();
         } catch (Exception e) {
             e.printStackTrace();
@@ -75,7 +74,7 @@ public interface DashboardRepository {
         return data;
     }
 
-    static List<ChartData> getLastMonthPurchases() {
+    static List<TemporalChartData> getLastMonthPurchases() {
 
         // Default to the last 30 days
         LocalDate startDate = LocalDate.now().minusDays(30);
@@ -85,7 +84,7 @@ public interface DashboardRepository {
 
         Session session = sessionFactory.openSession();
 
-        List<ChartData> data = null;
+        List<TemporalChartData> data = null;
 
         try (session) {
             String queryString = "select  D.issueDate as date, sum(D.totalIncludingTaxes) as total_sales from PurchaseDeliveryNote as CI join Document D on D.id = CI.id where CI.status not in (:draft_status, :cancelled_status) and D.issueDate between :start_date and :end_date group by D.issueDate order by D.issueDate";
@@ -97,7 +96,7 @@ public interface DashboardRepository {
 
             data = query.list().
                     stream()
-                    .map(entry -> new ChartData(entry[0], entry[1]))
+                    .map(entry -> new TemporalChartData((LocalDate) entry[0], (Number) entry[1]))
                     .toList();
         } catch (Exception e) {
             e.printStackTrace();
@@ -106,7 +105,7 @@ public interface DashboardRepository {
         return data;
     }
 
-    static List<ChartData> getMonthlySales() {
+    static List<NumericChartData> getMonthlySales() {
 
         // Default to the 1st jan of the current year
         LocalDate startDate = LocalDate.of(LocalDate.now().getYear(), 1, 1);
@@ -116,7 +115,7 @@ public interface DashboardRepository {
 
         Session session = sessionFactory.openSession();
 
-        List<ChartData> data = null;
+        List<NumericChartData> data = null;
 
         try (session) {
             String queryString = "select month(D.issueDate) as date, sum(D.totalIncludingTaxes) as total_sales from Invoice as I join Document D on D.id = I.id where I.status not in (:draft_status, :cancelled_status) and D.issueDate between :start_date and :end_date group by month(D.issueDate) order by month(D.issueDate)";
@@ -128,7 +127,7 @@ public interface DashboardRepository {
 
             data = query.list().
                     stream()
-                    .map(entry -> new ChartData(entry[0], entry[1]))
+                    .map(entry -> new NumericChartData((Number) entry[0], (Number) entry[1]))
                     .toList();
         } catch (Exception e) {
             e.printStackTrace();
@@ -137,7 +136,7 @@ public interface DashboardRepository {
         return data;
     }
 
-    static List<ChartData> getMonthlyReturns() {
+    static List<NumericChartData> getMonthlyReturns() {
 
         // Default to the 1st jan of the current year
         LocalDate startDate = LocalDate.of(LocalDate.now().getYear(), 1, 1);
@@ -147,7 +146,7 @@ public interface DashboardRepository {
 
         Session session = sessionFactory.openSession();
 
-        List<ChartData> data = null;
+        List<NumericChartData> data = null;
 
         try (session) {
             String queryString = "select month(D.issueDate) as date, sum(D.totalIncludingTaxes) as total_sales from CreditInvoice as I join Document D on D.id = I.id where I.status not in (:draft_status, :cancelled_status) and D.issueDate between :start_date and :end_date group by month(D.issueDate) order by month(D.issueDate)";
@@ -159,7 +158,7 @@ public interface DashboardRepository {
 
             data = query.list().
                     stream()
-                    .map(entry -> new ChartData(entry[0], entry[1]))
+                    .map(entry -> new NumericChartData((Number) entry[0], (Number) entry[1]))
                     .toList();
         } catch (Exception e) {
             e.printStackTrace();
@@ -168,7 +167,7 @@ public interface DashboardRepository {
         return data;
     }
 
-    static List<ChartData> getMonthlyPurchases() {
+    static List<NumericChartData> getMonthlyPurchases() {
 
         // Default to the 1st jan of the current year
         LocalDate startDate = LocalDate.of(LocalDate.now().getYear(), 1, 1);
@@ -178,7 +177,7 @@ public interface DashboardRepository {
 
         Session session = sessionFactory.openSession();
 
-        List<ChartData> data = null;
+        List<NumericChartData> data = null;
 
         try (session) {
             String queryString = "select month(D.issueDate) as date, sum(D.totalIncludingTaxes) as total_sales from PurchaseDeliveryNote as I join Document D on D.id = I.id where I.status not in (:draft_status, :cancelled_status) and D.issueDate between :start_date and :end_date group by month(D.issueDate) order by month(D.issueDate)";
@@ -190,7 +189,7 @@ public interface DashboardRepository {
 
             data = query.list().
                     stream()
-                    .map(entry -> new ChartData(entry[0], entry[1]))
+                    .map(entry -> new NumericChartData((Number) entry[0], (Number) entry[1]))
                     .toList();
         } catch (Exception e) {
             e.printStackTrace();
