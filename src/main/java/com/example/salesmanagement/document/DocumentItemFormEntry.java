@@ -28,6 +28,7 @@ public class DocumentItemFormEntry {
         this.documentItem = new DocumentItem();
         this.documentController = documentController;
         initProductsComboBox(items);
+        setProductComboBoxListener();
     }
 
     public DocumentItemFormEntry(ObservableList<Product> items,
@@ -39,7 +40,11 @@ public class DocumentItemFormEntry {
         this.documentItem = documentItem;
 
         initProductsComboBox(items);
+        setProduct(documentItem);
+        setProductComboBoxListener();
+    }
 
+    private void setProduct(DocumentItem documentItem) {
         Product product = documentItem.getProduct();
 
         productComboBox.getItems()
@@ -54,28 +59,17 @@ public class DocumentItemFormEntry {
                 );
     }
 
-    private void initProductsComboBox(ObservableList<Product> items) {
-        this.productComboBox = new ComboBox<>();
-        productComboBox.setCellFactory(x -> new ProductComboCell());
-        productComboBox.setButtonCell(new ProductComboCell());
-        productComboBox.setMinWidth(350);
-
-        productComboBox.getItems().add(EMPTY_PRODUCT);
-        Function<Product, Pair<String, Product>> productObjectFunction = product -> new Pair<>(product.getName(), product);
-        productComboBox.getItems().addAll(items.stream().map(productObjectFunction).toList());
-
-        productComboBox.getSelectionModel().selectFirst();
-
+    private void setProductComboBoxListener() {
         productComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (isChanging || Objects.equals(newValue, oldValue)) {
                 return;
             }
 
-            tableView = tableView != null ? tableView : ((TableRow) productComboBox.getParent().getParent()).getTableView();
+            this.tableView = this.tableView != null ? this.tableView : ((TableRow) productComboBox.getParent().getParent()).getTableView();
 
             // check if the product was already selected
             if (newValue.getValue() != null) {
-                for (DocumentItemFormEntry documentItemFormEntry : tableView.getItems()) {
+                for (DocumentItemFormEntry documentItemFormEntry : this.tableView.getItems()) {
                     if (documentItemFormEntry.selectedProduct == newValue.getValue()) {
                         // Set the flag to true before changing the value
                         isChanging = true;
@@ -127,6 +121,20 @@ public class DocumentItemFormEntry {
 
             documentController.updateTotals();
         });
+    }
+
+    private void initProductsComboBox(ObservableList<Product> items) {
+        this.productComboBox = new ComboBox<>();
+        productComboBox.setCellFactory(x -> new ProductComboCell());
+        productComboBox.setButtonCell(new ProductComboCell());
+        productComboBox.setMinWidth(350);
+
+        productComboBox.getItems().add(EMPTY_PRODUCT);
+        Function<Product, Pair<String, Product>> productObjectFunction = product -> new Pair<>(product.getName(), product);
+        productComboBox.getItems().addAll(items.stream().map(productObjectFunction).toList());
+
+        productComboBox.getSelectionModel().selectFirst();
+
     }
 
     public DocumentItem getInvoiceItem() {
