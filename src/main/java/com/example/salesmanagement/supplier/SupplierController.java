@@ -196,8 +196,10 @@ public class SupplierController implements Initializable {
     public void initSupplierUpdate(Supplier supplier) {
         this.supplier.setId(supplier.getId());
         this.supplier.setName(supplier.getName());
-        this.supplier.setCommonCompanyIdentifier(supplier.getCommonCompanyIdentifier());
-        this.supplier.setTaxIdentificationNumber(supplier.getTaxIdentificationNumber());
+        this.supplier.setCommonCompanyIdentifier(supplier.getCommonCompanyIdentifier() == null ? "" : supplier.getCommonCompanyIdentifier());
+        this.supplier.setTaxIdentificationNumber(supplier.getTaxIdentificationNumber() == null ? "" : supplier.getTaxIdentificationNumber());
+        this.supplier.setPhoneNumber(supplier.getPhoneNumber() == null ? "" : supplier.getPhoneNumber());
+        this.supplier.setAddress(supplier.getAddress() == null ? "" : supplier.getAddress());
 
         this.nameTextField.setText(this.supplier.getName());
         this.commonCompanyIdentifierTextField.setText(this.supplier.getCommonCompanyIdentifier());

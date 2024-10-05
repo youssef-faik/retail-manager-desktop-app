@@ -196,6 +196,7 @@ public class ClientController implements Initializable {
         this.client.setCommonCompanyIdentifier(client.getCommonCompanyIdentifier() == null ? "" : client.getCommonCompanyIdentifier());
         this.client.setTaxIdentificationNumber(client.getTaxIdentificationNumber() == null ? "" : client.getTaxIdentificationNumber());
         this.client.setPhoneNumber(client.getPhoneNumber() == null ? "" : client.getPhoneNumber());
+        this.client.setAddress(client.getAddress() == null ? "" : client.getAddress());
 
         this.nameTextField.setText(this.client.getName());
         this.commonCompanyIdentifierTextField.setText(this.client.getCommonCompanyIdentifier());
