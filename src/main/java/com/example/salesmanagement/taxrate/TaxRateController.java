@@ -61,7 +61,7 @@ public class TaxRateController implements Initializable {
             clearTextFields();
 
             if (listTaxRatesController != null) {
-                listTaxRatesController.taxRateTableView.getItems().add(taxRate);
+                listTaxRatesController.getTaxRatesObservableList().add(taxRate);
             }
 
             displaySuccessAlert();
@@ -81,13 +81,13 @@ public class TaxRateController implements Initializable {
 
         if (optionalTaxRate.isPresent()) {
             if (listTaxRatesController != null) {
-                int index = listTaxRatesController.taxRateTableView.getItems().indexOf(taxRate);
+                int index = listTaxRatesController.getTaxRatesObservableList().indexOf(taxRate);
 
                 if (index != -1) {
-                    TaxRate oldTaxRate = listTaxRatesController.taxRateTableView.getItems().get(index);
+                    TaxRate oldTaxRate = listTaxRatesController.getTaxRatesObservableList().get(index);
 
-                    listTaxRatesController.taxRateTableView.getItems().remove(oldTaxRate);
-                    listTaxRatesController.taxRateTableView.getItems().add(optionalTaxRate.get());
+                    listTaxRatesController.getTaxRatesObservableList().remove(oldTaxRate);
+                    listTaxRatesController.getTaxRatesObservableList().add(index, optionalTaxRate.get());
                     listTaxRatesController.taxRateTableView.refresh();
                 }
             }

@@ -12,6 +12,7 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -103,7 +104,7 @@ public class DocumentController implements Initializable {
 
         documentController = this;
 
-        products = ProductRepository.findAll();
+        products = FXCollections.observableArrayList(ProductRepository.findAll());
 
         issueDateDatePicker.setValue(LocalDate.now());
         totalExcludingTaxesTextField.setText("0");
@@ -297,13 +298,13 @@ public class DocumentController implements Initializable {
             comboBox.setCellFactory(x -> new ClientComboCell());
             comboBox.setButtonCell(new ClientComboCell());
 
-            ObservableList<Client> clients = ClientRepository.findAll();
+            ObservableList<Client> clients = FXCollections.observableArrayList(ClientRepository.findAll());
             comboBox.setItems(clients);
         } else {
             comboBox.setCellFactory(x -> new SupplierComboCell());
             comboBox.setButtonCell(new SupplierComboCell());
 
-            ObservableList<Supplier> suppliers = SupplierRepository.findAll();
+            ObservableList<Supplier> suppliers = FXCollections.observableArrayList(SupplierRepository.findAll());
             comboBox.setItems(suppliers);
 
             comboBoxLabel.setText("Details du fournisseur");

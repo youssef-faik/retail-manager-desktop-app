@@ -1,21 +1,21 @@
 package com.example.salesmanagement.taxrate;
 
 import com.example.salesmanagement.HibernateUtil;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.hibernate.resource.transaction.spi.TransactionStatus;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public interface TaxRateRepository {
     SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
 
-    static ObservableList<TaxRate> findAll() {
-        ObservableList<TaxRate> taxRates = FXCollections.observableArrayList();
+    static List<TaxRate> findAll() {
+        List<TaxRate> taxRates = new ArrayList<>();
 
         Session session = sessionFactory.openSession();
 

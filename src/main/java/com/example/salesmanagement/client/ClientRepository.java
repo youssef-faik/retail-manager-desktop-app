@@ -1,20 +1,20 @@
 package com.example.salesmanagement.client;
 
 import com.example.salesmanagement.HibernateUtil;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.hibernate.resource.transaction.spi.TransactionStatus;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public interface ClientRepository {
     SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
 
-    static ObservableList<Client> findAll() {
-        ObservableList<Client> clients = FXCollections.observableArrayList();
+    static List<Client> findAll() {
+        List<Client> clients = new ArrayList<>();
 
         Session session = sessionFactory.openSession();
 

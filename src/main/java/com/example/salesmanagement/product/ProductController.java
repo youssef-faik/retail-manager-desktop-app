@@ -10,7 +10,6 @@ import com.example.salesmanagement.stockmouvement.*;
 import com.example.salesmanagement.taxrate.TaxRate;
 import com.example.salesmanagement.taxrate.TaxRateRepository;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
@@ -38,11 +37,13 @@ public class ProductController implements Initializable {
     private final Pair<String, TaxRate> EMPTY_TAX_RATE = new Pair<>(null, null);
     private final Product product = new Product();
     @FXML
-    public Tab stockMouvementsTab;
-    @FXML
     public TableView<StockMovement> stockMouvementsTable;
-    public VBox parentVBox;
-    TabPane tabPane;
+    @FXML
+    private Tab stockMouvementsTab;
+    @FXML
+    private VBox parentVBox;
+
+    private TabPane tabPane;
 
     private ListProductsController listProductsController;
     @FXML
@@ -113,7 +114,7 @@ public class ProductController implements Initializable {
             resetForm();
 
             if (listProductsController != null) {
-                listProductsController.getProductsTable().getItems().add(product);
+                listProductsController.getProductsObservableList().add(product);
             }
 
             displaySuccessAlert();
@@ -150,15 +151,15 @@ public class ProductController implements Initializable {
 
         if (optionalProduct.isPresent()) {
             if (listProductsController != null) {
-                int index = listProductsController.getProductsTable().getItems().indexOf(product);
+                int index = listProductsController.getProductsObservableList().indexOf(product);
 
                 if (index != -1) {
-                    Product oldProduct = listProductsController.getProductsTable().getItems().get(index);
+                    Product oldProduct = listProductsController.getProductsObservableList().get(index);
 
-                    listProductsController.getProductsTable().getItems().remove(oldProduct);
-                    listProductsController.getProductsTable().getItems().add(optionalProduct.get());
+                    listProductsController.getProductsObservableList().remove(oldProduct);
+                    listProductsController.getProductsObservableList().add(index, optionalProduct.get());
 
-                    listProductsController.getProductsTable().refresh();
+                    listProductsController.productsTableView.refresh();
                 }
             }
 
@@ -319,11 +320,10 @@ public class ProductController implements Initializable {
         categoryComboBox.setCellFactory(x -> new CategoryComboCell());
         categoryComboBox.setButtonCell(new CategoryComboCell());
 
-        ObservableList<Category> categories = CategoryRepository.findAll();
         Function<Category, Pair<String, Category>> categoryObjectFunction = category -> new Pair<>(category.getName(), category);
 
         categoryComboBox.getItems().add(EMPTY_CATEGORY);
-        categoryComboBox.getItems().addAll(categories.stream().map(categoryObjectFunction).toList());
+        categoryComboBox.getItems().addAll(CategoryRepository.findAll().stream().map(categoryObjectFunction).toList());
         categoryComboBox.getSelectionModel().selectFirst();
     }
 
@@ -333,11 +333,10 @@ public class ProductController implements Initializable {
         taxRateComboBox.setCellFactory(x -> new TaxRateComboCell());
         taxRateComboBox.setButtonCell(new TaxRateComboCell());
 
-        ObservableList<TaxRate> taxRates = TaxRateRepository.findAll();
         Function<TaxRate, Pair<String, TaxRate>> taxRateObjectFunction = taxRate -> new Pair<>(taxRate.getLabel(), taxRate);
 
         taxRateComboBox.getItems().add(EMPTY_TAX_RATE);
-        taxRateComboBox.getItems().addAll(taxRates.stream().map(taxRateObjectFunction).toList());
+        taxRateComboBox.getItems().addAll(TaxRateRepository.findAll().stream().map(taxRateObjectFunction).toList());
         taxRateComboBox.getSelectionModel().selectFirst();
     }
 

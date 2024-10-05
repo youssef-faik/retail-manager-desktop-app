@@ -64,7 +64,7 @@ public class ClientController implements Initializable {
         if (ClientRepository.save(client)) {
             clearTextFields();
             if (listClientsController != null) {
-                listClientsController.getClientsTable().getItems().add(client);
+                listClientsController.getClientsObservableList().add(client);
             }
 
             displaySuccessAlert();
@@ -84,13 +84,14 @@ public class ClientController implements Initializable {
 
         if (optionalClient.isPresent()) {
             if (listClientsController != null) {
-                int index = listClientsController.getClientsTable().getItems().indexOf(client);
+                int index = listClientsController.getClientsObservableList().indexOf(client);
 
                 if (index != -1) {
-                    Client oldClient = listClientsController.getClientsTable().getItems().get(index);
+                    Client oldClient = listClientsController.getClientsObservableList().get(index);
 
-                    listClientsController.getClientsTable().getItems().remove(oldClient);
-                    listClientsController.getClientsTable().getItems().add(optionalClient.get());
+                    listClientsController.getClientsObservableList().remove(oldClient);
+                    listClientsController.getClientsObservableList().add(index, optionalClient.get());
+                    listClientsController.clientsTableView.refresh();
                 }
             }
 

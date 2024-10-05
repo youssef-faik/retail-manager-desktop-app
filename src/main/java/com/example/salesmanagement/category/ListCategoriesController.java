@@ -35,9 +35,9 @@ public class ListCategoriesController implements Initializable {
     public Button newButton, updateButton, deleteButton;
     @FXML
     public TableView<Category> categoriesTableView;
-    FilteredList<Category> filteredList;
-    SortedList<Category> sortedList;
-    ObservableList<Category> observableList;
+    private FilteredList<Category> filteredList;
+    private SortedList<Category> sortedList;
+    private ObservableList<Category> observableList;
     @FXML
     private TextField searchTextField;
     @FXML
@@ -180,7 +180,9 @@ public class ListCategoriesController implements Initializable {
     }
 
     public void refreshCategoriesTable() {
-        categoriesTableView.setItems(CategoryRepository.findAll());
+        List<Category> categories = CategoryRepository.findAll();
+        categoriesTableView.getItems().clear();
+        categoriesTableView.getItems().addAll(categories);
 
         observableList = categoriesTableView.getItems();
 
@@ -231,7 +233,7 @@ public class ListCategoriesController implements Initializable {
         return categoriesTableView;
     }
 
-    public TableView<Category> getCategoriesTableView() {
-        return categoriesTableView;
+    public ObservableList<Category> getCategoriesObservableList() {
+        return categoriesTableView.getItems();
     }
 }

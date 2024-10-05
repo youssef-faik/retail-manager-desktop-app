@@ -30,11 +30,11 @@ import java.util.ResourceBundle;
 
 public class ListSuppliersController implements Initializable {
     private static final int ROWS_PER_PAGE = 13;
-    FilteredList<Supplier> filteredList;
-    SortedList<Supplier> sortedList;
-    ObservableList<Supplier> observableList;
     @FXML
-    private TableView<Supplier> supplierTableView;
+    TableView<Supplier> supplierTableView;
+    private FilteredList<Supplier> filteredList;
+    private SortedList<Supplier> sortedList;
+    private ObservableList<Supplier> observableList;
     @FXML
     private Pagination pagination;
     @FXML
@@ -200,7 +200,8 @@ public class ListSuppliersController implements Initializable {
     }
 
     public void refreshSuppliersTable() {
-        supplierTableView.setItems(SupplierRepository.findAll());
+        supplierTableView.getItems().clear();
+        supplierTableView.getItems().addAll(SupplierRepository.findAll());
 
         observableList = supplierTableView.getItems();
 
@@ -251,7 +252,7 @@ public class ListSuppliersController implements Initializable {
         return supplierTableView;
     }
 
-    public TableView<Supplier> getSuppliersTable() {
-        return supplierTableView;
+    public ObservableList<Supplier> getSuppliersObservableList() {
+        return supplierTableView.getItems();
     }
 }

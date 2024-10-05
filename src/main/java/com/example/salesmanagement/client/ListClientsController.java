@@ -31,11 +31,11 @@ import java.util.ResourceBundle;
 
 public class ListClientsController implements Initializable {
     private static final int ROWS_PER_PAGE = 13;
-    FilteredList<Client> filteredList;
-    SortedList<Client> sortedList;
-    ObservableList<Client> observableList;
     @FXML
-    private TableView<Client> clientsTableView;
+    TableView<Client> clientsTableView;
+    private FilteredList<Client> filteredList;
+    private SortedList<Client> sortedList;
+    private ObservableList<Client> observableList;
     @FXML
     private Button deleteButton, updateButton, newButton;
     @FXML
@@ -199,7 +199,8 @@ public class ListClientsController implements Initializable {
     }
 
     public void refreshClientsTable() {
-        clientsTableView.setItems(ClientRepository.findAll());
+        clientsTableView.getItems().clear();
+        clientsTableView.getItems().addAll(ClientRepository.findAll());
 
         observableList = clientsTableView.getItems();
 
@@ -250,7 +251,7 @@ public class ListClientsController implements Initializable {
         return clientsTableView;
     }
 
-    public TableView<Client> getClientsTable() {
-        return clientsTableView;
+    public ObservableList<Client> getClientsObservableList() {
+        return clientsTableView.getItems();
     }
 }

@@ -2,8 +2,6 @@ package com.example.salesmanagement.user;
 
 import com.example.salesmanagement.HibernateUtil;
 import jakarta.persistence.NoResultException;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
@@ -16,8 +14,8 @@ import java.util.Optional;
 public interface UserRepository {
     SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
 
-    static ObservableList<User> findAll() {
-        ObservableList<User> users = FXCollections.observableArrayList();
+    static List<User> findAll() {
+        List<User> users = new ArrayList<>();
 
         Session session = sessionFactory.openSession();
 

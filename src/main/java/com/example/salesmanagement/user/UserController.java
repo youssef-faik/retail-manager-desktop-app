@@ -66,7 +66,7 @@ public class UserController implements Initializable {
         if (UserRepository.save(user)) {
             clearTextFields();
             if (listUsersController != null) {
-                listUsersController.getUsersTable().getItems().add(user);
+                listUsersController.getUsersObservableList().add(user);
             }
 
             displaySuccessAlert();
@@ -86,13 +86,14 @@ public class UserController implements Initializable {
 
         if (optionalUser.isPresent()) {
             if (listUsersController != null) {
-                int index = listUsersController.getUsersTable().getItems().indexOf(user);
+                int index = listUsersController.getUsersObservableList().indexOf(user);
 
                 if (index != -1) {
-                    User oldUser = listUsersController.getUsersTable().getItems().get(index);
+                    User oldUser = listUsersController.getUsersObservableList().get(index);
 
-                    listUsersController.getUsersTable().getItems().remove(oldUser);
-                    listUsersController.getUsersTable().getItems().add(optionalUser.get());
+                    listUsersController.getUsersObservableList().remove(oldUser);
+                    listUsersController.getUsersObservableList().add(index, optionalUser.get());
+                    listUsersController.usersTableView.refresh();
                 }
             }
 

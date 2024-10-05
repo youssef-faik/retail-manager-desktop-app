@@ -32,12 +32,12 @@ import java.util.ResourceBundle;
 public class ListTaxRatesController implements Initializable {
     private static final int ROWS_PER_PAGE = 13;
     @FXML
-    public Button newButton, updateButton, deleteButton;
+    TableView<TaxRate> taxRateTableView;
     @FXML
-    public TableView<TaxRate> taxRateTableView;
-    FilteredList<TaxRate> filteredList;
-    SortedList<TaxRate> sortedList;
-    ObservableList<TaxRate> observableList;
+    private Button newButton, updateButton, deleteButton;
+    private FilteredList<TaxRate> filteredList;
+    private SortedList<TaxRate> sortedList;
+    private ObservableList<TaxRate> observableList;
     @FXML
     private Pagination pagination;
     @FXML
@@ -179,7 +179,9 @@ public class ListTaxRatesController implements Initializable {
     }
 
     public void refreshTaxRatesTable() {
-        taxRateTableView.setItems(TaxRateRepository.findAll());
+        List<TaxRate> taxRates = TaxRateRepository.findAll();
+        taxRateTableView.getItems().clear();
+        taxRateTableView.getItems().addAll(taxRates);
 
         observableList = taxRateTableView.getItems();
 
@@ -228,6 +230,11 @@ public class ListTaxRatesController implements Initializable {
         List<TaxRate> subbedList = filteredList.subList(fromIndex, toIndex);
         taxRateTableView.setItems(FXCollections.observableArrayList(subbedList));
         return taxRateTableView;
+    }
+
+
+    public ObservableList<TaxRate> getTaxRatesObservableList() {
+        return taxRateTableView.getItems();
     }
 
 }

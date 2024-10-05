@@ -38,11 +38,11 @@ import java.util.logging.Logger;
 
 public class ListUsersController implements Initializable {
     private static final int ROWS_PER_PAGE = 13;
-    FilteredList<User> filteredList;
-    SortedList<User> sortedList;
-    ObservableList<User> observableList;
     @FXML
-    private TableView<User> usersTableView;
+    TableView<User> usersTableView;
+    private FilteredList<User> filteredList;
+    private SortedList<User> sortedList;
+    private ObservableList<User> observableList;
     @FXML
     private TextField searchTextField;
     @FXML
@@ -286,7 +286,9 @@ public class ListUsersController implements Initializable {
     }
 
     public void refreshUsersTable() {
-        usersTableView.setItems(UserRepository.findAll());
+        List<User> users = UserRepository.findAll();
+        usersTableView.getItems().clear();
+        usersTableView.getItems().addAll(users);
 
         observableList = usersTableView.getItems();
 
@@ -337,8 +339,8 @@ public class ListUsersController implements Initializable {
         return usersTableView;
     }
 
-    public TableView<User> getUsersTable() {
-        return usersTableView;
+    public ObservableList<User> getUsersObservableList() {
+        return usersTableView.getItems();
     }
 
 }

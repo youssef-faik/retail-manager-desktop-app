@@ -64,7 +64,7 @@ public class CategoryController implements Initializable {
             clearTextFields();
 
             if (listCategoriesController != null) {
-                listCategoriesController.getCategoriesTableView().getItems().add(category);
+                listCategoriesController.getCategoriesObservableList().add(category);
             }
 
             displaySuccessAlert();
@@ -84,13 +84,13 @@ public class CategoryController implements Initializable {
 
         if (optionalCategory.isPresent()) {
             if (listCategoriesController != null) {
-                int index = listCategoriesController.getCategoriesTableView().getItems().indexOf(category);
+                int index = listCategoriesController.getCategoriesObservableList().indexOf(category);
 
                 if (index != -1) {
-                    Category oldCategory = listCategoriesController.getCategoriesTableView().getItems().get(index);
+                    Category oldCategory = listCategoriesController.getCategoriesObservableList().get(index);
 
-                    listCategoriesController.getCategoriesTableView().getItems().remove(oldCategory);
-                    listCategoriesController.getCategoriesTableView().getItems().add(optionalCategory.get());
+                    listCategoriesController.getCategoriesObservableList().remove(oldCategory);
+                    listCategoriesController.getCategoriesObservableList().add(index, optionalCategory.get());
                     listCategoriesController.categoriesTableView.refresh();
                 }
             }

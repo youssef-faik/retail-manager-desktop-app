@@ -34,12 +34,12 @@ import java.util.ResourceBundle;
 public class ListProductsController implements Initializable {
     private static final int ROWS_PER_PAGE = 13;
     @FXML
-    public Button newButton, deleteButton, updateButton;
-    FilteredList<Product> filteredList;
-    SortedList<Product> sortedList;
-    ObservableList<Product> observableList;
+    TableView<Product> productsTableView;
     @FXML
-    private TableView<Product> productsTableView;
+    private Button newButton, deleteButton, updateButton;
+    private FilteredList<Product> filteredList;
+    private SortedList<Product> sortedList;
+    private ObservableList<Product> observableList;
     @FXML
     private Pagination pagination;
     @FXML
@@ -221,7 +221,9 @@ public class ListProductsController implements Initializable {
     }
 
     public void refreshProductsTable() {
-        productsTableView.setItems(ProductRepository.findAll());
+        List<Product> products = ProductRepository.findAll();
+        productsTableView.getItems().clear();
+        productsTableView.getItems().addAll(products);
 
         observableList = productsTableView.getItems();
 
@@ -272,7 +274,7 @@ public class ListProductsController implements Initializable {
         return productsTableView;
     }
 
-    public TableView<Product> getProductsTable() {
-        return productsTableView;
+    public ObservableList<Product> getProductsObservableList() {
+        return productsTableView.getItems();
     }
 }

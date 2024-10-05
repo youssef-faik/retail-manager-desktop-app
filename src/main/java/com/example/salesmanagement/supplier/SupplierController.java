@@ -64,7 +64,7 @@ public class SupplierController implements Initializable {
         if (SupplierRepository.save(supplier)) {
             clearTextFields();
             if (listSuppliersController != null) {
-                listSuppliersController.getSuppliersTable().getItems().add(supplier);
+                listSuppliersController.getSuppliersObservableList().add(supplier);
             }
 
             displaySuccessAlert();
@@ -84,13 +84,14 @@ public class SupplierController implements Initializable {
 
         if (optionalSupplier.isPresent()) {
             if (listSuppliersController != null) {
-                int index = listSuppliersController.getSuppliersTable().getItems().indexOf(supplier);
+                int index = listSuppliersController.getSuppliersObservableList().indexOf(supplier);
 
                 if (index != -1) {
-                    Supplier oldSupplier = listSuppliersController.getSuppliersTable().getItems().get(index);
+                    Supplier oldSupplier = listSuppliersController.getSuppliersObservableList().get(index);
 
-                    listSuppliersController.getSuppliersTable().getItems().remove(oldSupplier);
-                    listSuppliersController.getSuppliersTable().getItems().add(optionalSupplier.get());
+                    listSuppliersController.getSuppliersObservableList().remove(oldSupplier);
+                    listSuppliersController.getSuppliersObservableList().add(index, optionalSupplier.get());
+                    listSuppliersController.supplierTableView.refresh();
                 }
             }
 

@@ -6,6 +6,7 @@ import com.example.salesmanagement.product.ProductRepository;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.Initializable;
@@ -38,14 +39,7 @@ public class StockCorrectionsController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        DropShadow dropShadow = new DropShadow(
-                BlurType.ONE_PASS_BOX,
-                Color.color(0.6392, 0.6392, 0.6392, 1.0),
-                10.0,
-                0,
-                0,
-                0
-        );
+        DropShadow dropShadow = new DropShadow(BlurType.ONE_PASS_BOX, Color.color(0.6392, 0.6392, 0.6392, 1.0), 10.0, 0, 0, 0);
 
         saveButton.setEffect(dropShadow);
         saveButton.setTextFill(Color.color(1, 1, 1));
@@ -57,7 +51,7 @@ public class StockCorrectionsController implements Initializable {
             saveButton.setDisable(!isItemTableViewValide());
         });
 
-        products = ProductRepository.findAll();
+        products = FXCollections.observableArrayList(ProductRepository.findAll());
         stockCorrection = new StockCorrection();
 
         initDocumentItemsTableView();
@@ -104,14 +98,7 @@ public class StockCorrectionsController implements Initializable {
         TableColumn<StockCorrectionFormEntry, String> actionColumn = new TableColumn<>("Action");
 
         stockCorrectionItemEntryTableView.setEditable(true);
-        stockCorrectionItemEntryTableView.getColumns().addAll(
-                productColumn,
-                currentQuantityColumn,
-                correctionTypeColumn,
-                quantityToUpdateColumn,
-                newQuantityColumn,
-                actionColumn
-        );
+        stockCorrectionItemEntryTableView.getColumns().addAll(productColumn, currentQuantityColumn, correctionTypeColumn, quantityToUpdateColumn, newQuantityColumn, actionColumn);
 
         productColumn.setCellValueFactory(new PropertyValueFactory<>("productComboBox"));
         correctionTypeColumn.setCellValueFactory(new PropertyValueFactory<>("stockCorrectionTypeComboBox"));
@@ -146,44 +133,43 @@ public class StockCorrectionsController implements Initializable {
         actionColumn.setReorderable(false);
 
         // delete
-        Callback<TableColumn<StockCorrectionFormEntry, String>, TableCell<StockCorrectionFormEntry, String>> cellFactory =
-                (TableColumn<StockCorrectionFormEntry, String> param) -> {
-                    // make cell containing button
+        Callback<TableColumn<StockCorrectionFormEntry, String>, TableCell<StockCorrectionFormEntry, String>> cellFactory = (TableColumn<StockCorrectionFormEntry, String> param) -> {
+            // make cell containing button
 
-                    return new TableCell<>() {
-                        @Override
-                        public void updateItem(String item, boolean empty) {
-                            super.updateItem(item, empty);
-                            //that cell created only on non-empty rows
-                            if (empty) {
-                                setGraphic(null);
-                                setText(null);
+            return new TableCell<>() {
+                @Override
+                public void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    //that cell created only on non-empty rows
+                    if (empty) {
+                        setGraphic(null);
+                        setText(null);
 
-                            } else {
-                                FontAwesomeIconView deleteIcon = new FontAwesomeIconView(FontAwesomeIcon.TRASH);
-                                Button deleteButton = new Button("Supprimer", deleteIcon);
+                    } else {
+                        FontAwesomeIconView deleteIcon = new FontAwesomeIconView(FontAwesomeIcon.TRASH);
+                        Button deleteButton = new Button("Supprimer", deleteIcon);
 
-                                deleteButton.setOnMouseClicked((MouseEvent event) -> {
-                                    try {
-                                        TableRow tableRow = (TableRow) deleteButton.getParent().getParent().getParent();
-                                        StockCorrectionFormEntry rowItem = (StockCorrectionFormEntry) tableRow.getItem();
-                                        stockCorrectionItemEntryTableView.getItems().remove(rowItem);
+                        deleteButton.setOnMouseClicked((MouseEvent event) -> {
+                            try {
+                                TableRow tableRow = (TableRow) deleteButton.getParent().getParent().getParent();
+                                StockCorrectionFormEntry rowItem = (StockCorrectionFormEntry) tableRow.getItem();
+                                stockCorrectionItemEntryTableView.getItems().remove(rowItem);
 
-                                    } catch (Exception ex) {
-                                        Logger.getLogger(DocumentController.class.getName()).log(Level.SEVERE, null, ex);
-                                    }
-                                });
-
-                                HBox actionsHBox = new HBox(deleteButton);
-                                actionsHBox.setStyle("-fx-alignment:center");
-                                setGraphic(actionsHBox);
-
-                                setText(null);
+                            } catch (Exception ex) {
+                                Logger.getLogger(DocumentController.class.getName()).log(Level.SEVERE, null, ex);
                             }
-                        }
+                        });
 
-                    };
-                };
+                        HBox actionsHBox = new HBox(deleteButton);
+                        actionsHBox.setStyle("-fx-alignment:center");
+                        setGraphic(actionsHBox);
+
+                        setText(null);
+                    }
+                }
+
+            };
+        };
 
         actionColumn.setCellFactory(cellFactory);
 
