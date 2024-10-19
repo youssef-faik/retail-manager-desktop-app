@@ -137,7 +137,7 @@ public class ConfigurationController implements Initializable {
             allConfigurations.put(ConfigKey.COMPANY_FIXED_PHONE_NUMBER, fixedPhoneNumberTextField.getText().trim());
             allConfigurations.put(ConfigKey.COMPANY_EMAIL_ADDRESS, emailTextField.getText().trim());
 
-            String addressText = emailTextField.getText().trim();
+            String addressText = addressTextArea.getText().trim();
             if (addressText.isBlank()) {
                 displayErrorAlert("Adresse est obligatoire");
                 return;
