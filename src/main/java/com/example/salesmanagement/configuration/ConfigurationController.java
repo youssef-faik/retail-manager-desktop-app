@@ -49,7 +49,11 @@ public class ConfigurationController implements Initializable {
     @FXML
     private TextField commercialRegistrationNumberTextField;
     @FXML
-    private Button saveButton;
+    private Button saveCompanyInfosButton;
+    @FXML
+    private Button saveDocumentReferencesButton;
+    @FXML
+    private Button savePrintingOptionsButton;
     @FXML
     private CheckBox printHeaderCheckBox, printDeliveryNoteUnitPriceCheckBox;
 
@@ -64,9 +68,17 @@ public class ConfigurationController implements Initializable {
                 0
         );
 
-        saveButton.setEffect(dropShadow);
-        saveButton.setTextFill(Color.color(1, 1, 1));
-        saveButton.setBackground(new Background(new BackgroundFill(Color.color(0.4, 0.44, 1, 1.0), new CornerRadii(3.0), null)));
+        saveCompanyInfosButton.setEffect(dropShadow);
+        saveCompanyInfosButton.setTextFill(Color.color(1, 1, 1));
+        saveCompanyInfosButton.setBackground(new Background(new BackgroundFill(Color.color(0.4, 0.44, 1, 1.0), new CornerRadii(3.0), null)));
+
+        saveDocumentReferencesButton.setEffect(dropShadow);
+        saveDocumentReferencesButton.setTextFill(Color.color(1, 1, 1));
+        saveDocumentReferencesButton.setBackground(new Background(new BackgroundFill(Color.color(0.4, 0.44, 1, 1.0), new CornerRadii(3.0), null)));
+
+        savePrintingOptionsButton.setEffect(dropShadow);
+        savePrintingOptionsButton.setTextFill(Color.color(1, 1, 1));
+        savePrintingOptionsButton.setBackground(new Background(new BackgroundFill(Color.color(0.4, 0.44, 1, 1.0), new CornerRadii(3.0), null)));
 
         AppConfiguration configuration = AppConfiguration.getInstance();
 
@@ -96,7 +108,7 @@ public class ConfigurationController implements Initializable {
 
         thread.start();
 
-        saveButton.setOnAction(event -> {
+        saveCompanyInfosButton.setOnAction(event -> {
             String companyNameText = companyNameTextField.getText().trim();
             if (companyNameText.isBlank()) {
                 displayErrorAlert("Nom de l'entreprise est obligatoire");
@@ -132,7 +144,11 @@ public class ConfigurationController implements Initializable {
             }
             allConfigurations.put(ConfigKey.BUSINESS_ADDRESS, addressText);
 
+            configuration.setConfigurationValues(allConfigurations);
+            displaySuccessAlert();
+        });
 
+        saveDocumentReferencesButton.setOnAction(event -> {
             if (setDocumentReference(
                     PurchaseOrder.class,
                     purchaseOrderNumberTextField,
@@ -199,6 +215,11 @@ public class ConfigurationController implements Initializable {
                 return;
             }
 
+            configuration.setConfigurationValues(allConfigurations);
+            displaySuccessAlert();
+        });
+
+        savePrintingOptionsButton.setOnAction(event -> {
             allConfigurations.put(ConfigKey.PRINT_SALES_DOCUMENT_HEADING, String.valueOf(printHeaderCheckBox.isSelected()));
             allConfigurations.put(ConfigKey.PRINT_DELIVERY_NOTE_UNIT_PRICE, String.valueOf(printDeliveryNoteUnitPriceCheckBox.isSelected()));
 

@@ -10,7 +10,7 @@
 <VBox xmlns:fx="http://javafx.com/fxml/1" spacing="8.0" xmlns="http://javafx.com/javafx/22"
       fx:controller="com.example.salesmanagement.DashboardController">
     <children>
-        <Label text="Tableau de board">
+        <Label text="Tableau de bord">
             <font>
                 <Font name="System Bold" size="32.0"/>
             </font>
