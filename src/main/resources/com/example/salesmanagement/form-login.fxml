@@ -39,9 +39,9 @@
                                 <Pane>
                                     <children>
                                         <PasswordField fx:id="passwordField" minWidth="-Infinity" prefHeight="25.0"
-                                                       prefWidth="266.0" text="12345678"/>
+                                                       prefWidth="266.0"/>
                                         <TextField fx:id="passwordTextField" prefHeight="25.0" prefWidth="266.0"
-                                                   text="12345678" visible="false"/>
+                                                   visible="false"/>
                                     </children>
                                 </Pane>
                             </children>

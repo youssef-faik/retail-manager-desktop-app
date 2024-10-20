@@ -313,4 +313,7 @@ replay_pid*
 .history
 .ionide
 
+# Ignore the generated dependency-reduced POM
+**/dependency-reduced-pom.xml
+
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,java,intellij,intellij+all,intellij+iml
